@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartIntern AI</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span>SmartIntern AI</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-outline" onclick="showPage('auth'); switchTab('login')">Se connecter</button>
+      <button class="btn-primary" onclick="showPage('auth'); switchTab('register')">S'inscrire</button>
+    </div>
+  </nav>
+
+  <!-- PAGE: LANDING -->
+  <div id="page-landing" class="page active">
+    <section class="hero">
+      <div class="hero-badge">Plateforme de gestion des stages universitaires</div>
+      <h1>Gérez vos stages avec <span class="highlight">l'intelligence artificielle</span></h1>
+      <p>Connectez étudiants, entreprises et encadrants dans une plateforme unifiée, intuitive et intelligente.</p>
+      <div class="hero-cta">
+        <button class="btn-hero-primary" onclick="showPage('auth'); switchTab('register')">Commencer gratuitement</button>
+        <button class="btn-hero-outline" onclick="showPage('auth'); switchTab('login')">Se connecter</button>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label">Étudiants actifs</div></div>
+      <div class="stat"><div class="stat-num">380+</div><div class="stat-label">Entreprises partenaires</div></div>
+      <div class="stat"><div class="stat-num">94%</div><div class="stat-label">Taux de placement</div></div>
+    </section>
+
+    <section class="roles-section">
+      <h2>Une plateforme pour tous les acteurs</h2>
+      <p class="roles-sub">Chaque rôle dispose d'un espace dédié et personnalisé</p>
+      <div class="roles-grid">
+        <div class="role-card" onclick="showPage('auth'); switchTab('register')">
+          <div class="role-icon" style="background:#E6F1FB">🎓</div>
+          <div class="role-title">Étudiant</div>
+          <div class="role-desc">Postulez, suivez vos candidatures et rédigez vos rapports</div>
+        </div>
+        <div class="role-card" onclick="showPage('auth'); switchTab('register')">
+          <div class="role-icon" style="background:#EAF3DE">🏢</div>
+          <div class="role-title">Entreprise</div>
+          <div class="role-desc">Publiez des offres et gérez vos candidatures avec le matching IA</div>
+        </div>
+        <div class="role-card" onclick="showPage('auth'); switchTab('register')">
+          <div class="role-icon" style="background:#EEEDFE">🛠️</div>
+          <div class="role-title">Administrateur</div>
+          <div class="role-desc">Supervisez la plateforme et générez les documents officiels</div>
+        </div>
+        <div class="role-card" onclick="showPage('auth'); switchTab('register')">
+          <div class="role-icon" style="background:#FAEEDA">📚</div>
+          <div class="role-title">Enc. académique</div>
+          <div class="role-desc">Suivez vos étudiants et validez leurs rapports de stage</div>
+        </div>
+        <div class="role-card" onclick="showPage('auth'); switchTab('register')">
+          <div class="role-icon" style="background:#E1F5EE">🏭</div>
+          <div class="role-title">Enc. entreprise</div>
+          <div class="role-desc">Définissez les missions et évaluez les stagiaires</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- PAGE: AUTH -->
+  <div id="page-auth" class="page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <span>SmartIntern AI</span>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+          <button class="tab" id="tab-register" onclick="switchTab('register')">Inscription</button>
+        </div>
+
+        <!-- ALERT -->
+        <div id="alert" class="alert hidden"></div>
+
+        <!-- LOGIN FORM -->
+        <form id="form-login" class="auth-form" onsubmit="handleLogin(event)">
+          <h2 id="form-title">Bon retour !</h2>
+          <p id="form-sub">Connectez-vous à votre espace</p>
+          <div class="form-group">
+            <label>Adresse email</label>
+            <input type="email" id="login-email" placeholder="votre@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="login-password" placeholder="••••••••" required>
+          </div>
+          <a class="forgot-link" onclick="showForgotPassword()">Mot de passe oublié ?</a>
+          <button type="submit" class="btn-submit" id="btn-login">Se connecter</button>
+          <p class="switch-text">Pas encore de compte ? <a onclick="switchTab('register')">S'inscrire</a></p>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="form-register" class="auth-form hidden" onsubmit="handleRegister(event)">
+          <h2>Créer un compte</h2>
+          <p>Rejoignez SmartIntern AI gratuitement</p>
+          <div class="role-select">
+            <div class="role-opt selected" data-role="ETUDIANT" onclick="selectRole(this)"><span>🎓</span> Étudiant</div>
+            <div class="role-opt" data-role="ENTREPRISE" onclick="selectRole(this)"><span>🏢</span> Entreprise</div>
+            <div class="role-opt" data-role="ENCADRANT_ACADEMIQUE" onclick="selectRole(this)"><span>📚</span> Enc. académique</div>
+            <div class="role-opt" data-role="ENCADRANT_ENTREPRISE" onclick="selectRole(this)"><span>🏭</span> Enc. entreprise</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Prénom</label>
+              <input type="text" id="reg-firstname" placeholder="Prénom" required>
+            </div>
+            <div class="form-group">
+              <label>Nom</label>
+              <input type="text" id="reg-lastname" placeholder="Nom" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Adresse email</label>
+            <input type="email" id="reg-email" placeholder="votre@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="reg-password" placeholder="8 caractères minimum" required minlength="8">
+          </div>
+          <button type="submit" class="btn-submit" id="btn-register">Créer mon compte</button>
+          <p class="switch-text">Déjà un compte ? <a onclick="switchTab('login')">Se connecter</a></p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: DASHBOARD -->
+ <div id="page-dashboard" class="page">
+  <div class="dashboard-content">
+    <h2 id="dashboard-welcome">Bienvenue, Ahmed !</h2>
+    <p id="dashboard-sub">Votre espace personnel SmartIntern AI</p>
+    <div class="dashboard-cards" id="dashboard-cards"></div>
+  </div>
+</div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
