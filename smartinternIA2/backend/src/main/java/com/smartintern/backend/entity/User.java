@@ -77,7 +77,8 @@ public class User {
     }
 
     public enum Role {
-        ETUDIANT, ENTREPRISE, ADMIN, ENCADRANT_ACADEMIQUE, ENCADRANT_ENTREPRISE
+        ETUDIANT, ENTREPRISE, ADMIN,
+        ENCADRANT_ACADEMIQUE, ENCADRANT_ENTREPRISE
     }
 
     public enum Statut {

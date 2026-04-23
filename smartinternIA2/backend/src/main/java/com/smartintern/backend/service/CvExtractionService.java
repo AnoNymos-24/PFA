@@ -1,5 +1,5 @@
+package com.smartintern.backend.service;
 
-package com.smartintern.backend.service;   
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
@@ -16,10 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/**
- * Service Spring Boot qui délègue l'extraction et l'analyse du CV
- * au microservice Python/FastAPI dédié.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +27,7 @@ public class CvExtractionService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    // ── DTOs miroir du microservice Python ────────────────────────────────
+    // ── DTOs ──────────────────────────────────────────────────────────────
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -110,15 +106,10 @@ public class CvExtractionService {
         private String niveau;
     }
 
-    // ── Méthodes publiques ─────────────────────────────────────────────────
+    // ── Méthodes ──────────────────────────────────────────────────────────
 
-    /**
-     * Envoie le fichier PDF au microservice Python pour extraction complète.
-     * Retourne les données structurées du CV.
-     */
     public CvResponse extraireCv(MultipartFile file) {
         try {
-            // Construire la requête multipart
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -142,11 +133,7 @@ public class CvExtractionService {
             log.info("Appel microservice extraction CV: {}", url);
 
             ResponseEntity<CvResponse> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    requestEntity,
-                    CvResponse.class
-            );
+                    url, HttpMethod.POST, requestEntity, CvResponse.class);
 
             CvResponse cvResponse = response.getBody();
             if (cvResponse != null && cvResponse.isSuccess()) {
@@ -163,9 +150,6 @@ public class CvExtractionService {
         }
     }
 
-    /**
-     * Vérifie que le microservice Python est disponible.
-     */
     public boolean isServiceDisponible() {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(

@@ -1,15 +1,18 @@
 package com.smartintern.backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 
 public class StageDto {
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class StageRequest {
         private LocalDate dateDebut;
         private LocalDate dateFin;
@@ -32,7 +35,6 @@ public class StageDto {
         private String sujet;
         private String mission;
         private String evaluationFinale;
-        // Infos dénormalisées
         private Long etudiantId;
         private String etudiantNom;
         private Long entrepriseId;
