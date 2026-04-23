@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
@@ -33,63 +36,59 @@ public class AuthService implements UserDetailsService {
     }
 
     public AuthDto.AuthResponse register(AuthDto.RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Cet email est déjà utilisé");
-        }
 
+        // ✅ statut EN_ATTENTE par défaut via @Builder.Default — pas de setEnabled()
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole() != null ? request.getRole() : User.Role.ETUDIANT)
-                .enabled(false)
+                .telephone(request.getTelephone())
                 .build();
 
-        // Générer OTP
-        String otp = String.format("%04d", new java.util.Random().nextInt(10000));
+        String otp = String.format("%04d", new Random().nextInt(10000));
         user.setOtpCode(otp);
-        user.setOtpExpiry(java.time.LocalDateTime.now().plusMinutes(10));
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        // Envoyer email
         emailService.sendOtpEmail(user.getEmail(), user.getFirstName(), otp);
 
-        // Retourner réponse sans token
         return AuthDto.AuthResponse.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .statut(user.getStatut().name())
                 .token("PENDING_VERIFICATION")
                 .type("OTP_REQUIRED")
                 .build();
-    }  // ← accolade fermante manquante !
+    }
 
     public AuthDto.AuthResponse login(AuthDto.LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email ou mot de passe incorrect"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new BadCredentialsException("Email ou mot de passe incorrect");
-        }
 
-        if (!user.isEnabled()) {
+        if (!user.isEnabled()) // ✅ isEnabled() → statut == ACTIF
             throw new RuntimeException("Compte non vérifié. Vérifiez votre email.");
-        }
 
         UserDetails userDetails = loadUserByUsername(user.getEmail());
         String token = jwtUtils.generateToken(userDetails);
 
         return AuthDto.AuthResponse.builder()
-                .token(token)
-                .type("Bearer")
+                .token(token).type("Bearer")
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .statut(user.getStatut().name())
                 .build();
     }
 }

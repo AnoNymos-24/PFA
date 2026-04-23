@@ -1,5 +1,5 @@
-package com.smartintern.backend.service;
 
+package com.smartintern.backend.service;   
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
