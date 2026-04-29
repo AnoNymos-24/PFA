@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Inscription</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #1d4ed8;
+      --blue-dark: #1e40af;
+      --blue-soft: #eff6ff;
+      --blue-mid:  #dbeafe;
+      --dark:      #0f172a;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --bg:        #f8fafc;
+      --white:     #ffffff;
+      --green:     #16a34a;
+      --red:       #dc2626;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── LEFT PANEL ─────────────────────────────────── */
+    .panel-left {
+      background: var(--dark);
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .panel-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .panel-logo-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .panel-logo-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .panel-logo-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .panel-logo-text span { color: #60a5fa; }
+
+    .panel-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    .panel-content h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .panel-content h2 span { color: #60a5fa; }
+
+    .panel-content p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .panel-features { display: flex; flex-direction: column; gap: 1rem; }
+
+    .panel-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.875rem;
+    }
+
+    .panel-feat-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(59,130,246,0.15);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .panel-feat-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: #60a5fa;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .panel-feat-text h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .panel-feat-text p {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .panel-footer {
+      font-size: 0.75rem;
+      color: #334155;
+    }
+
+    /* ── RIGHT PANEL ─────────────────────────────────── */
+    .panel-right {
+      padding: 3rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-container {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── STEP INDICATOR ──────────────────────────────── */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 2.5rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .step.active .step-num {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .step.active { color: var(--text); }
+
+    .step.done .step-num {
+      background: #dcfce7;
+      color: var(--green);
+    }
+
+    .step-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      margin: 0 0.5rem;
+    }
+
+    /* ── SECTION TITLE ───────────────────────────────── */
+    .form-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.8px;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* ── ROLE CARDS ──────────────────────────────────── */
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      background: var(--white);
+      text-align: left;
+    }
+
+    .role-card:hover {
+      border-color: #93c5fd;
+      transform: translateY(-2px);
+    }
+
+    .role-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .role-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 1rem;
+      transition: background 0.2s;
+    }
+
+    .role-card-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.2s;
+    }
+
+    .role-card:not(.selected) .role-card-icon {
+      background: var(--bg);
+    }
+
+    .role-card:not(.selected) .role-card-icon svg { stroke: var(--muted); }
+
+    .role-card.selected .role-card-icon {
+      background: var(--blue-mid);
+    }
+
+    .role-card.selected .role-card-icon svg { stroke: var(--blue); }
+
+    .role-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.3rem;
+    }
+
+    .role-card p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .role-card.selected h3 { color: var(--blue); }
+
+    /* ── FORM ────────────────────────────────────────── */
+    .form-section { display: none; }
+    .form-section.visible { display: block; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .field label svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--muted);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 0.65rem 0.875rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+    }
+
+    .field input::placeholder { color: #cbd5e1; }
+
+    /* Strength bar */
+    .strength-wrap { margin-top: 6px; }
+
+    .strength-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .strength-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0.5rem 0 1.25rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ALERT ───────────────────────────────────────── */
+    .alert {
+      padding: 0.7rem 1rem;
+      border-radius: 9px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .alert.error {
+      background: #fef2f2;
+      color: var(--red);
+      border: 1px solid #fecaca;
+    }
+
+    .alert.error svg { stroke: var(--red); }
+
+    .alert.success {
+      background: #f0fdf4;
+      color: var(--green);
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert.success svg { stroke: var(--green); }
+
+    /* ── BUTTON ──────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.15s;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-submit:hover    { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-submit:disabled { background: #93c5fd; cursor: not-allowed; transform: none; }
+
+    .btn-submit svg {
+      width: 16px;
+      height: 16px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .signin-link {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.825rem;
+      color: var(--muted);
+    }
+
+    .signin-link a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .signin-link a:hover { text-decoration: underline; }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.8s linear infinite; }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .panel-right { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <aside class="panel-left">
+    <a class="panel-logo" href="../index.html">
+      <div class="panel-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="panel-logo-text">SmartIntern <span>AI</span></span>
+    </a>
+
+    <div class="panel-content">
+      <h2>Gérez vos stages avec <span>intelligence</span></h2>
+      <p>Rejoignez des centaines d'étudiants et entreprises qui utilisent SmartIntern AI pour simplifier chaque étape du stage.</p>
+      <div class="panel-features">
+        <div class="panel-feat">
+          <div class="panel-feat-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="panel-feat-text">
+            <h4>Inscription en 2 minutes</h4>
+            <p>Créez votre compte et accédez immédiatement à la plateforme</p>
+          </div>
+        </div>
+        <div class="panel-feat">
+          <div class="panel-feat-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="panel-feat-text">
+            <h4>Compte sécurisé</h4>
+            <p>Vérification par code email pour protéger votre accès</p>
+          </div>
+        </div>
+        <div class="panel-feat">
+          <div class="panel-feat-icon">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="panel-feat-text">
+            <h4>IA intégrée</h4>
+            <p>Recommandations personnalisées et matching intelligent</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="panel-footer">© 2024 SmartIntern AI</p>
+  </aside>
+
+  <!-- RIGHT PANEL -->
+  <main class="panel-right">
+    <div class="form-container">
+
+      <!-- STEP INDICATOR -->
+      <div class="steps">
+        <div class="step active" id="step1-ind">
+          <div class="step-num" id="s1num">1</div>
+          <span>Type de compte</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step2-ind">
+          <div class="step-num" id="s2num">2</div>
+          <span>Informations</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3-ind">
+          <div class="step-num" id="s3num">3</div>
+          <span>Vérification</span>
+        </div>
+      </div>
+
+      <!-- STEP 1 : CHOIX DU RÔLE -->
+      <div id="step1" class="form-section visible">
+        <h1 class="form-title">Créer un compte</h1>
+        <p class="form-subtitle">Sélectionnez votre profil pour accéder au formulaire adapté.</p>
+
+        <div class="role-cards">
+          <div class="role-card" id="card-etudiant" onclick="selectRole('etudiant')">
+            <div class="role-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <h3>Étudiant</h3>
+            <p>Recherchez et postulez à des offres de stage</p>
+          </div>
+
+          <div class="role-card" id="card-entreprise" onclick="selectRole('entreprise')">
+            <div class="role-card-icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <h3>Entreprise</h3>
+            <p>Publiez des offres et gérez vos stagiaires</p>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="step1-next" onclick="goStep2()" style="margin-top:0.5rem">
+          Continuer
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="signin-link">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
+      </div>
+
+      <!-- STEP 2A : FORMULAIRE ÉTUDIANT -->
+      <div id="step2-etudiant" class="form-section">
+        <button onclick="goBack()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);font-family:inherit;margin-bottom:1.5rem;padding:0;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Retour
+        </button>
+
+        <h1 class="form-title">Profil étudiant</h1>
+        <p class="form-subtitle">Renseignez vos informations personnelles et académiques.</p>
+
+        <div class="alert error" id="err-etudiant">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="err-etudiant-text"></span>
+        </div>
+
+        <div class="divider">Identité</div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Nom</label>
+            <input type="text" id="et-nom" placeholder="Ben Ali"/>
+          </div>
+          <div class="field">
+            <label>Prénom</label>
+            <input type="text" id="et-prenom" placeholder="Youssef"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Adresse e-mail universitaire</label>
+          <input type="email" id="et-email" placeholder="y.benali@univ.tn"/>
+        </div>
+
+        <div class="divider">Informations académiques</div>
+
+        <div class="field">
+          <label>Université / École</label>
+          <input type="text" id="et-universite" placeholder="ENIT, FST, ESPRIT…"/>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Numéro carte étudiant</label>
+            <input type="text" id="et-carte" placeholder="20240012345"/>
+          </div>
+          <div class="field">
+            <label>Niveau d'études</label>
+            <select id="et-niveau">
+              <option value="">Sélectionner</option>
+              <option>Licence 1</option>
+              <option>Licence 2</option>
+              <option>Licence 3</option>
+              <option>Master 1</option>
+              <option>Master 2</option>
+              <option>Ingénierie 1</option>
+              <option>Ingénierie 2</option>
+              <option>Ingénierie 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Spécialité</label>
+          <input type="text" id="et-specialite" placeholder="Génie logiciel, Finance, Marketing…"/>
+        </div>
+
+        <div class="divider">Sécurité</div>
+
+        <div class="field">
+          <label>Mot de passe</label>
+          <input type="password" id="et-password" placeholder="Minimum 8 caractères" oninput="checkStrength(this.value,'et')"/>
+          <div class="strength-wrap">
+            <div class="strength-bar"><div class="strength-fill" id="et-sfill"></div></div>
+            <div class="strength-label" id="et-slabel">Entrez un mot de passe</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="et-confirm" placeholder="Répétez votre mot de passe"/>
+        </div>
+
+        <button class="btn-submit" id="btn-etudiant" onclick="submitEtudiant()">
+          Créer mon compte
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="signin-link">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
+      </div>
+
+      <!-- STEP 2B : FORMULAIRE ENTREPRISE -->
+      <div id="step2-entreprise" class="form-section">
+        <button onclick="goBack()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);font-family:inherit;margin-bottom:1.5rem;padding:0;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Retour
+        </button>
+
+        <h1 class="form-title">Profil entreprise</h1>
+        <p class="form-subtitle">Renseignez les informations de votre entreprise.</p>
+
+        <div class="alert error" id="err-entreprise">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="err-entreprise-text"></span>
+        </div>
+
+        <div class="divider">Responsable du compte</div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Nom</label>
+            <input type="text" id="en-nom" placeholder="Dupont"/>
+          </div>
+          <div class="field">
+            <label>Prénom</label>
+            <input type="text" id="en-prenom" placeholder="Marie"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>E-mail professionnel</label>
+          <input type="email" id="en-email" placeholder="contact@entreprise.com"/>
+        </div>
+
+        <div class="divider">Informations entreprise</div>
+
+        <div class="field">
+          <label>Raison sociale</label>
+          <input type="text" id="en-raison" placeholder="TechCorp Tunisia SARL"/>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Matricule fiscal</label>
+            <input type="text" id="en-matricule" placeholder="1234567/A/M/000"/>
+          </div>
+          <div class="field">
+            <label>Secteur d'activité</label>
+            <select id="en-secteur">
+              <option value="">Sélectionner</option>
+              <option>Informatique & Tech</option>
+              <option>Finance & Banque</option>
+              <option>Industrie</option>
+              <option>Santé</option>
+              <option>Commerce & Distribution</option>
+              <option>BTP & Immobilier</option>
+              <option>Télécommunications</option>
+              <option>Consulting</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Adresse</label>
+            <input type="text" id="en-adresse" placeholder="12 rue de la République"/>
+          </div>
+          <div class="field">
+            <label>Ville</label>
+            <input type="text" id="en-ville" placeholder="Tunis"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Téléphone</label>
+          <input type="tel" id="en-tel" placeholder="+216 71 000 000"/>
+        </div>
+
+        <div class="divider">Sécurité</div>
+
+        <div class="field">
+          <label>Mot de passe</label>
+          <input type="password" id="en-password" placeholder="Minimum 8 caractères" oninput="checkStrength(this.value,'en')"/>
+          <div class="strength-wrap">
+            <div class="strength-bar"><div class="strength-fill" id="en-sfill"></div></div>
+            <div class="strength-label" id="en-slabel">Entrez un mot de passe</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="en-confirm" placeholder="Répétez votre mot de passe"/>
+        </div>
+
+        <button class="btn-submit" id="btn-entreprise" onclick="submitEntreprise()">
+          Créer mon compte
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="signin-link">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../js/auth.js"></script>
+<script src="../js/api.js"></script>
+<script>
+  if (isLoggedIn()) redirectByRole(getRole());
+
+  let currentRole = null;
+
+  function selectRole(role) {
+    currentRole = role;
+    document.getElementById('card-etudiant').classList.toggle('selected',  role === 'etudiant');
+    document.getElementById('card-entreprise').classList.toggle('selected', role === 'entreprise');
+  }
+
+  function goStep2() {
+    if (!currentRole) { alert('Veuillez sélectionner un type de compte.'); return; }
+    hide('step1');
+    show('step2-' + currentRole);
+    setStep(2);
+  }
+
+  function goBack() {
+    hide('step2-etudiant');
+    hide('step2-entreprise');
+    show('step1');
+    setStep(1);
+  }
+
+  function setStep(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById('step'+i+'-ind').classList.remove('active','done');
+    });
+    for (let i = 1; i < n; i++) document.getElementById('step'+i+'-ind').classList.add('done');
+    document.getElementById('step'+n+'-ind').classList.add('active');
+  }
+
+  function show(id) { document.getElementById(id).classList.add('visible'); }
+  function hide(id) { document.getElementById(id).classList.remove('visible'); }
+
+  function checkStrength(pwd, prefix) {
+    let score = 0;
+    if (pwd.length >= 8)          score++;
+    if (/[A-Z]/.test(pwd))        score++;
+    if (/[0-9]/.test(pwd))        score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    const levels = [
+      { pct:'0%',   color:'#e2e8f0', text:'Entrez un mot de passe' },
+      { pct:'25%',  color:'#ef4444', text:'Très faible' },
+      { pct:'50%',  color:'#f97316', text:'Faible' },
+      { pct:'75%',  color:'#eab308', text:'Moyen' },
+      { pct:'100%', color:'#22c55e', text:'Fort' },
+    ];
+    const lvl = pwd.length === 0 ? levels[0] : levels[score];
+    const fill  = document.getElementById(prefix+'-sfill');
+    const label = document.getElementById(prefix+'-slabel');
+    fill.style.width      = lvl.pct;
+    fill.style.background = lvl.color;
+    label.textContent     = lvl.text;
+    label.style.color     = lvl.color === '#e2e8f0' ? 'var(--muted)' : lvl.color;
+  }
+
+  function showErr(prefix, msg) {
+    const el = document.getElementById('err-'+prefix);
+    document.getElementById('err-'+prefix+'-text').textContent = msg;
+    el.style.display = 'flex';
+  }
+
+  function hideErr(prefix) {
+    document.getElementById('err-'+prefix).style.display = 'none';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? `<svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Création…`
+      : `Créer mon compte <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+  }
+
+  async function submitEtudiant() {
+    hideErr('etudiant');
+    const nom        = document.getElementById('et-nom').value.trim();
+    const prenom     = document.getElementById('et-prenom').value.trim();
+    const email      = document.getElementById('et-email').value.trim();
+    const universite = document.getElementById('et-universite').value.trim();
+    const carte      = document.getElementById('et-carte').value.trim();
+    const niveau     = document.getElementById('et-niveau').value;
+    const specialite = document.getElementById('et-specialite').value.trim();
+    const password   = document.getElementById('et-password').value;
+    const confirm    = document.getElementById('et-confirm').value;
+
+    if (!nom || !prenom || !email || !universite || !carte || !niveau || !specialite || !password)
+      return showErr('etudiant', 'Veuillez remplir tous les champs obligatoires.');
+    if (password.length < 8)
+      return showErr('etudiant', 'Le mot de passe doit contenir au moins 8 caractères.');
+    if (password !== confirm)
+      return showErr('etudiant', 'Les mots de passe ne correspondent pas.');
+
+    setLoading('btn-etudiant', true);
+    try {
+      // firstName = prenom, lastName = nom (mapping backend)
+      const data = await apiRegister(prenom, nom, email, password, 'ETUDIANT', {
+        universite, carteEtudiant: carte, niveau, specialite
+      });
+      saveSession(data);
+      localStorage.setItem('pending_email', email);
+      window.location.href = 'verify-email.html';
+    } catch (err) {
+      showErr('etudiant', err.message);
+    } finally {
+      setLoading('btn-etudiant', false);
+    }
+  }
+
+  async function submitEntreprise() {
+    hideErr('entreprise');
+    const nom       = document.getElementById('en-nom').value.trim();
+    const prenom    = document.getElementById('en-prenom').value.trim();
+    const email     = document.getElementById('en-email').value.trim();
+    const raison    = document.getElementById('en-raison').value.trim();
+    const matricule = document.getElementById('en-matricule').value.trim();
+    const secteur   = document.getElementById('en-secteur').value;
+    const adresse   = document.getElementById('en-adresse').value.trim();
+    const ville     = document.getElementById('en-ville').value.trim();
+    const tel       = document.getElementById('en-tel').value.trim();
+    const password  = document.getElementById('en-password').value;
+    const confirm   = document.getElementById('en-confirm').value;
+
+    if (!nom || !prenom || !email || !raison || !matricule || !secteur || !password)
+      return showErr('entreprise', 'Veuillez remplir tous les champs obligatoires.');
+    if (password.length < 8)
+      return showErr('entreprise', 'Le mot de passe doit contenir au moins 8 caractères.');
+    if (password !== confirm)
+      return showErr('entreprise', 'Les mots de passe ne correspondent pas.');
+
+    setLoading('btn-entreprise', true);
+    try {
+      // firstName = prenom, lastName = nom (mapping backend)
+      const data = await apiRegister(prenom, nom, email, password, 'ENTREPRISE', {
+        raisonSociale: raison, matriculeFiscal: matricule,
+        secteur, adresse, ville, telephone: tel
+      });
+      saveSession(data);
+      localStorage.setItem('pending_email', email);
+      window.location.href = 'verify-email.html';
+    } catch (err) {
+      showErr('entreprise', err.message);
+    } finally {
+      setLoading('btn-entreprise', false);
+    }
+  }
+</script>
+</body>
+</html>

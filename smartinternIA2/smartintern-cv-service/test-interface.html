@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartIntern AI — Interface de Test</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-dark: #3730a3;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #273347;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo h1 { font-size: 18px; font-weight: 700; }
+    .logo span { font-size: 13px; color: var(--text-muted); }
+
+    .status-bar { display: flex; align-items: center; gap: 16px; }
+    .api-config { display: flex; align-items: center; gap: 8px; }
+    .api-config label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+    .api-config input {
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 6px 12px;
+      font-size: 13px; width: 220px;
+    }
+    #health-badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: var(--border); color: var(--text-muted); cursor: pointer;
+      border: none; transition: all .2s;
+    }
+    #health-badge.ok  { background: #064e3b; color: var(--success); }
+    #health-badge.err { background: #450a0a; color: var(--danger); }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--surface); border-radius: var(--radius);
+      padding: 6px; margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1; padding: 10px 16px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      background: transparent; color: var(--text-muted);
+      transition: all .2s; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .tab.active {
+      background: var(--primary); color: #fff;
+      box-shadow: 0 2px 12px rgba(79,70,229,.4);
+    }
+    .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 600; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px; color: var(--text);
+    }
+    .card-title .icon { font-size: 20px; }
+
+    /* ── Drop Zone ───────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 48px 24px; text-align: center; cursor: pointer;
+      transition: all .3s; position: relative;
+    }
+    .drop-zone.hovering {
+      border-color: var(--primary); background: rgba(79,70,229,.06);
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+    }
+    .drop-zone .dz-icon { font-size: 48px; margin-bottom: 12px; }
+    .drop-zone p { color: var(--text-muted); font-size: 14px; margin-top: 8px; }
+    .drop-zone .dz-name { font-weight: 600; color: var(--text); font-size: 15px; }
+    .drop-zone .badge {
+      display: inline-block; margin-top: 12px; padding: 4px 10px;
+      background: var(--surface2); border-radius: 20px;
+      font-size: 12px; color: var(--text-muted);
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { filter: brightness(1.1); }
+    .btn-outline {
+      background: transparent; color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-outline:hover { background: rgba(79,70,229,.1); }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+    /* ── Form ────────────────────────────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    input, select, textarea {
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 10px 14px;
+      font-size: 14px; transition: border-color .2s; font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--surface); }
+
+    /* ── Score gauge ─────────────────────────────────────────── */
+    .score-container { text-align: center; padding: 24px 0; }
+    .score-circle {
+      width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; position: relative;
+      background: conic-gradient(var(--primary) var(--pct, 0%), var(--surface2) 0%);
+    }
+    .score-circle::before {
+      content: ''; position: absolute; inset: 10px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .score-value {
+      font-size: 28px; font-weight: 800; z-index: 1; line-height: 1;
+    }
+    .score-label { font-size: 11px; color: var(--text-muted); z-index: 1; }
+    .niveau-badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 700; letter-spacing: .5px;
+    }
+    .niveau-EXCELLENT { background: #064e3b; color: #34d399; }
+    .niveau-BON       { background: #1e3a5f; color: #60a5fa; }
+    .niveau-MOYEN     { background: #451a03; color: #fbbf24; }
+    .niveau-INSUFFISANT { background: #450a0a; color: #f87171; }
+
+    /* ── Result sections ─────────────────────────────────────── */
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .result-section {
+      background: var(--surface2); border-radius: 10px; padding: 16px;
+    }
+    .result-section h4 {
+      font-size: 13px; font-weight: 700; color: var(--primary-light);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px;
+    }
+    .info-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 14px; }
+    .info-label { color: var(--text-muted); min-width: 110px; flex-shrink: 0; }
+    .info-value { color: var(--text); font-weight: 500; word-break: break-all; }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .tag {
+      padding: 3px 10px; border-radius: 20px; font-size: 12px;
+      background: rgba(79,70,229,.15); color: var(--primary-light);
+      border: 1px solid rgba(79,70,229,.25);
+    }
+    .tag.green  { background: rgba(16,185,129,.12); color: #34d399; border-color: rgba(16,185,129,.25); }
+    .tag.orange { background: rgba(245,158,11,.12); color: #fbbf24; border-color: rgba(245,158,11,.25); }
+    .tag.red    { background: rgba(239,68,68,.12); color: #f87171; border-color: rgba(239,68,68,.25); }
+
+    .exp-item, .form-item {
+      border-left: 3px solid var(--primary); padding-left: 12px;
+      margin-bottom: 14px;
+    }
+    .exp-item h5 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .exp-item .sub { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .exp-item .desc { font-size: 13px; color: var(--text); }
+
+    /* ── Progress ────────────────────────────────────────────── */
+    .progress-bar {
+      height: 6px; background: var(--surface2); border-radius: 3px;
+      overflow: hidden; margin: 8px 0;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      transition: width .6s ease;
+    }
+
+    /* ── Loader ──────────────────────────────────────────────── */
+    .loader {
+      display: none; flex-direction: column; align-items: center;
+      gap: 16px; padding: 40px;
+    }
+    .loader.visible { display: flex; }
+    .spinner {
+      width: 48px; height: 48px; border: 4px solid var(--border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader p { color: var(--text-muted); font-size: 14px; }
+
+    /* ── Alert ───────────────────────────────────────────────── */
+    .alert {
+      padding: 12px 16px; border-radius: 8px; font-size: 14px;
+      margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;
+    }
+    .alert-success { background: #064e3b; border: 1px solid #065f46; color: #a7f3d0; }
+    .alert-error   { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+    .alert-info    { background: #1e3a5f; border: 1px solid #1e40af; color: #93c5fd; }
+    .alert-warn    { background: #451a03; border: 1px solid #92400e; color: #fde68a; }
+
+    /* ── Doc result ──────────────────────────────────────────── */
+    .doc-result {
+      background: var(--surface2); border-radius: 10px; padding: 20px;
+      text-align: center;
+    }
+    .doc-result .doc-icon { font-size: 64px; margin-bottom: 12px; }
+    .doc-result h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .doc-uuid {
+      font-family: monospace; font-size: 13px; color: var(--text-muted);
+      background: var(--bg); padding: 6px 12px; border-radius: 6px;
+      word-break: break-all; margin: 8px 0 16px;
+    }
+    .doc-meta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .doc-meta span {
+      font-size: 12px; color: var(--text-muted);
+      background: var(--bg); padding: 4px 10px; border-radius: 6px;
+    }
+
+    /* ── Verification result ─────────────────────────────────── */
+    .verif-result {
+      padding: 32px; text-align: center; border-radius: var(--radius);
+      border: 2px solid;
+    }
+    .verif-result.VALIDE    { border-color: var(--success); background: rgba(16,185,129,.06); }
+    .verif-result.EXPIRE    { border-color: var(--warning); background: rgba(245,158,11,.06); }
+    .verif-result.FALSIFIE  { border-color: var(--danger);  background: rgba(239,68,68,.06); }
+    .verif-result.INTROUVABLE { border-color: var(--border); background: var(--surface2); }
+    .verif-icon { font-size: 56px; margin-bottom: 12px; }
+    .verif-statut { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .verif-statut.VALIDE     { color: var(--success); }
+    .verif-statut.EXPIRE     { color: var(--warning); }
+    .verif-statut.FALSIFIE   { color: var(--danger); }
+    .verif-statut.INTROUVABLE { color: var(--text-muted); }
+
+    /* ── Score bars ──────────────────────────────────────────── */
+    .score-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 10px; font-size: 13px;
+    }
+    .score-row .sname { min-width: 110px; color: var(--text-muted); }
+    .score-row .sbar  { flex: 1; }
+    .score-row .spct  { min-width: 42px; text-align: right; font-weight: 700; color: var(--text); }
+
+    /* ── Section divider ─────────────────────────────────────── */
+    .section-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .form-grid, .result-grid { grid-template-columns: 1fr; }
+      .tabs { flex-direction: column; }
+      header { flex-direction: column; gap: 12px; }
+    }
+
+    /* ── Rec list ────────────────────────────────────────────── */
+    .rec-list { list-style: none; padding: 0; }
+    .rec-list li {
+      padding: 8px 12px; background: var(--surface2);
+      border-radius: 8px; margin-bottom: 6px; font-size: 13px;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .rec-list li::before { content: '💡'; flex-shrink: 0; }
+
+    /* ── Collapsible raw ─────────────────────────────────────── */
+    details summary {
+      cursor: pointer; font-size: 13px; color: var(--text-muted);
+      padding: 8px 0; user-select: none;
+    }
+    details pre {
+      background: var(--bg); border-radius: 8px; padding: 16px;
+      font-size: 12px; overflow: auto; max-height: 300px;
+      color: #a5b4fc; border: 1px solid var(--border); margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <h1>SmartIntern AI</h1>
+      <span>Interface de test — Microservice FastAPI</span>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div class="api-config">
+      <label>API URL :</label>
+      <input id="api-url" value="http://localhost:8000" placeholder="http://localhost:8000" />
+    </div>
+    <button id="health-badge" onclick="checkHealth()">⬤ Vérifier</button>
+  </div>
+</header>
+
+<!-- ── MAIN ───────────────────────────────────────────────────────────── -->
+<div class="container">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('cv')">📄 Extraction CV</button>
+    <button class="tab" onclick="switchTab('modele')">📋 Créer un Modèle</button>
+    <button class="tab" onclick="switchTab('generer')">⚙️ Générer Document</button>
+    <button class="tab" onclick="switchTab('verifier')">🔍 Vérifier Document</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB 1 : EXTRACTION CV
+  ════════════════════════════════════════════════════════════════ -->
+  <div id="tab-cv" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📤</span> Téléverser un CV</div>
+
+      <div class="drop-zone" id="cv-drop" onclick="document.getElementById('cv-file').click()">
+        <input type="file" id="cv-file" accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.doc"
+               onchange="onCvFileChange(this)" />
+        <div class="dz-icon">📎</div>
+        <div class="dz-name" id="cv-file-name">Glisser-déposer ou cliquer</div>
+        <p>Formats acceptés : PDF, JPG, PNG, WEBP, DOCX, DOC</p>
+        <span class="badge">Max 10 MB</span>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btn-extract" onclick="extractCV(false)" disabled>
+          🧠 Extraire + Analyser IA
+        </button>
+        <button class="btn btn-outline btn-sm" id="btn-text-only" onclick="extractCV(true)" disabled>
+          📝 Texte brut seulement
+        </button>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div class="loader" id="cv-loader">
+      <div class="spinner"></div>
+      <p id="cv-loader-msg">Extraction en cours… Claude analyse votre CV ✨</p>
+    </div>
+
+    <!-- Alert zone (erreurs réseau, sans détruire les résultats) -->
+    <div id="cv-alert" style="display:none;"></div>
+
+    <!-- Result -->
+    <div id="cv-result" style="display:none;">
+
+      <!-- Score -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎯</span> Score de complétude</div>
+        <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
+          <div class="score-container">
+            <div class="score-circle" id="score-circle">
+              <div class="score-value" id="score-val">0</div>
+              <div class="score-label">/ 100</div>
+            </div>
+            <div id="niveau-badge" class="niveau-badge">—</div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div id="score-sections"></div>
+          </div>
+        </div>
+
+        <hr class="section-divider" />
+        <h4 style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Recommandations</h4>
+        <ul class="rec-list" id="rec-list"></ul>
+      </div>
+
+      <!-- Profil -->
+      <div class="card">
+        <div class="card-title"><span class="icon">👤</span> Profil extrait</div>
+        <div class="result-grid">
+          <div class="result-section">
+            <h4>Informations personnelles</h4>
+            <div id="profil-info"></div>
+          </div>
+          <div class="result-section">
+            <h4>Compétences</h4>
+            <div id="competences-info"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expériences / Formations -->
+      <div class="result-grid">
+        <div class="card">
+          <div class="card-title"><span class="icon">💼</span> Expériences</div>
+          <div id="experiences-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🎓</span> Formations</div>
+          <div id="formations-list"></div>
+        </div>
+      </div>
+
+      <!-- Langues + Divers -->
+      <div class="result-grid">
+        <div class="card">
+          <div class="card-title"><span class="icon">🌍</span> Langues</div>
+          <div id="langues-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">✨</span> Divers</div>
+          <div id="divers-list"></div>
+        </div>
+      </div>
+
+      <!-- Raw JSON -->
+      <div class="card">
+        <details>
+          <summary>🔧 Afficher le JSON brut</summary>
+          <pre id="cv-raw-json"></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB 2 : CRÉER UN MODÈLE DE DOCUMENT
+  ════════════════════════════════════════════════════════════════ -->
+  <div id="tab-modele" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> Créer un modèle de document</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID du modèle *</label>
+          <input id="m-id" placeholder="ex: conv-stage-2024" />
+        </div>
+        <div class="form-group">
+          <label>Nom du modèle *</label>
+          <input id="m-nom" placeholder="ex: Convention de stage ITEAM" />
+        </div>
+        <div class="form-group">
+          <label>Type de document *</label>
+          <select id="m-type">
+            <option value="">-- Choisir --</option>
+            <option value="convention_stage">Convention de stage</option>
+            <option value="attestation_stage">Attestation de stage</option>
+            <option value="lettre_recommandation">Lettre de recommandation</option>
+            <option value="attestation_inscription">Attestation d'inscription</option>
+            <option value="releve_notes">Relevé de notes</option>
+            <option value="demande_stage">Demande de stage</option>
+            <option value="rapport_stage">Rapport de stage</option>
+            <option value="fiche_evaluation">Fiche d'évaluation</option>
+            <option value="certificat_formation">Certificat de formation</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Durée de validité (jours)</label>
+          <input id="m-validite" type="number" value="365" min="1" max="3650" />
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Fichier modèle (PDF ou DOCX) *</label>
+          <div class="drop-zone" style="padding:24px" onclick="document.getElementById('m-fichier').click()">
+            <input type="file" id="m-fichier" accept=".pdf,.docx,.doc" onchange="showFileName(this,'m-fichier-name')" />
+            <div style="font-size:24px;margin-bottom:6px">📄</div>
+            <div id="m-fichier-name" class="dz-name" style="font-size:13px">Choisir le modèle PDF/DOCX</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="form-group">
+            <label>En-tête (PNG/JPG) — optionnel</label>
+            <div class="drop-zone" style="padding:16px" onclick="document.getElementById('m-header').click()">
+              <input type="file" id="m-header" accept=".png,.jpg,.jpeg" onchange="showFileName(this,'m-header-name')" />
+              <div style="font-size:20px;margin-bottom:4px">🖼️</div>
+              <div id="m-header-name" style="font-size:12px;color:var(--text-muted)">Choisir l'en-tête</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Pied de page (PNG/JPG) — optionnel</label>
+            <div class="drop-zone" style="padding:16px" onclick="document.getElementById('m-footer').click()">
+              <input type="file" id="m-footer" accept=".png,.jpg,.jpeg" onchange="showFileName(this,'m-footer-name')" />
+              <div style="font-size:20px;margin-bottom:4px">🖼️</div>
+              <div id="m-footer-name" style="font-size:12px;color:var(--text-muted)">Choisir le pied de page</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="creerModele()">
+          🤖 Analyser & Créer le modèle
+        </button>
+      </div>
+    </div>
+
+    <div class="loader" id="modele-loader">
+      <div class="spinner"></div>
+      <p>Claude analyse la structure du document… ✨</p>
+    </div>
+
+    <div id="modele-result" style="display:none;"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB 3 : GÉNÉRER UN DOCUMENT
+  ════════════════════════════════════════════════════════════════ -->
+  <div id="tab-generer" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> Paramètres du document</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID du modèle *</label>
+          <input id="g-modele-id" placeholder="ex: conv-stage-2024" />
+        </div>
+        <div class="form-group">
+          <label>Chemin script Python *</label>
+          <input id="g-script" placeholder="uploads/scripts/conv-stage-2024_script.py" />
+        </div>
+        <div class="form-group">
+          <label>Type de document *</label>
+          <select id="g-type">
+            <option value="convention_stage">Convention de stage</option>
+            <option value="attestation_stage">Attestation de stage</option>
+            <option value="lettre_recommandation">Lettre de recommandation</option>
+            <option value="attestation_inscription">Attestation d'inscription</option>
+            <option value="releve_notes">Relevé de notes</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nom de l'établissement</label>
+          <input id="g-etablissement" value="ITEAM University" />
+        </div>
+        <div class="form-group">
+          <label>Chemin en-tête (optionnel)</label>
+          <input id="g-header" placeholder="uploads/headers/..." />
+        </div>
+        <div class="form-group">
+          <label>Chemin pied de page (optionnel)</label>
+          <input id="g-footer" placeholder="uploads/footers/..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">👤</span> Données du profil (JSON)</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+        Renseigner les champs dynamiques définis dans le modèle.
+      </p>
+      <div class="form-grid">
+        <div class="form-group"><label>Nom</label><input id="d-nom" placeholder="Dupont" /></div>
+        <div class="form-group"><label>Prénom</label><input id="d-prenom" placeholder="Jean" /></div>
+        <div class="form-group"><label>Email</label><input id="d-email" placeholder="jean@etudiant.fr" /></div>
+        <div class="form-group"><label>Téléphone</label><input id="d-tel" placeholder="+216 ..." /></div>
+        <div class="form-group"><label>Filière / Spécialité</label><input id="d-filiere" placeholder="Génie Logiciel" /></div>
+        <div class="form-group"><label>Classe</label><input id="d-classe" placeholder="3ING2" /></div>
+        <div class="form-group"><label>Nom entreprise</label><input id="d-entreprise" placeholder="TechCorp" /></div>
+        <div class="form-group"><label>Adresse entreprise</label><input id="d-adresse-ent" placeholder="Tunis, Tunisie" /></div>
+        <div class="form-group"><label>Date début stage</label><input id="d-debut" type="date" /></div>
+        <div class="form-group"><label>Date fin stage</label><input id="d-fin" type="date" /></div>
+        <div class="form-group full">
+          <label>Données supplémentaires (JSON)</label>
+          <textarea id="d-extra" placeholder='{"encadrant": "M. Ben Ali", "sujet": "Développement web"}'></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="genererDocument()">
+          📄 Générer le document PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="loader" id="gen-loader">
+      <div class="spinner"></div>
+      <p>Génération du PDF en cours…</p>
+    </div>
+
+    <div id="gen-result" style="display:none;"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB 4 : VÉRIFIER UN DOCUMENT
+  ════════════════════════════════════════════════════════════════ -->
+  <div id="tab-verifier" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🔍</span> Vérification d'authenticité</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        Entrez l'UUID du document (disponible après génération ou depuis le QR code).
+      </p>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>UUID du document *</label>
+          <input id="v-uuid" placeholder="ex: 550e8400-e29b-41d4-a716-446655440000" />
+        </div>
+        <div class="form-group">
+          <label>Date de génération (optionnel)</label>
+          <input id="v-date-gen" placeholder="2024-04-23T14:30:00" />
+        </div>
+        <div class="form-group">
+          <label>Date d'expiration (optionnel)</label>
+          <input id="v-date-exp" placeholder="2025-04-23T14:30:00" />
+        </div>
+        <div class="form-group">
+          <label>Signature HMAC (optionnel)</label>
+          <input id="v-signature" placeholder="abc123..." />
+        </div>
+        <div class="form-group">
+          <label>Type de document (optionnel)</label>
+          <input id="v-type" placeholder="convention_stage" />
+        </div>
+        <div class="form-group">
+          <label>Établissement (optionnel)</label>
+          <input id="v-etab" placeholder="ITEAM University" />
+        </div>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="verifierDocument()">🔍 Vérifier l'authenticité</button>
+      </div>
+    </div>
+
+    <div class="loader" id="verif-loader">
+      <div class="spinner"></div>
+      <p>Vérification en cours…</p>
+    </div>
+
+    <div id="verif-result" style="display:none;"></div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// Utilitaires
+// ═══════════════════════════════════════════════════════════════════════
+const apiUrl = () => document.getElementById('api-url').value.replace(/\/+$/, '');
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function showFileName(input, targetId) {
+  document.getElementById(targetId).textContent = input.files[0]?.name || 'Aucun fichier';
+}
+
+function setLoader(id, visible) {
+  document.getElementById(id).classList.toggle('visible', visible);
+}
+
+function tag(text, cls = '') {
+  return `<span class="tag ${cls}">${text}</span>`;
+}
+
+function infoRow(label, value) {
+  if (!value) return '';
+  return `<div class="info-row">
+    <span class="info-label">${label}</span>
+    <span class="info-value">${value}</span>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Health check
+// ═══════════════════════════════════════════════════════════════════════
+async function checkHealth() {
+  const btn = document.getElementById('health-badge');
+  btn.textContent = '⬤ ...';
+  btn.className = '';
+  try {
+    const r = await fetch(apiUrl() + '/health');
+    const d = await r.json();
+    if (d.status === 'ok') {
+      btn.textContent = '⬤ Connecté';
+      btn.className = 'ok';
+    } else throw new Error();
+  } catch {
+    btn.textContent = '⬤ Hors ligne';
+    btn.className = 'err';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 1 : CV
+// ═══════════════════════════════════════════════════════════════════════
+let cvFile = null;
+
+function onCvFileChange(input) {
+  cvFile = input.files[0];
+  if (!cvFile) return;
+  document.getElementById('cv-file-name').textContent = cvFile.name;
+  document.getElementById('btn-extract').disabled = false;
+  document.getElementById('btn-text-only').disabled = false;
+  document.getElementById('cv-result').style.display = 'none';
+}
+
+// Drag & drop
+const cvDrop = document.getElementById('cv-drop');
+cvDrop.addEventListener('dragover', e => { e.preventDefault(); cvDrop.classList.add('hovering'); });
+cvDrop.addEventListener('dragleave', () => cvDrop.classList.remove('hovering'));
+cvDrop.addEventListener('drop', e => {
+  e.preventDefault(); cvDrop.classList.remove('hovering');
+  const f = e.dataTransfer.files[0];
+  if (f) { cvFile = f; document.getElementById('cv-file-name').textContent = f.name;
+           document.getElementById('btn-extract').disabled = false;
+           document.getElementById('btn-text-only').disabled = false; }
+});
+
+function showCvAlert(msg, type = 'error') {
+  const el = document.getElementById('cv-alert');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+function hideCvAlert() {
+  const el = document.getElementById('cv-alert');
+  el.style.display = 'none';
+  el.innerHTML = '';
+}
+
+async function extractCV(textOnly = false) {
+  if (!cvFile) return;
+  const endpoint = textOnly ? '/extract/text-only' : '/extract';
+  setLoader('cv-loader', true);
+  hideCvAlert();
+  document.getElementById('cv-loader-msg').textContent = textOnly
+    ? 'Extraction du texte brut…'
+    : 'Extraction en cours… Claude analyse votre CV ✨';
+
+  const fd = new FormData();
+  fd.append('file', cvFile);
+
+  try {
+    const r = await fetch(apiUrl() + endpoint, { method: 'POST', body: fd });
+    const data = await r.json();
+    setLoader('cv-loader', false);
+
+    if (!data.success) {
+      showCvAlert(`❌ ${data.message || data.detail || 'Erreur inconnue'}`);
+      return;
+    }
+    renderCvResult(data, textOnly);
+  } catch(e) {
+    setLoader('cv-loader', false);
+    showCvAlert(`❌ Erreur : ${e.message}<br><small>Vérifiez l'URL et que le service est démarré.</small>`);
+  }
+}
+
+function renderCvResult(data, textOnly) {
+  const el = document.getElementById('cv-result');
+  el.style.display = 'block';
+
+  if (textOnly) {
+    // Masquer toutes les sections résultat
+    document.querySelectorAll('#cv-result .card').forEach(c => c.style.display = 'none');
+    // Créer/afficher un bloc dédié texte brut
+    let textBlock = document.getElementById('cv-text-brut-block');
+    if (!textBlock) {
+      textBlock = document.createElement('div');
+      textBlock.id = 'cv-text-brut-block';
+      textBlock.className = 'card';
+      el.appendChild(textBlock);
+    }
+    textBlock.style.display = 'block';
+    const texte = data.texteBrut || '(aucun texte extrait)';
+    textBlock.innerHTML = `
+      <div class="card-title"><span class="icon">📝</span> Texte extrait (${data.nbPages ?? 0} page(s) — ${data.methodeExtraction ?? ''})</div>
+      <div style="background:var(--bg);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;overflow:auto;max-height:500px;color:var(--text);border:1px solid var(--border)">${texte.replace(/</g,'&lt;')}</div>`;
+    return;
+  }
+  // S'assurer que toutes les cartes résultat sont visibles et que le bloc texte brut est caché
+  document.querySelectorAll('#cv-result .card').forEach(c => c.style.display = '');
+  const oldTextBlock = document.getElementById('cv-text-brut-block');
+  if (oldTextBlock) oldTextBlock.style.display = 'none';
+
+  const cv = data.cvStandardise;
+  const score = data.score;
+
+  // Score gauge
+  const pct = score?.scoreSur100 ?? cv?.scoreCompletude ?? 0;
+  const circle = document.getElementById('score-circle');
+  if (circle) circle.style.setProperty('--pct', pct.toFixed(1) + '%');
+  const scoreVal = document.getElementById('score-val');
+  if (scoreVal) scoreVal.textContent = Math.round(pct);
+
+  const niveau = score?.niveau ?? 'N/A';
+  const badge = document.getElementById('niveau-badge');
+  if (badge) { badge.textContent = niveau; badge.className = 'niveau-badge niveau-' + niveau; }
+
+  // Score bars
+  const sections = score?.details ?? {};
+  const sNoms = { profil:'Profil', formations:'Formations', experiences:'Expériences',
+                  competences:'Compétences', langues:'Langues', bonus:'Bonus' };
+  const scoreSections = document.getElementById('score-sections');
+  if (scoreSections) scoreSections.innerHTML = Object.entries(sections).map(([k, s]) => `
+    <div class="score-row">
+      <span class="sname">${sNoms[k] ?? k}</span>
+      <div class="sbar"><div class="progress-bar">
+        <div class="progress-fill" style="width:${s.pourcentage ?? 0}%"></div>
+      </div></div>
+      <span class="spct">${s.pourcentage ?? 0}%</span>
+    </div>`).join('');
+
+  // Recommandations
+  const recs = score?.recommandations ?? [];
+  const recList = document.getElementById('rec-list');
+  if (recList) recList.innerHTML = recs.length
+    ? recs.map(r => `<li>${r}</li>`).join('')
+    : '<li style="color:var(--success)">✅ CV complet !</li>';
+
+  // Profil
+  const p = cv?.profil ?? {};
+  const profilInfo = document.getElementById('profil-info');
+  if (profilInfo) profilInfo.innerHTML = [
+    infoRow('Nom', (p.prenom || '') + ' ' + (p.nom || '')),
+    infoRow('Email', p.email),
+    infoRow('Téléphone', p.telephone),
+    infoRow('Titre', p.titreProfessionnel),
+    infoRow('Adresse', p.adresse),
+    infoRow('Nationalité', p.nationalite),
+    infoRow('Naissance', p.dateNaissance),
+    p.resume ? `<div style="margin-top:10px;font-size:13px;color:var(--text-muted);line-height:1.5">${p.resume}</div>` : ''
+  ].join('');
+
+  // Compétences
+  const c = cv?.competences ?? {};
+  const compInfo = document.getElementById('competences-info');
+  if (compInfo) compInfo.innerHTML = `
+    <div style="margin-bottom:10px"><strong style="font-size:12px;color:var(--text-muted)">TECHNIQUES</strong><div class="tag-list">
+      ${(c.techniques ?? []).map(s => tag(s)).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucune</em>'}
+    </div></div>
+    <div style="margin-bottom:10px"><strong style="font-size:12px;color:var(--text-muted)">OUTILS</strong><div class="tag-list">
+      ${(c.outils ?? []).map(s => tag(s, 'green')).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucun</em>'}
+    </div></div>
+    <div style="margin-bottom:10px"><strong style="font-size:12px;color:var(--text-muted)">SOFT SKILLS</strong><div class="tag-list">
+      ${(c.softSkills ?? []).map(s => tag(s, 'orange')).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucun</em>'}
+    </div></div>
+    ${(c.autres ?? []).length ? `<div><strong style="font-size:12px;color:var(--text-muted)">AUTRES</strong><div class="tag-list">
+      ${c.autres.map(s => tag(s, 'red')).join('')}
+    </div></div>` : ''}`;
+
+  // Expériences
+  const exps = cv?.experiences ?? [];
+  const expsList = document.getElementById('experiences-list');
+  if (expsList) expsList.innerHTML = exps.length
+    ? exps.map(e => `<div class="exp-item">
+        <h5>${e.poste ?? ''}</h5>
+        <div class="sub">${e.entreprise ?? ''} ${e.lieu ? '• ' + e.lieu : ''} ${e.periode ? '• ' + e.periode : ''}</div>
+        ${e.description ? `<div class="desc">${e.description}</div>` : ''}
+      </div>`).join('')
+    : '<p style="color:var(--text-muted);font-size:13px">Aucune expérience trouvée</p>';
+
+  // Formations
+  const forms = cv?.formations ?? [];
+  const formsList = document.getElementById('formations-list');
+  if (formsList) formsList.innerHTML = forms.length
+    ? forms.map(f => `<div class="form-item">
+        <h5>${f.diplome ?? ''}</h5>
+        <div class="sub">${f.etablissement ?? ''} ${f.lieu ? '• ' + f.lieu : ''} ${f.periode ? '• ' + f.periode : ''}</div>
+        ${f.specialite ? `<div class="desc">${f.specialite}</div>` : ''}
+      </div>`).join('')
+    : '<p style="color:var(--text-muted);font-size:13px">Aucune formation trouvée</p>';
+
+  // Langues
+  const langs = cv?.langues ?? [];
+  const langsList = document.getElementById('langues-list');
+  if (langsList) langsList.innerHTML = langs.length
+    ? `<div class="tag-list">${langs.map(l => tag(l.langue + (l.niveau ? ' — ' + l.niveau : ''))).join('')}</div>`
+    : '<p style="color:var(--text-muted);font-size:13px">Aucune langue</p>';
+
+  // Divers
+  const certs = cv?.certifications ?? [];
+  const projs = cv?.projets ?? [];
+  const ints  = cv?.interets ?? [];
+  const diversList = document.getElementById('divers-list');
+  if (diversList) diversList.innerHTML = `
+    ${certs.length ? `<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--text-muted)">CERTIFICATIONS</strong><div class="tag-list">${certs.map(s=>tag(s,'green')).join('')}</div></div>` : ''}
+    ${projs.length ? `<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--text-muted)">PROJETS</strong><div class="tag-list">${projs.map(s=>tag(s)).join('')}</div></div>` : ''}
+    ${ints.length  ? `<div><strong style="font-size:12px;color:var(--text-muted)">INTÉRÊTS</strong><div class="tag-list">${ints.map(s=>tag(s,'orange')).join('')}</div></div>` : ''}
+    ${!certs.length && !projs.length && !ints.length ? '<p style="color:var(--text-muted);font-size:13px">Aucune info supplémentaire</p>' : ''}`;
+
+  // Raw JSON
+  const rawJson = document.getElementById('cv-raw-json');
+  if (rawJson) rawJson.textContent = JSON.stringify(data, null, 2);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 2 : CRÉER UN MODÈLE
+// ═══════════════════════════════════════════════════════════════════════
+async function creerModele() {
+  const id    = document.getElementById('m-id').value.trim();
+  const nom   = document.getElementById('m-nom').value.trim();
+  const type  = document.getElementById('m-type').value;
+  const valid = document.getElementById('m-validite').value;
+  const fich  = document.getElementById('m-fichier').files[0];
+
+  if (!id || !nom || !type || !fich) {
+    alert('Veuillez remplir tous les champs obligatoires et joindre le fichier modèle.');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('modele_id', id);
+  fd.append('nom_modele', nom);
+  fd.append('type_document', type);
+  fd.append('duree_validite_jours', valid);
+  fd.append('fichier_modele', fich);
+
+  const header = document.getElementById('m-header').files[0];
+  if (header) fd.append('fichier_header', header);
+  const footer = document.getElementById('m-footer').files[0];
+  if (footer) fd.append('fichier_footer', footer);
+
+  setLoader('modele-loader', true);
+  document.getElementById('modele-result').style.display = 'none';
+
+  try {
+    const r = await fetch(apiUrl() + '/modeles/creer', { method: 'POST', body: fd });
+    const data = await r.json();
+    setLoader('modele-loader', false);
+
+    const el = document.getElementById('modele-result');
+    el.style.display = 'block';
+
+    if (data.success) {
+      const m = data.modele ?? {};
+      const champs = m.champs_dynamiques ?? [];
+      el.innerHTML = `
+        <div class="alert alert-success">✅ ${data.message}</div>
+        <div class="card">
+          <div class="card-title"><span class="icon">✅</span> Modèle créé avec succès</div>
+          <div class="result-grid">
+            <div class="result-section">
+              <h4>Informations</h4>
+              ${infoRow('ID Modèle', m.modele_id)}
+              ${infoRow('Nom', m.nom_modele)}
+              ${infoRow('Type', m.type_document)}
+              ${infoRow('Script', m.chemin_script)}
+              ${infoRow('Header', m.chemin_header || '—')}
+              ${infoRow('Footer', m.chemin_footer || '—')}
+              ${infoRow('Validité', (m.duree_validite_jours ?? 365) + ' jours')}
+            </div>
+            <div class="result-section">
+              <h4>Champs dynamiques détectés (${champs.length})</h4>
+              <div class="tag-list">${champs.map(c => tag('{{' + c + '}}', 'orange')).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucun champ détecté</em>'}</div>
+              <hr class="section-divider"/>
+              <h4>Remplir automatiquement l'onglet Génération</h4>
+              <button class="btn btn-outline btn-sm" onclick="prefillGeneration(${JSON.stringify(m).replace(/"/g,'&quot;')})">
+                → Pré-remplir l'onglet Génération
+              </button>
+            </div>
+          </div>
+          <details style="margin-top:16px">
+            <summary>🔧 JSON complet</summary>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          </details>
+        </div>`;
+    } else {
+      el.innerHTML = `<div class="alert alert-error">❌ ${data.detail ?? JSON.stringify(data)}</div>`;
+    }
+  } catch(e) {
+    setLoader('modele-loader', false);
+    document.getElementById('modele-result').style.display = 'block';
+    document.getElementById('modele-result').innerHTML =
+      `<div class="alert alert-error">❌ Erreur réseau : ${e.message}</div>`;
+  }
+}
+
+function prefillGeneration(m) {
+  document.getElementById('g-modele-id').value = m.modele_id ?? '';
+  document.getElementById('g-script').value    = m.chemin_script ?? '';
+  document.getElementById('g-type').value      = m.type_document ?? 'autre';
+  if (m.chemin_header) document.getElementById('g-header').value = m.chemin_header;
+  if (m.chemin_footer) document.getElementById('g-footer').value = m.chemin_footer;
+  // Switch to tab
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-generer').classList.add('active');
+  document.querySelectorAll('.tab')[2].classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 3 : GÉNÉRER UN DOCUMENT
+// ═══════════════════════════════════════════════════════════════════════
+async function genererDocument() {
+  const modeleId   = document.getElementById('g-modele-id').value.trim();
+  const script     = document.getElementById('g-script').value.trim();
+  const type       = document.getElementById('g-type').value;
+  const etab       = document.getElementById('g-etablissement').value.trim();
+  const header     = document.getElementById('g-header').value.trim();
+  const footer     = document.getElementById('g-footer').value.trim();
+
+  if (!modeleId || !script || !type) {
+    alert('Veuillez renseigner l\'ID du modèle, le chemin script et le type de document.');
+    return;
+  }
+
+  // Construire donnees_profil
+  let extra = {};
+  const extraRaw = document.getElementById('d-extra').value.trim();
+  if (extraRaw) { try { extra = JSON.parse(extraRaw); } catch { alert('JSON supplémentaire invalide.'); return; } }
+
+  const donneesProfil = {
+    ...extra,
+    nom: document.getElementById('d-nom').value.trim(),
+    prenom: document.getElementById('d-prenom').value.trim(),
+    email: document.getElementById('d-email').value.trim(),
+    telephone: document.getElementById('d-tel').value.trim(),
+    filiere: document.getElementById('d-filiere').value.trim(),
+    classe: document.getElementById('d-classe').value.trim(),
+    nom_entreprise: document.getElementById('d-entreprise').value.trim(),
+    adresse_entreprise: document.getElementById('d-adresse-ent').value.trim(),
+    date_debut_stage: document.getElementById('d-debut').value,
+    date_fin_stage: document.getElementById('d-fin').value,
+  };
+  // Supprimer les vides
+  Object.keys(donneesProfil).forEach(k => { if (!donneesProfil[k]) delete donneesProfil[k]; });
+
+  const payload = {
+    modeleId,
+    cheminScript: script,
+    typeDocument: type,
+    nomEtablissement: etab || 'SmartIntern',
+    dureeValiditeJours: 365,
+    donneesProfil,
+    ...(header ? { cheminHeader: header } : {}),
+    ...(footer ? { cheminFooter: footer } : {}),
+  };
+
+  setLoader('gen-loader', true);
+  document.getElementById('gen-result').style.display = 'none';
+
+  try {
+    const r = await fetch(apiUrl() + '/documents/generer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json();
+    setLoader('gen-loader', false);
+
+    const el = document.getElementById('gen-result');
+    el.style.display = 'block';
+
+    if (data.success) {
+      const doc = data.document ?? {};
+      const uuid = doc.docUuid ?? doc.doc_uuid ?? '';
+      el.innerHTML = `
+        <div class="alert alert-success">✅ ${data.message}</div>
+        <div class="card">
+          <div class="doc-result">
+            <div class="doc-icon">📄</div>
+            <h3>Document généré</h3>
+            <div class="doc-uuid">${uuid}</div>
+            <div class="doc-meta">
+              <span>📅 ${doc.dateGeneration ?? doc.date_generation ?? '—'}</span>
+              <span>⏰ Expire : ${doc.dateExpiration ?? doc.date_expiration ?? '—'}</span>
+              <span>📦 ${Math.round((doc.tailleOctets ?? 0) / 1024)} Ko</span>
+              <span>🏛️ ${doc.nomEtablissement ?? '—'}</span>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+              <a href="${apiUrl()}/documents/telecharger/${uuid}" target="_blank"
+                 class="btn btn-success">⬇️ Télécharger le PDF</a>
+              <button class="btn btn-outline" onclick="prefillVerif('${uuid}')">
+                🔍 Vérifier ce document
+              </button>
+            </div>
+          </div>
+          <details style="margin-top:16px">
+            <summary>🔧 JSON complet</summary>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          </details>
+        </div>`;
+    } else {
+      el.innerHTML = `<div class="alert alert-error">❌ ${data.detail ?? JSON.stringify(data)}</div>`;
+    }
+  } catch(e) {
+    setLoader('gen-loader', false);
+    document.getElementById('gen-result').style.display = 'block';
+    document.getElementById('gen-result').innerHTML =
+      `<div class="alert alert-error">❌ Erreur réseau : ${e.message}</div>`;
+  }
+}
+
+function prefillVerif(uuid) {
+  document.getElementById('v-uuid').value = uuid;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-verifier').classList.add('active');
+  document.querySelectorAll('.tab')[3].classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 4 : VÉRIFIER
+// ═══════════════════════════════════════════════════════════════════════
+async function verifierDocument() {
+  const uuid = document.getElementById('v-uuid').value.trim();
+  if (!uuid) { alert('Veuillez entrer un UUID.'); return; }
+
+  const params = new URLSearchParams();
+  const dgen  = document.getElementById('v-date-gen').value.trim();
+  const dexp  = document.getElementById('v-date-exp').value.trim();
+  const sig   = document.getElementById('v-signature').value.trim();
+  const vtype = document.getElementById('v-type').value.trim();
+  const etab  = document.getElementById('v-etab').value.trim();
+  if (dgen)  params.set('date_generation', dgen);
+  if (dexp)  params.set('date_expiration', dexp);
+  if (sig)   params.set('signature', sig);
+  if (vtype) params.set('type_document', vtype);
+  if (etab)  params.set('nom_etablissement', etab);
+
+  setLoader('verif-loader', true);
+  document.getElementById('verif-result').style.display = 'none';
+
+  try {
+    const url = `${apiUrl()}/documents/verifier/${uuid}?${params.toString()}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    setLoader('verif-loader', false);
+
+    const statut = data.statut ?? 'INTROUVABLE';
+    const icons = { VALIDE:'✅', EXPIRE:'⚠️', FALSIFIE:'❌', INTROUVABLE:'🔎' };
+    const msgs  = { VALIDE:'Document authentique et valide.',
+                    EXPIRE:'Document expiré.', FALSIFIE:'Document falsifié ou altéré.',
+                    INTROUVABLE:'Document introuvable.' };
+
+    const el = document.getElementById('verif-result');
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div class="card">
+        <div class="verif-result ${statut}">
+          <div class="verif-icon">${icons[statut] ?? '❓'}</div>
+          <div class="verif-statut ${statut}">${statut}</div>
+          <p style="color:var(--text-muted);margin-bottom:16px">${msgs[statut] ?? data.message ?? ''}</p>
+          ${data.typeDocument ? `<div class="doc-meta" style="justify-content:center"><span>📋 ${data.typeDocument}</span><span>🏛️ ${data.nomEtablissement ?? ''}</span><span>📅 ${data.dateGeneration ?? ''}</span></div>` : ''}
+        </div>
+        <details style="margin-top:16px">
+          <summary>🔧 Détails JSON</summary>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        </details>
+      </div>`;
+  } catch(e) {
+    setLoader('verif-loader', false);
+    document.getElementById('verif-result').style.display = 'block';
+    document.getElementById('verif-result').innerHTML =
+      `<div class="alert alert-error">❌ Erreur réseau : ${e.message}</div>`;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+window.addEventListener('load', checkHealth);
+</script>
+</body>
+</html>

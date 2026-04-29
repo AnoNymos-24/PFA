@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Définir mon mot de passe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --blue:#1d4ed8; --blue-dark:#1e40af; --blue-soft:#eff6ff; --blue-mid:#dbeafe;
+      --dark:#0f172a; --text:#1e293b; --muted:#64748b; --border:#e2e8f0;
+      --bg:#f8fafc; --white:#fff; --green:#16a34a; --red:#dc2626;
+    }
+    body {
+      font-family:'Inter',system-ui,sans-serif;
+      min-height:100vh;
+      background:var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem;
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+    .card {
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:2.75rem 2.25rem;
+      width:100%;
+      max-width:420px;
+      box-shadow:0 4px 32px rgba(0,0,0,0.06);
+    }
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:2rem;
+      text-decoration:none;
+    }
+    .logo-mark {
+      width:32px;height:32px;
+      background:var(--blue);
+      border-radius:8px;
+      display:grid;place-items:center;
+    }
+    .logo-mark svg { width:16px;height:16px; }
+    .logo-text { font-size:0.95rem;font-weight:800;color:var(--dark); }
+    .logo-text span { color:var(--blue); }
+
+    .icon-wrap {
+      width:56px;height:56px;
+      background:var(--blue-mid);
+      border-radius:14px;
+      display:grid;place-items:center;
+      margin-bottom:1.5rem;
+    }
+    .icon-wrap svg {
+      width:26px;height:26px;
+      stroke:var(--blue);fill:none;
+      stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    }
+    h1 { font-size:1.45rem;font-weight:800;color:var(--dark);letter-spacing:-0.6px;margin-bottom:0.4rem; }
+    .subtitle { font-size:0.875rem;color:var(--muted);line-height:1.65;margin-bottom:2rem; }
+
+    .notice {
+      background:var(--blue-soft);
+      border:1px solid var(--blue-mid);
+      border-radius:10px;
+      padding:0.875rem 1rem;
+      font-size:0.8rem;
+      color:#1e40af;
+      line-height:1.6;
+      margin-bottom:1.75rem;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .notice svg { width:16px;height:16px;stroke:#1d4ed8;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;margin-top:1px; }
+
+    .field { margin-bottom:1.25rem; }
+    .field label { display:block;font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:6px; }
+    .field input {
+      width:100%;padding:0.7rem 0.9rem;
+      border:1.5px solid var(--border);border-radius:9px;
+      font-size:0.9rem;font-family:inherit;color:var(--text);
+      background:var(--white);outline:none;
+      transition:border-color 0.15s,box-shadow 0.15s;
+    }
+    .field input:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,78,216,0.08); }
+
+    .strength-bar { height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:6px; }
+    .strength-fill { height:100%;width:0%;border-radius:99px;transition:width 0.3s,background 0.3s; }
+    .strength-label { font-size:0.72rem;font-weight:500;color:var(--muted);margin-top:4px; }
+
+    .requirements {
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:9px;
+      padding:0.875rem 1rem;
+      margin-bottom:1.5rem;
+    }
+    .req-title { font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:0.5rem; }
+    .req-list { display:flex;flex-direction:column;gap:4px; }
+    .req-item {
+      display:flex;align-items:center;gap:7px;
+      font-size:0.78rem;color:var(--muted);
+      transition:color 0.2s;
+    }
+    .req-item svg { width:13px;height:13px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke:var(--border);transition:stroke 0.2s; }
+    .req-item.ok { color:var(--green); }
+    .req-item.ok svg { stroke:var(--green); }
+
+    .alert {
+      padding:0.7rem 1rem;border-radius:9px;
+      font-size:0.825rem;font-weight:500;
+      margin-bottom:1.25rem;display:none;
+      align-items:center;gap:8px;
+    }
+    .alert.error   { background:#fef2f2;color:var(--red);border:1px solid #fecaca; }
+    .alert.success { background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0; }
+    .alert svg { width:15px;height:15px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round; }
+    .alert.error svg { stroke:var(--red); }
+    .alert.success svg { stroke:var(--green); }
+
+    .btn-submit {
+      width:100%;padding:0.8rem;
+      background:var(--blue);color:#fff;border:none;
+      border-radius:9px;font-size:0.95rem;font-weight:700;font-family:inherit;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:background 0.15s,transform 0.15s;
+    }
+    .btn-submit:hover    { background:var(--blue-dark);transform:translateY(-1px); }
+    .btn-submit:disabled { background:#93c5fd;cursor:not-allowed;transform:none; }
+    .btn-submit svg { width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
+
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spin { animation:spin 0.8s linear infinite; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <a class="logo" href="../index.html">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="logo-text">SmartIntern <span>AI</span></span>
+  </a>
+
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  </div>
+
+  <h1>Définir mon mot de passe</h1>
+  <p class="subtitle">Votre compte a été créé par un administrateur. Choisissez un mot de passe personnel pour sécuriser votre accès.</p>
+
+  <div class="notice">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Le mot de passe temporaire fourni par votre administrateur ne sera plus valide après cette étape.
+  </div>
+
+  <div class="alert error" id="alert-err">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="alert-err-text"></span>
+  </div>
+
+  <div class="alert success" id="alert-ok">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="alert-ok-text"></span>
+  </div>
+
+  <div class="field">
+    <label>Mot de passe temporaire</label>
+    <input type="password" id="old-pwd" placeholder="Mot de passe reçu par e-mail"/>
+  </div>
+
+  <div class="field">
+    <label>Nouveau mot de passe</label>
+    <input type="password" id="new-pwd" placeholder="Minimum 8 caractères" oninput="checkStrength(this.value)"/>
+    <div class="strength-bar"><div class="strength-fill" id="sfill"></div></div>
+    <div class="strength-label" id="slabel">Entrez un mot de passe</div>
+  </div>
+
+  <div class="requirements">
+    <div class="req-title">Le mot de passe doit contenir :</div>
+    <div class="req-list">
+      <div class="req-item" id="req-len">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Au moins 8 caractères
+      </div>
+      <div class="req-item" id="req-upper">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Une majuscule
+      </div>
+      <div class="req-item" id="req-num">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Un chiffre
+      </div>
+      <div class="req-item" id="req-special">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Un caractère spécial
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Confirmer le nouveau mot de passe</label>
+    <input type="password" id="confirm-pwd" placeholder="Répétez votre nouveau mot de passe"/>
+  </div>
+
+  <button class="btn-submit" id="btn-submit" onclick="submitChange()">
+    Enregistrer mon mot de passe
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </button>
+</div>
+
+<script src="../js/auth.js"></script>
+<script src="../js/api.js"></script>
+<script>
+  function checkStrength(pwd) {
+    const fill  = document.getElementById('sfill');
+    const label = document.getElementById('slabel');
+    const reqs  = {
+      len:     pwd.length >= 8,
+      upper:   /[A-Z]/.test(pwd),
+      num:     /[0-9]/.test(pwd),
+      special: /[^A-Za-z0-9]/.test(pwd),
+    };
+    Object.entries(reqs).forEach(([k,v]) => {
+      document.getElementById('req-'+k).classList.toggle('ok', v);
+    });
+    const score = Object.values(reqs).filter(Boolean).length;
+    const levels = [
+      { pct:'0%',   color:'#e2e8f0', text:'Entrez un mot de passe' },
+      { pct:'25%',  color:'#ef4444', text:'Très faible' },
+      { pct:'50%',  color:'#f97316', text:'Faible' },
+      { pct:'75%',  color:'#eab308', text:'Moyen' },
+      { pct:'100%', color:'#22c55e', text:'Fort' },
+    ];
+    const lvl = pwd.length === 0 ? levels[0] : levels[score];
+    fill.style.width      = lvl.pct;
+    fill.style.background = lvl.color;
+    label.textContent     = lvl.text;
+    label.style.color     = lvl.color === '#e2e8f0' ? 'var(--muted)' : lvl.color;
+  }
+
+  async function submitChange() {
+    const oldPwd  = document.getElementById('old-pwd').value;
+    const newPwd  = document.getElementById('new-pwd').value;
+    const confirm = document.getElementById('confirm-pwd').value;
+    const btn     = document.getElementById('btn-submit');
+    const errEl   = document.getElementById('alert-err');
+    const okEl    = document.getElementById('alert-ok');
+
+    errEl.style.display = 'none';
+    okEl.style.display  = 'none';
+
+    if (!oldPwd || !newPwd || !confirm) {
+      document.getElementById('alert-err-text').textContent = 'Veuillez remplir tous les champs.';
+      errEl.style.display = 'flex'; return;
+    }
+    if (newPwd.length < 8) {
+      document.getElementById('alert-err-text').textContent = 'Mot de passe trop court (min. 8 caractères).';
+      errEl.style.display = 'flex'; return;
+    }
+    if (newPwd !== confirm) {
+      document.getElementById('alert-err-text').textContent = 'Les mots de passe ne correspondent pas.';
+      errEl.style.display = 'flex'; return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Enregistrement…`;
+
+    try {
+      await apiChangePassword(oldPwd, newPwd);
+      document.getElementById('alert-ok-text').textContent = 'Mot de passe mis à jour ! Redirection…';
+      okEl.style.display = 'flex';
+      setTimeout(() => redirectByRole(getRole()), 1500);
+    } catch(err) {
+      document.getElementById('alert-err-text').textContent = err.message || 'Erreur lors de la mise à jour.';
+      errEl.style.display = 'flex';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `Enregistrer mon mot de passe <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    }
+  }
+</script>
+</body>
+</html>

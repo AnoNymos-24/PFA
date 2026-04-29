@@ -122,7 +122,10 @@ public class CvExtractionService {
             };
 
             HttpHeaders fileHeaders = new HttpHeaders();
-            fileHeaders.setContentType(MediaType.APPLICATION_PDF);
+            String ct = file.getContentType();
+            fileHeaders.setContentType(ct != null
+                    ? MediaType.parseMediaType(ct)
+                    : MediaType.APPLICATION_PDF);
             HttpEntity<ByteArrayResource> filePart = new HttpEntity<>(fileResource, fileHeaders);
             body.add("file", filePart);
 

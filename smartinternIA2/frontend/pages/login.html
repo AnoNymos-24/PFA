@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #1d4ed8;
+      --blue-dark: #1e40af;
+      --blue-soft: #eff6ff;
+      --blue-mid:  #dbeafe;
+      --dark:      #0f172a;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --bg:        #f8fafc;
+      --white:     #ffffff;
+      --green:     #16a34a;
+      --red:       #dc2626;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ───────────────────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── PANNEAU GAUCHE ───────────────────────────────────── */
+    .panel-left {
+      background: var(--dark);
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .panel-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .panel-logo-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .panel-logo-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .panel-logo-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .panel-logo-text span { color: #60a5fa; }
+
+    .panel-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .panel-content h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .panel-content h2 span { color: #60a5fa; }
+
+    .panel-content p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Testimonial card */
+    .testimonial {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .testimonial-text {
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .testimonial-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      display: grid;
+      place-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .testimonial-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .testimonial-role {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 1px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    .panel-footer {
+      font-size: 0.75rem;
+      color: #334155;
+    }
+
+    /* ── PANNEAU DROIT ────────────────────────────────────── */
+    .panel-right {
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      overflow-y: auto;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Header form */
+    .form-header {
+      margin-bottom: 2.25rem;
+    }
+
+    .form-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.6rem;
+    }
+
+    .form-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.8px;
+      margin-bottom: 0.4rem;
+      line-height: 1.2;
+    }
+
+    .form-subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Champs */
+    .field {
+      margin-bottom: 1.1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      stroke: #94a3b8;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 0.7rem 0.875rem 0.7rem 2.5rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+    }
+
+    .input-wrap input:focus + .input-focus-icon svg,
+    .input-wrap input:focus ~ svg { stroke: var(--blue); }
+
+    .input-wrap input::placeholder { color: #cbd5e1; }
+
+    /* Toggle password */
+    .toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .toggle-pwd svg {
+      position: static;
+      transform: none;
+      width: 16px;
+      height: 16px;
+      stroke: #94a3b8;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Row options */
+    .row-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .remember-me span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .forgot-link {
+      font-size: 0.8rem;
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .forgot-link:hover { text-decoration: underline; }
+
+    /* Alert */
+    .alert {
+      padding: 0.7rem 1rem;
+      border-radius: 9px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .alert.error {
+      background: #fef2f2;
+      color: var(--red);
+      border: 1px solid #fecaca;
+    }
+
+    .alert.error svg { stroke: var(--red); }
+
+    .alert.success {
+      background: #f0fdf4;
+      color: var(--green);
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert.success svg { stroke: var(--green); }
+
+    /* Bouton */
+    .btn-submit {
+      width: 100%;
+      padding: 0.825rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.15s;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-submit:hover    { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-submit:disabled { background: #93c5fd; cursor: not-allowed; transform: none; }
+
+    .btn-submit svg {
+      width: 16px;
+      height: 16px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1.5rem 0;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Register link */
+    .register-link {
+      text-align: center;
+      font-size: 0.825rem;
+      color: var(--muted);
+    }
+
+    .register-link a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .register-link a:hover { text-decoration: underline; }
+
+    /* Sécurité badge */
+    .security-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 1.5rem;
+    }
+
+    .security-badge svg {
+      width: 13px;
+      height: 13px;
+      stroke: #94a3b8;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.8s linear infinite; }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .panel-right { padding: 2rem 1.25rem; background: var(--white); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── PANNEAU GAUCHE ──────────────────────────────────── -->
+  <aside class="panel-left">
+    <a class="panel-logo" href="../index.html">
+      <div class="panel-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="panel-logo-text">SmartIntern <span>AI</span></span>
+    </a>
+
+    <div class="panel-content">
+      <h2>Bon retour<br/>parmi nous <span>!</span></h2>
+      <p>Accédez à votre espace personnalisé et gérez vos stages en toute simplicité.</p>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-value">500+</div>
+          <div class="stat-label">Offres actives</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">120+</div>
+          <div class="stat-label">Entreprises</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">98%</div>
+          <div class="stat-label">Satisfaction</div>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <p class="testimonial-text">
+          "SmartIntern AI a complètement transformé notre gestion des stagiaires.
+          Les documents se génèrent automatiquement et le suivi est impeccable."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">SR</div>
+          <div>
+            <div class="testimonial-name">Sami Rekik</div>
+            <div class="testimonial-role">DRH — TechCorp Tunisia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="panel-footer">© 2024 SmartIntern AI</p>
+  </aside>
+
+  <!-- ── PANNEAU DROIT ────────────────────────────────────── -->
+  <main class="panel-right">
+    <div class="form-container">
+
+      <div class="form-header">
+        <div class="form-eyebrow">Accès sécurisé</div>
+        <h1 class="form-title">Connexion</h1>
+        <p class="form-subtitle">Entrez vos identifiants pour accéder à votre tableau de bord.</p>
+      </div>
+
+      <!-- Alertes -->
+      <div class="alert error" id="alert-err">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="alert-err-text"></span>
+      </div>
+
+      <div class="alert success" id="alert-ok">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="alert-ok-text"></span>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label for="email">Adresse e-mail</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="email" id="email"
+                 placeholder="vous@exemple.com"
+                 autocomplete="email"/>
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input type="password" id="password"
+                 placeholder="••••••••"
+                 autocomplete="current-password"/>
+          <button class="toggle-pwd" type="button"
+                  onclick="togglePassword()" id="toggle-btn"
+                  title="Afficher / masquer">
+            <svg id="eye-icon" viewBox="0 0 24 24">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="row-options">
+        <label class="remember-me">
+          <input type="checkbox" id="remember"/>
+          <span>Se souvenir de moi</span>
+        </label>
+        <a class="forgot-link" href="forgot-password.html">Mot de passe oublié ?</a>
+      </div>
+
+      <!-- Bouton -->
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">
+        Se connecter
+        <svg viewBox="0 0 24 24">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+
+      <div class="divider">ou</div>
+
+      <div class="register-link">
+        Pas encore de compte ?
+        <a href="register.html">Créer un compte gratuitement</a>
+      </div>
+
+      <div class="security-badge">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Connexion chiffrée · JWT sécurisé
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+      if (isLoggedIn()) redirectByRole(getRole());
+
+      function togglePassword() {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('eye-icon');
+        const shown = input.type === 'text';
+        input.type  = shown ? 'password' : 'text';
+        icon.innerHTML = shown
+          ? `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+             <circle cx="12" cy="12" r="3"/>`
+          : `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8
+                      a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4
+                      c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07
+                      a3 3 0 1 1-4.24-4.24"/>
+             <line x1="1" y1="1" x2="23" y2="23"/>`;
+      }
+
+      function showMsg(type, text) {
+        const err = document.getElementById('alert-err');
+        const ok  = document.getElementById('alert-ok');
+        err.style.display = 'none';
+        ok.style.display  = 'none';
+        if (type === 'error') {
+          document.getElementById('alert-err-text').textContent = text;
+          err.style.display = 'flex';
+        }
+        if (type === 'success') {
+          document.getElementById('alert-ok-text').textContent = text;
+          ok.style.display = 'flex';
+        }
+      }
+
+      async function doLogin() {
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember').checked;
+        const btn      = document.getElementById('btn-login');
+
+        showMsg('', '');
+
+        if (!email || !password) {
+          showMsg('error', 'Veuillez remplir tous les champs.');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg class="spin" width="18" height="18" viewBox="0 0 24 24"
+               fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          Connexion en cours…`;
+
+        try {
+          const data = await apiLogin(email, password);
+          saveSession(data);
+
+          if (remember) localStorage.setItem('remembered_email', email);
+          else          localStorage.removeItem('remembered_email');
+
+          showMsg('success', `Bienvenue ${data.prenom} ! Redirection…`);
+
+          setTimeout(() => {
+            if (data.firstLogin) {
+              window.location.href = 'first-login.html';
+            } else {
+              redirectByRole(data.role);
+            }
+          }, 1000);
+
+        } catch (err) {
+          showMsg('error', err.message || 'Email ou mot de passe incorrect.');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = `
+            Se connecter
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                 stroke="#fff" stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>`;
+        }
+      }
+
+      const remembered = localStorage.getItem('remembered_email');
+      if (remembered) {
+        document.getElementById('email').value     = remembered;
+        document.getElementById('remember').checked = true;
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+      });
+    </script>
+  </body>
+</html>

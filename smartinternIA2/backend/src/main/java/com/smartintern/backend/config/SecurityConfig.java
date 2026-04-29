@@ -35,6 +35,9 @@ public class SecurityConfig {
                 // ── Public : auth ──────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
 
+                // ── Vérification de documents (QR code scannable publiquement) ──
+                .requestMatchers("/api/documents/*/verifier").permitAll()
+
                 // ── Étudiant ──────────────────────────────────────────────
                 .requestMatchers("/api/etudiant/**").hasRole("ETUDIANT")
 
@@ -51,6 +54,9 @@ public class SecurityConfig {
                 // ── Encadrant entreprise ───────────────────────────────────
                 .requestMatchers("/api/encadrant-entreprise/**")
                     .hasRole("ENCADRANT_ENTREPRISE")
+
+                // ── Documents — génération et téléchargement (tout utilisateur authentifié) ──
+                .requestMatchers("/api/documents/**").authenticated()
 
                 // ── Tout le reste nécessite une authentification ───────────
                 .anyRequest().authenticated()

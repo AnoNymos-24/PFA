@@ -6,6 +6,8 @@ import com.smartintern.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,7 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.Executor;
+
 @Configuration
+@EnableAsync
 @RequiredArgsConstructor
 public class AppConfig {
 
@@ -52,7 +57,7 @@ public class AppConfig {
         return config.getAuthenticationManager();
     }
 
-    // ── Beans nécessaires pour CvExtractionService ─────────────────────────
+    // ── Beans HTTP / Sérialisation ─────────────────────────────────────────
 
     @Bean
     public RestTemplate restTemplate() {
@@ -64,5 +69,21 @@ public class AppConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper;
+    }
+
+    // ── Thread pool dédié à l'extraction CV (tâches longues 5-15s) ────────
+    // Taille core = 2, max = 5, queue = 20 : adapté à un usage académique
+
+    @Bean(name = "cvExecutor")
+    public Executor cvExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(20);
+        executor.setThreadNamePrefix("cv-async-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
+        return executor;
     }
 }

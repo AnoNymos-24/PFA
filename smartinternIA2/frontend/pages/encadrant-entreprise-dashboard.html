@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Encadrant Entreprise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-dark:#1d4ed8; --blue-glow:rgba(37,99,235,0.15);
+      --dark:#04070f; --dark2:#0c1220; --surface:#141c2e; --surface2:#1a2540;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+      --text:#f1f5f9; --text2:#94a3b8; --text3:#475569;
+      --green:#10b981; --green-soft:rgba(16,185,129,0.12);
+      --amber:#f59e0b; --amber-soft:rgba(245,158,11,0.12);
+      --red:#ef4444; --red-soft:rgba(239,68,68,0.12);
+      --purple:#8b5cf6; --purple-soft:rgba(139,92,246,0.12);
+      --teal:#14b8a6; --teal-soft:rgba(20,184,166,0.12);
+      --orange:#f97316; --orange-soft:rgba(249,115,22,0.12);
+      --sidebar-w:240px; --sidebar-col:72px; --topbar-h:64px;
+    }
+    html,body { min-height:100vh; font-family:'Sora',system-ui,sans-serif; background:var(--dark); color:var(--text); -webkit-font-smoothing:antialiased; }
+    .app { display:flex; min-height:100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--dark2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; left:0; top:0; bottom:0; z-index:100; transition:width 0.25s cubic-bezier(.4,0,.2,1); overflow:hidden; }
+    .sidebar.collapsed { width:var(--sidebar-col); }
+    .sidebar-logo { height:var(--topbar-h); display:flex; align-items:center; padding:0 1.1rem; border-bottom:1px solid var(--border); gap:10px; flex-shrink:0; text-decoration:none; }
+    .logo-mark { width:34px; height:34px; background:var(--blue); border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
+    .logo-mark svg { width:17px; height:17px; }
+    .logo-text { font-size:0.95rem; font-weight:800; color:var(--text); white-space:nowrap; opacity:1; transition:opacity 0.15s; }
+    .logo-text span { color:#60a5fa; }
+    .sidebar.collapsed .logo-text { opacity:0; pointer-events:none; }
+    .sidebar-nav { flex:1; padding:1rem 0.6rem; display:flex; flex-direction:column; gap:2px; overflow-y:auto; overflow-x:hidden; }
+    .nav-section-label { font-size:0.62rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--text3); padding:0.6rem 0.6rem 0.3rem; white-space:nowrap; overflow:hidden; transition:opacity 0.15s; }
+    .sidebar.collapsed .nav-section-label { opacity:0; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:0.6rem 0.75rem; border-radius:9px; font-size:0.875rem; font-weight:500; color:var(--text2); cursor:pointer; transition:background 0.15s,color 0.15s; white-space:nowrap; text-decoration:none; position:relative; }
+    .nav-item:hover { background:var(--surface); color:var(--text); }
+    .nav-item.active { background:var(--blue-glow); color:#60a5fa; font-weight:600; }
+    .nav-item.active::before { content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; background:var(--blue); border-radius:0 3px 3px 0; }
+    .nav-item svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .nav-label { opacity:1; transition:opacity 0.15s; overflow:hidden; }
+    .sidebar.collapsed .nav-label { opacity:0; }
+    .nav-badge { margin-left:auto; background:var(--red); color:#fff; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:99px; min-width:18px; text-align:center; transition:opacity 0.15s; }
+    .sidebar.collapsed .nav-badge { opacity:0; }
+    .sidebar.collapsed .nav-item:hover::after { content:attr(data-tooltip); position:absolute; left:calc(100% + 12px); top:50%; transform:translateY(-50%); background:var(--surface2); border:1px solid var(--border2); color:var(--text); font-size:0.78rem; font-weight:600; padding:5px 10px; border-radius:7px; white-space:nowrap; z-index:200; pointer-events:none; }
+    .sidebar-toggle { height:52px; display:flex; align-items:center; justify-content:flex-end; padding:0 0.85rem; border-top:1px solid var(--border); flex-shrink:0; }
+    .toggle-btn { width:28px; height:28px; background:var(--surface); border:1px solid var(--border2); border-radius:7px; display:grid; place-items:center; cursor:pointer; transition:background 0.15s; color:var(--text2); }
+    .toggle-btn:hover { background:var(--surface2); color:var(--text); }
+    .toggle-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; transition:transform 0.25s; }
+    .sidebar.collapsed .toggle-btn svg { transform:rotate(180deg); }
+    .sidebar-profile { padding:0.75rem 0.6rem; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .profile-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--orange),var(--red)); display:grid; place-items:center; font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .profile-info { overflow:hidden; transition:opacity 0.15s; }
+    .sidebar.collapsed .profile-info { opacity:0; }
+    .profile-name { font-size:0.8rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .profile-role { font-size:0.68rem; color:var(--text3); white-space:nowrap; }
+
+    /* MAIN */
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; transition:margin-left 0.25s cubic-bezier(.4,0,.2,1); }
+    .main.collapsed { margin-left:var(--sidebar-col); }
+    .topbar { height:var(--topbar-h); background:var(--dark2); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 2rem; position:sticky; top:0; z-index:50; }
+    .topbar-title { font-size:1rem; font-weight:700; color:var(--text); }
+    .topbar-right { display:flex; align-items:center; gap:0.75rem; }
+    .topbar-icon-btn { width:36px; height:36px; background:var(--surface); border:1px solid var(--border2); border-radius:9px; display:grid; place-items:center; cursor:pointer; color:var(--text2); position:relative; transition:background 0.15s,color 0.15s; }
+    .topbar-icon-btn:hover { background:var(--surface2); color:var(--text); }
+    .topbar-icon-btn svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .notif-dot { position:absolute; top:6px; right:6px; width:7px; height:7px; background:var(--red); border-radius:50%; border:1.5px solid var(--dark2); }
+    .topbar-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--orange),var(--red)); display:grid; place-items:center; font-size:0.78rem; font-weight:700; color:#fff; cursor:pointer; border:2px solid var(--border2); }
+    .content { flex:1; padding:2rem; max-width:1200px; width:100%; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+    .content { animation:fadeUp 0.3s ease; }
+
+    /* COMPOSANTS */
+    .page-header { margin-bottom:2rem; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .page-title { font-size:1.6rem; font-weight:800; color:var(--text); letter-spacing:-0.8px; line-height:1.2; }
+    .page-subtitle { font-size:0.875rem; color:var(--text2); margin-top:4px; }
+    .btn-primary { display:inline-flex; align-items:center; gap:7px; padding:0.6rem 1.25rem; background:var(--blue); color:#fff; border:none; border-radius:9px; font-size:0.875rem; font-weight:600; font-family:inherit; cursor:pointer; text-decoration:none; transition:background 0.15s,transform 0.15s; white-space:nowrap; }
+    .btn-primary:hover { background:var(--blue-dark); transform:translateY(-1px); }
+    .btn-primary svg { width:15px; height:15px; stroke:#fff; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+    .btn-ghost { display:inline-flex; align-items:center; gap:7px; padding:0.6rem 1.1rem; background:var(--surface); color:var(--text2); border:1px solid var(--border2); border-radius:9px; font-size:0.875rem; font-weight:600; font-family:inherit; cursor:pointer; transition:background 0.15s; }
+    .btn-ghost:hover { background:var(--surface2); color:var(--text); }
+    .btn-ghost svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+    .btn-sm { padding:0.35rem 0.75rem; font-size:0.75rem; font-weight:600; border-radius:7px; cursor:pointer; font-family:inherit; border:none; transition:background 0.15s; }
+    .btn-sm.primary { background:var(--blue-glow); color:#60a5fa; }
+    .btn-sm.success { background:var(--green-soft); color:var(--green); }
+    .btn-sm.danger  { background:var(--red-soft);   color:var(--red); }
+    .btn-sm.neutral { background:var(--surface2);   color:var(--text2); }
+    .btn-sm.amber   { background:var(--amber-soft); color:var(--amber); }
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.25rem 1.4rem; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
+    .stat-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; border-radius:14px 14px 0 0; }
+    .stat-card.blue::before   { background:var(--blue); }
+    .stat-card.green::before  { background:var(--green); }
+    .stat-card.amber::before  { background:var(--amber); }
+    .stat-card.orange::before { background:var(--orange); }
+    .stat-icon { width:38px; height:38px; border-radius:9px; display:grid; place-items:center; margin-bottom:1rem; }
+    .stat-card.blue   .stat-icon { background:var(--blue-glow); }
+    .stat-card.green  .stat-icon { background:var(--green-soft); }
+    .stat-card.amber  .stat-icon { background:var(--amber-soft); }
+    .stat-card.orange .stat-icon { background:var(--orange-soft); }
+    .stat-icon svg { width:18px; height:18px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .stat-card.blue   .stat-icon svg { stroke:#60a5fa; }
+    .stat-card.green  .stat-icon svg { stroke:var(--green); }
+    .stat-card.amber  .stat-icon svg { stroke:var(--amber); }
+    .stat-card.orange .stat-icon svg { stroke:var(--orange); }
+    .stat-value { font-size:2rem; font-weight:800; color:var(--text); letter-spacing:-1px; line-height:1; margin-bottom:4px; font-family:'JetBrains Mono',monospace; }
+    .stat-label { font-size:0.78rem; color:var(--text2); font-weight:500; }
+    .stat-trend { font-size:0.72rem; font-weight:600; margin-top:6px; }
+    .stat-trend.up   { color:var(--green); }
+    .stat-trend.down { color:var(--red); }
+    .stat-trend.same { color:var(--text3); }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    .card-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-title { font-size:0.95rem; font-weight:700; color:var(--text); }
+    .card-subtitle { font-size:0.75rem; color:var(--text3); margin-top:2px; }
+    .card-action { font-size:0.78rem; font-weight:600; color:#60a5fa; text-decoration:none; cursor:pointer; background:none; border:none; font-family:inherit; }
+    .card-body { padding:1.25rem 1.5rem; }
+    .main-grid { display:grid; grid-template-columns:1fr 320px; gap:1.25rem; margin-bottom:1.25rem; }
+    .badge { font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+    .badge.active   { background:var(--green-soft);  color:var(--green); }
+    .badge.pending  { background:var(--amber-soft);  color:var(--amber); }
+    .badge.done     { background:var(--blue-glow);   color:#60a5fa; }
+    .badge.rejected { background:var(--red-soft);    color:var(--red); }
+    .field { margin-bottom:1rem; }
+    .field label { display:block; font-size:0.78rem; font-weight:600; color:var(--text2); margin-bottom:5px; }
+    .field input,.field select,.field textarea { width:100%; padding:0.65rem 0.875rem; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.875rem; outline:none; transition:border-color 0.15s; }
+    .field input:focus,.field select:focus,.field textarea:focus { border-color:var(--blue); }
+    .field textarea { resize:vertical; min-height:90px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.875rem; }
+    .filter-chips { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .chip { padding:4px 12px; border-radius:99px; font-size:0.75rem; font-weight:600; border:1px solid var(--border2); color:var(--text2); cursor:pointer; background:none; font-family:inherit; transition:background 0.15s,color 0.15s,border-color 0.15s; }
+    .chip:hover { border-color:var(--blue); color:#60a5fa; }
+    .chip.active { background:var(--blue-glow); border-color:var(--blue); color:#60a5fa; }
+    .notif-list { display:flex; flex-direction:column; }
+    .notif-item { display:flex; gap:0.875rem; padding:0.875rem 1.5rem; border-bottom:1px solid var(--border); align-items:flex-start; transition:background 0.15s; }
+    .notif-item:last-child { border-bottom:none; }
+    .notif-item.unread { background:rgba(37,99,235,0.04); }
+    .notif-dot-ind { width:7px; height:7px; border-radius:50%; background:var(--blue); flex-shrink:0; margin-top:6px; }
+    .notif-item:not(.unread) .notif-dot-ind { background:transparent; }
+    .notif-text { font-size:0.8rem; color:var(--text2); line-height:1.5; flex:1; }
+    .notif-text strong { color:var(--text); font-weight:600; }
+    .notif-time { font-size:0.68rem; color:var(--text3); white-space:nowrap; font-family:'JetBrains Mono',monospace; }
+    .action-btns { display:flex; gap:0.4rem; align-items:center; }
+    .view { display:none; }
+    .view.active { display:block; }
+
+    /* STAGIAIRE CARD */
+    .stagiaire-list { display:flex; flex-direction:column; }
+    .stagiaire-row { display:flex; align-items:center; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid var(--border); transition:background 0.15s; cursor:pointer; }
+    .stagiaire-row:last-child { border-bottom:none; }
+    .stagiaire-row:hover { background:rgba(255,255,255,0.02); }
+    .s-avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-size:0.82rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .s-info { flex:1; min-width:0; }
+    .s-name { font-size:0.875rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+    .s-meta { font-size:0.75rem; color:var(--text3); display:flex; align-items:center; gap:8px; }
+    .progress-wrap { flex:1; max-width:140px; }
+    .progress-bar { height:5px; background:var(--surface2); border-radius:99px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--blue),var(--teal)); }
+    .progress-pct { font-size:0.72rem; font-weight:700; color:var(--teal); margin-top:3px; font-family:'JetBrains Mono',monospace; }
+
+    /* TACHES */
+    .tache-item { display:flex; align-items:flex-start; gap:0.875rem; padding:0.875rem 1.5rem; border-bottom:1px solid var(--border); }
+    .tache-item:last-child { border-bottom:none; }
+    .tache-check { width:18px; height:18px; border-radius:5px; border:2px solid var(--border2); display:grid; place-items:center; flex-shrink:0; margin-top:2px; cursor:pointer; transition:background 0.15s,border-color 0.15s; }
+    .tache-check.done { background:var(--green-soft); border-color:var(--green); }
+    .tache-check.done svg { display:block; }
+    .tache-check svg { display:none; width:10px; height:10px; stroke:var(--green); fill:none; stroke-width:2.5; stroke-linecap:round; }
+    .tache-info { flex:1; }
+    .tache-title { font-size:0.875rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+    .tache-desc { font-size:0.75rem; color:var(--text3); line-height:1.5; }
+    .tache-date { font-size:0.68rem; color:var(--text3); margin-top:4px; font-family:'JetBrains Mono',monospace; }
+
+    /* RAPPORT ROW */
+    .rapport-row { display:flex; align-items:center; gap:1rem; padding:0.875rem 1.5rem; border-bottom:1px solid var(--border); }
+    .rapport-row:last-child { border-bottom:none; }
+    .rapport-icon { width:36px; height:36px; border-radius:8px; background:var(--surface2); display:grid; place-items:center; flex-shrink:0; }
+    .rapport-icon svg { width:16px; height:16px; stroke:var(--text2); fill:none; stroke-width:2; stroke-linecap:round; }
+    .rapport-info { flex:1; }
+    .rapport-title { font-size:0.825rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+    .rapport-meta  { font-size:0.72rem; color:var(--text3); }
+
+    /* EVALUATION */
+    .eval-section { margin-bottom:1.5rem; }
+    .eval-label { font-size:0.78rem; font-weight:600; color:var(--text2); margin-bottom:0.5rem; display:flex; justify-content:space-between; }
+    .eval-stars { display:flex; gap:4px; }
+    .star { width:28px; height:28px; border-radius:7px; background:var(--surface2); border:1px solid var(--border2); display:grid; place-items:center; cursor:pointer; transition:background 0.15s,border-color 0.15s; }
+    .star svg { width:14px; height:14px; fill:none; stroke:var(--text3); stroke-width:2; stroke-linecap:round; transition:fill 0.15s,stroke 0.15s; }
+    .star.active { background:var(--amber-soft); border-color:var(--amber); }
+    .star.active svg { fill:var(--amber); stroke:var(--amber); }
+
+    @media (max-width:1100px) { .stats-grid{grid-template-columns:repeat(2,1fr);} .main-grid{grid-template-columns:1fr;} }
+    @media (max-width:768px)  { .sidebar{width:var(--sidebar-col);} .sidebar .logo-text,.sidebar .nav-label,.sidebar .nav-badge,.sidebar .nav-section-label,.sidebar .profile-info{opacity:0;pointer-events:none;} .main{margin-left:var(--sidebar-col);} .stats-grid{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="../index.html">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="logo-text">SmartIntern <span>AI</span></span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item active" data-view="accueil" data-tooltip="Accueil" onclick="showView('accueil',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="nav-label">Tableau de bord</span>
+      </a>
+      <a class="nav-item" data-view="stagiaires" data-tooltip="Stagiaires" onclick="showView('stagiaires',this)">
+        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <span class="nav-label">Mes stagiaires</span>
+        <span class="nav-badge" style="background:var(--blue)">3</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Suivi</div>
+      <a class="nav-item" data-view="taches" data-tooltip="Tâches" onclick="showView('taches',this)">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="nav-label">Tâches & missions</span>
+      </a>
+      <a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports',this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="nav-label">Rapports reçus</span>
+        <span class="nav-badge">2</span>
+      </a>
+      <a class="nav-item" data-view="evaluation" data-tooltip="Évaluation" onclick="showView('evaluation',this)">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="nav-label">Évaluation</span>
+      </a>
+      <a class="nav-item" data-view="convention" data-tooltip="Convention" onclick="showView('convention',this)">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span class="nav-label">Convention & docs</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Compte</div>
+      <a class="nav-item" data-view="notifications" data-tooltip="Notifications" onclick="showView('notifications',this)">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="nav-label">Notifications</span>
+        <span class="nav-badge">2</span>
+      </a>
+    </nav>
+    <div class="sidebar-profile">
+      <div class="profile-avatar" id="sidebar-avatar">MK</div>
+      <div class="profile-info">
+        <div class="profile-name" id="sidebar-name">Mohamed Khelil</div>
+        <div class="profile-role">Encadrant entreprise</div>
+      </div>
+    </div>
+    <div class="sidebar-toggle">
+      <button class="toggle-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    </div>
+  </aside>
+
+  <div class="main" id="main">
+    <header class="topbar">
+      <div class="topbar-title" id="topbar-title">Tableau de bord</div>
+      <div class="topbar-right">
+        <div class="topbar-icon-btn" onclick="showView('notifications',null)">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </div>
+        <div class="topbar-avatar" id="topbar-avatar">MK</div>
+        <div class="topbar-icon-btn" onclick="logout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ACCUEIL -->
+      <div class="view active" id="view-accueil">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" id="welcome-title">Bonjour, Mohamed 👋</h1>
+            <p class="page-subtitle">Encadrant entreprise · Société de Banque</p>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card blue"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="stat-value">3</div><div class="stat-label">Stagiaires actifs</div><div class="stat-trend same">— En cours</div></div>
+          <div class="stat-card amber"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-value">2</div><div class="stat-label">Rapports à valider</div><div class="stat-trend down">↓ Urgents</div></div>
+          <div class="stat-card green"><div class="stat-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="stat-value">8</div><div class="stat-label">Tâches définies</div><div class="stat-trend up">↑ 5 complètes</div></div>
+          <div class="stat-card orange"><div class="stat-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-value">1</div><div class="stat-label">Évaluations à faire</div><div class="stat-trend down">↓ En attente</div></div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Mes stagiaires</div><div class="card-subtitle">Progression en temps réel</div></div>
+              <button class="card-action" onclick="showView('stagiaires',document.querySelector('[data-view=stagiaires]'))">Voir tout</button>
+            </div>
+            <div class="stagiaire-list">
+              <div class="stagiaire-row">
+                <div class="s-avatar" style="background:linear-gradient(135deg,#10b981,#2563eb)">YB</div>
+                <div class="s-info"><div class="s-name">Youssef Ben Ali</div><div class="s-meta"><span>Data Analyst</span><span>Sem. 4/12</span></div></div>
+                <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div><div class="progress-pct">33%</div></div>
+                <span class="badge active">Actif</span>
+                <div class="action-btns"><button class="btn-sm neutral">Détails</button></div>
+              </div>
+              <div class="stagiaire-row">
+                <div class="s-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SM</div>
+                <div class="s-info"><div class="s-name">Sarra Mansouri</div><div class="s-meta"><span>DevOps</span><span>Sem. 8/12</span></div></div>
+                <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div><div class="progress-pct">67%</div></div>
+                <span class="badge active">Actif</span>
+                <div class="action-btns"><button class="btn-sm neutral">Détails</button></div>
+              </div>
+              <div class="stagiaire-row">
+                <div class="s-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">LK</div>
+                <div class="s-info"><div class="s-name">Lina Khelifi</div><div class="s-meta"><span>UX Design</span><span>Sem. 2/8</span></div></div>
+                <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div><div class="progress-pct">25%</div></div>
+                <span class="badge active">Actif</span>
+                <div class="action-btns"><button class="btn-sm neutral">Détails</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Rapports à valider</div><button class="card-action" onclick="showView('rapports',document.querySelector('[data-view=rapports]'))">Voir tout</button></div>
+              <div>
+                <div class="rapport-row">
+                  <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="rapport-info"><div class="rapport-title">Rapport sem. 4 — Youssef</div><div class="rapport-meta">Reçu il y a 1h</div></div>
+                  <span class="badge pending">À valider</span>
+                </div>
+                <div class="rapport-row">
+                  <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="rapport-info"><div class="rapport-title">Rapport sem. 8 — Sarra</div><div class="rapport-meta">Reçu il y a 3h</div></div>
+                  <span class="badge pending">À valider</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Notifications</div></div>
+              <div class="notif-list">
+                <div class="notif-item unread"><div class="notif-dot-ind"></div><div class="notif-text"><strong>Youssef</strong> a déposé son rapport semaine 4</div><div class="notif-time">1h</div></div>
+                <div class="notif-item unread"><div class="notif-dot-ind"></div><div class="notif-text"><strong>Sarra</strong> a déposé son rapport semaine 8</div><div class="notif-time">3h</div></div>
+                <div class="notif-item"><div class="notif-dot-ind"></div><div class="notif-text">Convention de <strong>Lina Khelifi</strong> signée</div><div class="notif-time">2j</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGIAIRES -->
+      <div class="view" id="view-stagiaires">
+        <div class="page-header"><div><h1 class="page-title">Mes stagiaires</h1><p class="page-subtitle">3 stagiaires actifs</p></div></div>
+        <div class="card">
+          <div class="stagiaire-list">
+            <div class="stagiaire-row">
+              <div class="s-avatar" style="background:linear-gradient(135deg,#10b981,#2563eb)">YB</div>
+              <div class="s-info"><div class="s-name">Youssef Ben Ali</div><div class="s-meta"><span>Data Analyst · ENIT · Master 2</span><span>Débuté 01 Avr · 3 mois</span></div></div>
+              <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div><div class="progress-pct">33%</div></div>
+              <span class="badge active">Actif</span>
+              <div class="action-btns"><button class="btn-sm primary" onclick="showView('taches',document.querySelector('[data-view=taches]'))">Tâches</button><button class="btn-sm neutral">Profil</button></div>
+            </div>
+            <div class="stagiaire-row">
+              <div class="s-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SM</div>
+              <div class="s-info"><div class="s-name">Sarra Mansouri</div><div class="s-meta"><span>DevOps · ESPRIT · Ingénierie 3</span><span>Débuté 01 Jan · 4 mois</span></div></div>
+              <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div><div class="progress-pct">67%</div></div>
+              <span class="badge active">Actif</span>
+              <div class="action-btns"><button class="btn-sm primary" onclick="showView('taches',document.querySelector('[data-view=taches]'))">Tâches</button><button class="btn-sm neutral">Profil</button></div>
+            </div>
+            <div class="stagiaire-row">
+              <div class="s-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">LK</div>
+              <div class="s-info"><div class="s-name">Lina Khelifi</div><div class="s-meta"><span>UX Design · ISG · Master 1</span><span>Débuté 15 Avr · 2 mois</span></div></div>
+              <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div><div class="progress-pct">25%</div></div>
+              <span class="badge active">Actif</span>
+              <div class="action-btns"><button class="btn-sm primary" onclick="showView('taches',document.querySelector('[data-view=taches]'))">Tâches</button><button class="btn-sm neutral">Profil</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TÂCHES -->
+      <div class="view" id="view-taches">
+        <div class="page-header">
+          <div><h1 class="page-title">Tâches & missions</h1><p class="page-subtitle">Définissez et suivez les missions des stagiaires</p></div>
+          <button class="btn-primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle tâche</button>
+        </div>
+        <div class="filter-chips">
+          <button class="chip active">Tous les stagiaires</button>
+          <button class="chip">Youssef Ben Ali</button>
+          <button class="chip">Sarra Mansouri</button>
+          <button class="chip">Lina Khelifi</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Tâches assignées</div><div class="card-subtitle">5 complètes · 3 en cours</div></div>
+          <div>
+            <div class="tache-item">
+              <div class="tache-check done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tache-info"><div class="tache-title">Analyse des données clients — Youssef</div><div class="tache-desc">Extraction et nettoyage des données depuis la base SQL, création de visualisations Power BI</div><div class="tache-date">Échéance : 15 Avr 2024 ✓ Complétée</div></div>
+              <span class="badge active">Complète</span>
+            </div>
+            <div class="tache-item">
+              <div class="tache-check done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tache-info"><div class="tache-title">Mise en place pipeline CI/CD — Sarra</div><div class="tache-desc">Configuration Docker, intégration GitHub Actions, déploiement automatisé</div><div class="tache-date">Échéance : 20 Avr 2024 ✓ Complétée</div></div>
+              <span class="badge active">Complète</span>
+            </div>
+            <div class="tache-item">
+              <div class="tache-check"></div>
+              <div class="tache-info"><div class="tache-title">Dashboard reporting mensuel — Youssef</div><div class="tache-desc">Création d'un tableau de bord automatisé pour les KPIs mensuels de l'équipe Data</div><div class="tache-date">Échéance : 30 Avr 2024 · En cours</div></div>
+              <span class="badge pending">En cours</span>
+            </div>
+            <div class="tache-item">
+              <div class="tache-check"></div>
+              <div class="tache-info"><div class="tache-title">Configuration Kubernetes — Sarra</div><div class="tache-desc">Déploiement du cluster K8s en environnement de production, configuration des pods</div><div class="tache-date">Échéance : 05 Mai 2024 · En cours</div></div>
+              <span class="badge pending">En cours</span>
+            </div>
+            <div class="tache-item">
+              <div class="tache-check"></div>
+              <div class="tache-info"><div class="tache-title">Prototypes Figma — interface mobile — Lina</div><div class="tache-desc">Création des maquettes haute-fidélité pour l'application mobile bancaire</div><div class="tache-date">Échéance : 10 Mai 2024 · En cours</div></div>
+              <span class="badge pending">En cours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPORTS -->
+      <div class="view" id="view-rapports">
+        <div class="page-header"><div><h1 class="page-title">Rapports reçus</h1><p class="page-subtitle">6 rapports · 2 à valider</p></div></div>
+        <div class="filter-chips">
+          <button class="chip active">Tous (6)</button>
+          <button class="chip">À valider (2)</button>
+          <button class="chip">Validés (4)</button>
+        </div>
+        <div class="card">
+          <div class="rapport-row">
+            <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="rapport-info"><div class="rapport-title">Rapport semaine 4 — Youssef Ben Ali</div><div class="rapport-meta">Reçu le 22 Avr 2024 · Data Analyst</div></div>
+            <span class="badge pending">À valider</span>
+            <div class="action-btns"><button class="btn-sm neutral">Lire</button><button class="btn-sm success">Valider</button><button class="btn-sm amber">Commenter</button></div>
+          </div>
+          <div class="rapport-row">
+            <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="rapport-info"><div class="rapport-title">Rapport semaine 8 — Sarra Mansouri</div><div class="rapport-meta">Reçu le 22 Avr 2024 · DevOps</div></div>
+            <span class="badge pending">À valider</span>
+            <div class="action-btns"><button class="btn-sm neutral">Lire</button><button class="btn-sm success">Valider</button><button class="btn-sm amber">Commenter</button></div>
+          </div>
+          <div class="rapport-row">
+            <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="rapport-info"><div class="rapport-title">Rapport semaine 3 — Youssef Ben Ali</div><div class="rapport-meta">Reçu le 15 Avr 2024</div></div>
+            <span class="badge active">Validé ✓</span>
+            <div class="action-btns"><button class="btn-sm neutral">Voir</button></div>
+          </div>
+          <div class="rapport-row">
+            <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="rapport-info"><div class="rapport-title">Rapport semaine 7 — Sarra Mansouri</div><div class="rapport-meta">Reçu le 14 Avr 2024</div></div>
+            <span class="badge active">Validé ✓</span>
+            <div class="action-btns"><button class="btn-sm neutral">Voir</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉVALUATION -->
+      <div class="view" id="view-evaluation">
+        <div class="page-header"><div><h1 class="page-title">Évaluation du stagiaire</h1><p class="page-subtitle">Remplissez la fiche d'évaluation finale</p></div></div>
+        <div class="main-grid">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Fiche d'évaluation</div><div class="card-subtitle">Sarra Mansouri — DevOps · Stage en fin de parcours</div></div>
+            <div class="card-body">
+              <div class="eval-section">
+                <div class="eval-label"><span>Compétences techniques</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace;">4/5</span></div>
+                <div class="eval-stars" id="stars-tech">
+                  <div class="star active" onclick="setStars('tech',1)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('tech',2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('tech',3)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('tech',4)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star" onclick="setStars('tech',5)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                </div>
+              </div>
+              <div class="eval-section">
+                <div class="eval-label"><span>Autonomie & initiative</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace;">3/5</span></div>
+                <div class="eval-stars" id="stars-auto">
+                  <div class="star active" onclick="setStars('auto',1)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('auto',2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('auto',3)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star" onclick="setStars('auto',4)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star" onclick="setStars('auto',5)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                </div>
+              </div>
+              <div class="eval-section">
+                <div class="eval-label"><span>Communication & travail en équipe</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace;">5/5</span></div>
+                <div class="eval-stars" id="stars-comm">
+                  <div class="star active" onclick="setStars('comm',1)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('comm',2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('comm',3)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('comm',4)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('comm',5)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                </div>
+              </div>
+              <div class="eval-section">
+                <div class="eval-label"><span>Respect des délais & organisation</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace;">4/5</span></div>
+                <div class="eval-stars" id="stars-orga">
+                  <div class="star active" onclick="setStars('orga',1)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('orga',2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('orga',3)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star active" onclick="setStars('orga',4)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="star" onclick="setStars('orga',5)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                </div>
+              </div>
+              <div class="field"><label>Commentaire général</label><textarea placeholder="Décrivez les points forts, axes d'amélioration et votre appréciation globale du stagiaire…">Sarra est une stagiaire très sérieuse et engagée. Elle a su s'intégrer rapidement dans l'équipe et a fait preuve d'une grande maîtrise des technologies DevOps.</textarea></div>
+              <div style="display:flex;gap:0.75rem;">
+                <button class="btn-primary" style="flex:1;">Soumettre l'évaluation</button>
+                <button class="btn-ghost">Générer l'attestation</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Stagiaires à évaluer</div></div>
+              <div class="stagiaire-list">
+                <div class="stagiaire-row">
+                  <div class="s-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SM</div>
+                  <div class="s-info"><div class="s-name">Sarra Mansouri</div><div class="s-meta"><span>Fin le 01 Mai</span></div></div>
+                  <span class="badge pending">À faire</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Évaluations soumises</div></div>
+              <div class="card-body" style="text-align:center;padding:2rem;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:0.75rem;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <p style="font-size:0.825rem;color:var(--text3);">Aucune évaluation soumise pour l'instant</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONVENTION -->
+      <div class="view" id="view-convention">
+        <div class="page-header"><div><h1 class="page-title">Convention & documents</h1><p class="page-subtitle">Signature et suivi des documents officiels</p></div></div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Documents à signer ou à compléter</div></div>
+          <div>
+            <div class="rapport-row">
+              <div class="rapport-icon" style="background:var(--green-soft);"><svg viewBox="0 0 24 24" stroke="var(--green)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="rapport-info"><div class="rapport-title">Convention de stage — Youssef Ben Ali</div><div class="rapport-meta">Signée le 01 Avr 2024 · Data Analyst</div></div>
+              <span class="badge active">Signée ✓</span>
+              <div class="action-btns"><button class="btn-sm neutral">Télécharger</button></div>
+            </div>
+            <div class="rapport-row">
+              <div class="rapport-icon" style="background:var(--amber-soft);"><svg viewBox="0 0 24 24" stroke="var(--amber)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="rapport-info"><div class="rapport-title">Convention de stage — Lina Khelifi</div><div class="rapport-meta">En attente de votre signature</div></div>
+              <span class="badge pending">À signer</span>
+              <div class="action-btns"><button class="btn-sm success">Signer</button></div>
+            </div>
+            <div class="rapport-row">
+              <div class="rapport-icon" style="background:var(--blue-glow);"><svg viewBox="0 0 24 24" stroke="#60a5fa"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="rapport-info"><div class="rapport-title">Fiche d'évaluation — Sarra Mansouri</div><div class="rapport-meta">Fin de stage le 01 Mai 2024</div></div>
+              <span class="badge pending">À remplir</span>
+              <div class="action-btns"><button class="btn-sm primary" onclick="showView('evaluation',document.querySelector('[data-view=evaluation]'))">Remplir</button></div>
+            </div>
+            <div class="rapport-row">
+              <div class="rapport-icon" style="background:var(--teal-soft);"><svg viewBox="0 0 24 24" stroke="var(--teal)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="rapport-info"><div class="rapport-title">Attestation de stage — Sarra Mansouri</div><div class="rapport-meta">Disponible après validation de l'évaluation</div></div>
+              <span class="badge" style="background:var(--surface2);color:var(--text3);">En attente</span>
+              <div class="action-btns"><button class="btn-sm neutral" disabled>Générer</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="view" id="view-notifications">
+        <div class="page-header"><div><h1 class="page-title">Notifications</h1><p class="page-subtitle">2 non lues</p></div><button class="btn-ghost">Tout marquer comme lu</button></div>
+        <div class="card">
+          <div class="notif-list">
+            <div class="notif-item unread"><div class="notif-dot-ind"></div><div class="notif-text"><strong>Youssef Ben Ali</strong> a déposé son rapport de la semaine 4</div><div class="notif-time">1h</div></div>
+            <div class="notif-item unread"><div class="notif-dot-ind"></div><div class="notif-text"><strong>Sarra Mansouri</strong> a déposé son rapport de la semaine 8</div><div class="notif-time">3h</div></div>
+            <div class="notif-item"><div class="notif-dot-ind"></div><div class="notif-text">Convention de stage de <strong>Lina Khelifi</strong> générée — en attente de votre signature</div><div class="notif-time">2j</div></div>
+            <div class="notif-item"><div class="notif-dot-ind"></div><div class="notif-text">Le stage de <strong>Sarra Mansouri</strong> se termine dans 10 jours — pensez à l'évaluation</div><div class="notif-time">3j</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  const prenom = getPrenom() || 'Mohamed';
+  const nom    = getNom()    || 'Khelil';
+  const initials = (prenom[0] + nom[0]).toUpperCase();
+  document.getElementById('welcome-title').textContent  = `Bonjour, ${prenom} 👋`;
+  document.getElementById('sidebar-name').textContent   = `${prenom} ${nom}`;
+  document.getElementById('sidebar-avatar').textContent = initials;
+  document.getElementById('topbar-avatar').textContent  = initials;
+
+  const viewTitles = { accueil:'Tableau de bord', stagiaires:'Mes stagiaires', taches:'Tâches & missions', rapports:'Rapports reçus', evaluation:'Évaluation du stagiaire', convention:'Convention & documents', notifications:'Notifications' };
+
+  function showView(name, navEl) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    const target = navEl || document.querySelector(`[data-view="${name}"]`);
+    if (target) target.classList.add('active');
+    document.getElementById('topbar-title').textContent = viewTitles[name] || '';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    document.getElementById('main').classList.toggle('collapsed');
+  }
+
+  function setStars(id, n) {
+    const stars = document.getElementById('stars-' + id).querySelectorAll('.star');
+    stars.forEach((s, i) => s.classList.toggle('active', i < n));
+  }
+
+  document.querySelectorAll('.filter-chips').forEach(group => {
+    group.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => { group.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); });
+    });
+  });
+
+  document.querySelectorAll('.tache-check:not(.done)').forEach(check => {
+    check.addEventListener('click', () => check.classList.toggle('done'));
+  });
+</script>
+</body>
+</html>
