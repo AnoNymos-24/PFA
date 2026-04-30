@@ -1,5 +1,6 @@
 # SmartIntern AI — CV Extraction & Document Service
 
+lancer une un processus : venv\Scripts\uvicorn.exe main:app --host 0.0.0.0 --port 8000 --reload
 Microservice Python FastAPI pour la plateforme SmartIntern AI.
 Développé dans le cadre du PFA — ITEAM University.
 

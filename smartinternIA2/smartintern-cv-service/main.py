@@ -431,10 +431,16 @@ def extraire_depuis_pdf(chemin: str) -> tuple[str, int, str]:
         mat = fitz.Matrix(200 / 72, 200 / 72)
         pix = page.get_pixmap(matrix=mat, colorspace=fitz.csRGB)
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_img:
-            pix.save(tmp_img.name)
-            img = Image.open(tmp_img.name)
-            texte_pages_ocr.append(pytesseract.image_to_string(img, lang="fra+eng"))
-            os.unlink(tmp_img.name)
+            tmp_path = tmp_img.name
+        pix.save(tmp_path)
+        try:
+            with Image.open(tmp_path) as img:
+                texte_pages_ocr.append(pytesseract.image_to_string(img, lang="fra+eng"))
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
     texte = "\n\n--- PAGE ---\n\n".join(texte_pages_ocr).strip()
     return texte, nb_pages, "pdf_ocr"
 

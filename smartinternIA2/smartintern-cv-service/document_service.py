@@ -130,7 +130,8 @@ def extraire_texte_pdf(chemin: str) -> str:
 
 
 def extraire_texte_docx(chemin: str) -> str:
-    """Extrait le texte d'un DOCX pour analyse IA."""
+    """Extrait le texte d'un DOCX/DOC pour analyse IA (3 tentatives)."""
+    # 1. pandoc (si installé)
     try:
         result = subprocess.run(
             ["pandoc", chemin, "-t", "plain", "--wrap=none"],
@@ -140,12 +141,37 @@ def extraire_texte_docx(chemin: str) -> str:
             return result.stdout.strip()
     except Exception:
         pass
+
+    # 2. python-docx
     try:
         from docx import Document
         doc = Document(chemin)
-        return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
-    except Exception as e:
-        raise RuntimeError(f"Impossible de lire le DOCX: {e}")
+        texte = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+        if texte.strip():
+            return texte
+    except Exception:
+        pass
+
+    # 3. Lecture ZIP directe du XML interne (DOCX = ZIP + word/document.xml)
+    try:
+        import zipfile
+        from xml.etree import ElementTree as ET
+        W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+        with zipfile.ZipFile(chemin, "r") as z:
+            if "word/document.xml" in z.namelist():
+                with z.open("word/document.xml") as f:
+                    root = ET.parse(f).getroot()
+                texts = [t.text for t in root.iter(f"{{{W}}}t") if t.text]
+                texte = " ".join(texts)
+                if texte.strip():
+                    return texte
+    except Exception:
+        pass
+
+    raise RuntimeError(
+        "Impossible de lire le fichier Word. "
+        "Vérifiez que le fichier est un DOCX valide (pas un .doc ancien format)."
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════
