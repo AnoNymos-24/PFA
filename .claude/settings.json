@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venv/Scripts/pip install *)",
+      "Bash(venv/Scripts/pip index *)",
+      "Bash(venv/Scripts/python -c \"from dotenv import load_dotenv; load_dotenv\\(\\); import os; print\\('ANTHROPIC_API_KEY:', 'OK' if os.getenv\\('ANTHROPIC_API_KEY',''\\).startswith\\('sk-ant'\\) else 'MANQUANTE'\\)\")",
+      "Bash(venv/Scripts/python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s http://localhost:8000/docs -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://127.0.0.1:8000/ -w \"\\\\nHTTP_CODE:%{http_code}\")",
+      "Bash(curl -s http://127.0.0.1:8000/docs -o /dev/null -w \"HTTP:%{http_code}\")",
+      "Bash(curl -s \"http://127.0.0.1:8000/openapi.json\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Titre:', d['info']['title']\\); print\\('Endpoints:', list\\(d['paths'].keys\\(\\)\\)[:8]\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8000\")",
+      "Bash(tasklist /FI \"PID eq 46484\")",
+      "Bash(tasklist /FI \"PID eq 33972\")",
+      "Bash(powershell \"Get-Process -Id 46484,33972,32620 | Select-Object Id,ProcessName,MainWindowTitle\")",
+      "Bash(powershell \"Get-Process -Id 33972 | Select-Object Id,ProcessName,Path,CommandLine\")",
+      "Bash(powershell \"Get-NetTCPConnection -LocalPort 8000 | Select-Object LocalAddress,LocalPort,OwningProcess | Get-Unique\")",
+      "Bash(powershell \"Stop-Process -Id 46484 -Force -ErrorAction SilentlyContinue; Stop-Process -Id 10800 -Force -ErrorAction SilentlyContinue; Write-Host 'done'\")",
+      "Bash(venv/Scripts/python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload)",
+      "Bash(curl -s http://127.0.0.1:8001/health)",
+      "Bash(powershell \"Stop-Process -Id 11472,19236 -Force -ErrorAction SilentlyContinue; Write-Host 'stopped'\")",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(start \"c:\\\\Users\\\\DELL\\\\Documents\\\\CODE\\\\PFA\\\\smartinternIA2\\\\smartintern-cv-service\\\\test-interface.html\")",
+      "Bash(powershell \"Stop-Process -Id 40160,6032 -Force -ErrorAction SilentlyContinue; Write-Host 'stopped'\")",
+      "Bash(mvn compile *)",
+      "Read(//c/c/Users/DELL/Documents/CODE/PFA/**)",
+      "Bash(venv\\\\Scripts\\\\python.exe -c \"from dotenv import load_dotenv; load_dotenv\\(\\); import os; print\\('NVIDIA_API_KEY:', 'OK' if os.environ.get\\('NVIDIA_API_KEY'\\) else 'MANQUANT'\\); print\\('OPENROUTER_API_KEY:', 'OK' if os.environ.get\\('OPENROUTER_API_KEY'\\) else 'MANQUANT'\\); print\\('NVIDIA_MAX_TOKENS:', os.environ.get\\('NVIDIA_MAX_TOKENS'\\)\\); print\\('OPENROUTER_MAX_TOKENS:', os.environ.get\\('OPENROUTER_MAX_TOKENS'\\)\\)\")",
+      "Bash(python -c \"from dotenv import load_dotenv; load_dotenv\\(\\); import os; print\\('NVIDIA_API_KEY:', 'OK' if os.environ.get\\('NVIDIA_API_KEY'\\) else 'MANQUANT'\\); print\\('OPENROUTER_API_KEY:', 'OK' if os.environ.get\\('OPENROUTER_API_KEY'\\) else 'MANQUANT'\\); print\\('NVIDIA_MAX_TOKENS:', os.environ.get\\('NVIDIA_MAX_TOKENS'\\)\\); print\\('OPENROUTER_MAX_TOKENS:', os.environ.get\\('OPENROUTER_MAX_TOKENS'\\)\\)\")",
+      "Bash(venv/Scripts/python.exe -c ' *)",
+      "Bash(venv/Scripts/uvicorn.exe main:app --host 0.0.0.0 --port 8000 --reload)",
+      "Bash(tasklist /FI \"IMAGENAME eq uvicorn.exe\")",
+      "Bash(tasklist /FI \"WINDOWTITLE eq uvicorn*\")",
+      "Bash(uvicorn main:app --reload --host 0.0.0.0 --port 8000)",
+      "Bash(python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000)",
+      "Bash(\"c:\\\\Users\\\\DELL\\\\Documents\\\\CODE\\\\PFA\\\\venv\\\\Scripts\\\\python.exe\" -m pip install uvicorn[standard])"
+    ]
+  }
+}

@@ -3,7 +3,6 @@ package com.smartintern.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
 import java.time.LocalDate;
 
 @Entity
@@ -20,7 +19,6 @@ public class Etudiant extends User {
     private String codeEtudiant;
 
     private String filiere;
-
     private String classe;
 
     @Column(unique = true)
@@ -40,4 +38,9 @@ public class Etudiant extends User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "etablissement_id")
     private Etablissement etablissement;
+
+    // CV structuré par l'IA (1:1 optionnel)
+    @OneToOne(mappedBy = "etudiant", fetch = FetchType.LAZY,
+              cascade = CascadeType.ALL, orphanRemoval = true)
+    private CvStandardise cvStandardise;
 }

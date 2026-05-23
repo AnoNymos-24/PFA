@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Mon Espace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #2563eb;
+      --blue-dark:  #1d4ed8;
+      --blue-glow:  rgba(37,99,235,0.15);
+      --blue-soft:  #eff6ff;
+      --blue-mid:   #dbeafe;
+      --dark:       #04070f;
+      --dark2:      #0c1220;
+      --dark3:      #111827;
+      --surface:    #141c2e;
+      --surface2:   #1a2540;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+      --text:       #f1f5f9;
+      --text2:      #94a3b8;
+      --text3:      #475569;
+      --green:      #10b981;
+      --green-soft: rgba(16,185,129,0.12);
+      --amber:      #f59e0b;
+      --amber-soft: rgba(245,158,11,0.12);
+      --red:        #ef4444;
+      --red-soft:   rgba(239,68,68,0.12);
+      --purple:     #8b5cf6;
+      --purple-soft:rgba(139,92,246,0.12);
+      --sidebar-w:  240px;
+      --sidebar-col:72px;
+      --topbar-h:   64px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Sora', system-ui, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--dark2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+      transition: width 0.25s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed { width: var(--sidebar-col); }
+
+    .sidebar-logo {
+      height: var(--topbar-h);
+      display: flex;
+      align-items: center;
+      padding: 0 1.1rem;
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-mark svg { width: 17px; height: 17px; }
+
+    .logo-text {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.15s;
+    }
+
+    .logo-text span { color: #60a5fa; }
+    .sidebar.collapsed .logo-text { opacity: 0; pointer-events: none; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .nav-section-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 0.6rem 0.6rem 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.15s;
+    }
+
+    .sidebar.collapsed .nav-section-label { opacity: 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.6rem 0.75rem;
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+
+    .nav-item.active {
+      background: var(--blue-glow);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 3px;
+      background: var(--blue);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item svg {
+      width: 18px; height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    .nav-label {
+      opacity: 1;
+      transition: opacity 0.15s;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed .nav-label { opacity: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 99px;
+      min-width: 18px;
+      text-align: center;
+      transition: opacity 0.15s;
+    }
+
+    .sidebar.collapsed .nav-badge { opacity: 0; }
+
+    .sidebar.collapsed .nav-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%; transform: translateY(-50%);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 7px;
+      white-space: nowrap;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 0.85rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .toggle-btn {
+      width: 28px; height: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      color: var(--text2);
+    }
+
+    .toggle-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .toggle-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.5; stroke-linecap: round;
+      transition: transform 0.25s;
+    }
+
+    .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
+
+    .sidebar-profile {
+      padding: 0.75rem 0.6rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: grid; place-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .profile-info { overflow: hidden; transition: opacity 0.15s; }
+    .sidebar.collapsed .profile-info { opacity: 0; }
+
+    .profile-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-role {
+      font-size: 0.68rem;
+      color: var(--text3);
+      white-space: nowrap;
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    .main.collapsed { margin-left: var(--sidebar-col); }
+
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--dark2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .topbar-icon-btn {
+      width: 36px; height: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      color: var(--text2);
+      position: relative;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .topbar-icon-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .topbar-icon-btn svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 1.5px solid var(--dark2);
+    }
+
+    .topbar-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: grid; place-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      border: 2px solid var(--border2);
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 0.875rem;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.25rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+    .btn-primary svg {
+      width: 15px; height: 15px;
+      stroke: #fff; fill: none;
+      stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.25rem;
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover { background: var(--surface); color: var(--text); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .stat-card.blue::before   { background: var(--blue); }
+    .stat-card.green::before  { background: var(--green); }
+    .stat-card.amber::before  { background: var(--amber); }
+    .stat-card.purple::before { background: var(--purple); }
+
+    .stat-icon {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      display: grid; place-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card.blue   .stat-icon { background: var(--blue-glow); }
+    .stat-card.green  .stat-icon { background: var(--green-soft); }
+    .stat-card.amber  .stat-icon { background: var(--amber-soft); }
+    .stat-card.purple .stat-icon { background: var(--purple-soft); }
+
+    .stat-icon svg {
+      width: 18px; height: 18px;
+      fill: none; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .stat-card.blue   .stat-icon svg { stroke: #60a5fa; }
+    .stat-card.green  .stat-icon svg { stroke: var(--green); }
+    .stat-card.amber  .stat-icon svg { stroke: var(--amber); }
+    .stat-card.purple .stat-icon svg { stroke: var(--purple); }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    .stat-trend {
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .stat-trend.up   { color: var(--green); }
+    .stat-trend.same { color: var(--text3); }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .card-action {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #60a5fa;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .card-action:hover { text-decoration: underline; }
+
+    .card-body { padding: 1.25rem 1.5rem; }
+
+    .offre-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .offre-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .offre-item:last-child { border-bottom: none; }
+    .offre-item:hover { background: rgba(255,255,255,0.02); }
+
+    .offre-logo {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text2);
+      letter-spacing: -0.5px;
+    }
+
+    .offre-info { flex: 1; min-width: 0; }
+
+    .offre-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .offre-meta {
+      font-size: 0.75rem;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .offre-meta span { display: flex; align-items: center; gap: 3px; }
+
+    .offre-meta svg {
+      width: 11px; height: 11px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge.new      { background: var(--blue-glow);   color: #60a5fa; }
+    .badge.open     { background: var(--green-soft);  color: var(--green); }
+    .badge.pending  { background: var(--amber-soft);  color: var(--amber); }
+    .badge.rejected { background: var(--red-soft);    color: var(--red); }
+    .badge.accepted { background: var(--green-soft);  color: var(--green); }
+
+    .cand-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .cand-item {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .cand-item:last-child { border-bottom: none; }
+
+    .cand-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .cand-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .cand-company {
+      font-size: 0.75rem;
+      color: var(--text3);
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 6px;
+    }
+
+    .progress-step {
+      flex: 1;
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 99px;
+      position: relative;
+      margin-right: 3px;
+    }
+
+    .progress-step:last-child { margin-right: 0; }
+
+    .progress-step.done { background: var(--blue); }
+    .progress-step.active { background: var(--amber); }
+
+    .progress-label {
+      font-size: 0.68rem;
+      color: var(--text3);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .rapport-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rapport-item:last-child { border-bottom: none; }
+
+    .rapport-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+
+    .rapport-icon svg {
+      width: 16px; height: 16px;
+      stroke: var(--text2); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .rapport-info { flex: 1; }
+
+    .rapport-title {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .rapport-date {
+      font-size: 0.72rem;
+      color: var(--text3);
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      padding: 0 1.5rem 1.25rem;
+      position: relative;
+    }
+
+    .timeline-item:first-child { padding-top: 0.25rem; }
+
+    .timeline-dot-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .timeline-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+
+    .timeline-dot svg {
+      width: 12px; height: 12px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 2.5; stroke-linecap: round;
+    }
+
+    .timeline-dot.done {
+      background: var(--green-soft);
+      border-color: var(--green);
+    }
+
+    .timeline-dot.done svg { stroke: var(--green); }
+
+    .timeline-dot.active {
+      background: var(--blue-glow);
+      border-color: var(--blue);
+    }
+
+    .timeline-dot.active svg { stroke: #60a5fa; }
+
+    .timeline-line {
+      flex: 1;
+      width: 1px;
+      background: var(--border);
+      margin-top: 4px;
+    }
+
+    .timeline-content { flex: 1; padding-top: 2px; }
+
+    .timeline-title {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .timeline-desc {
+      font-size: 0.75rem;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+
+    .timeline-date {
+      font-size: 0.68rem;
+      color: var(--text3);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cv-upload {
+      border: 1.5px dashed var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .cv-upload:hover {
+      border-color: var(--blue);
+      background: var(--blue-glow);
+    }
+
+    .cv-upload svg {
+      width: 28px; height: 28px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+      margin-bottom: 0.75rem;
+    }
+
+    .cv-upload p {
+      font-size: 0.825rem;
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+
+    .cv-upload span {
+      font-size: 0.72rem;
+      color: var(--text3);
+    }
+
+    .notif-list { display: flex; flex-direction: column; }
+
+    .notif-item {
+      display: flex;
+      gap: 0.875rem;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+      transition: background 0.15s;
+    }
+
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: rgba(255,255,255,0.02); }
+    .notif-item.unread { background: rgba(37,99,235,0.04); }
+
+    .notif-dot-indicator {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .notif-item:not(.unread) .notif-dot-indicator { background: transparent; }
+
+    .notif-text {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .notif-text strong { color: var(--text); font-weight: 600; }
+
+    .notif-time {
+      font-size: 0.68rem;
+      color: var(--text3);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.6rem 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar svg {
+      width: 16px; height: 16px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 2; stroke-linecap: round;
+      flex-shrink: 0;
+    }
+
+    .search-bar input {
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 0.875rem;
+      color: var(--text);
+      font-family: inherit;
+      flex: 1;
+    }
+
+    .search-bar input::placeholder { color: var(--text3); }
+
+    .filter-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .chip {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      cursor: pointer;
+      background: none;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .chip:hover { border-color: var(--blue); color: #60a5fa; }
+    .chip.active { background: var(--blue-glow); border-color: var(--blue); color: #60a5fa; }
+
+    .empty {
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+
+    .empty svg {
+      width: 40px; height: 40px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 1.5; stroke-linecap: round;
+      margin-bottom: 1rem;
+    }
+
+    .empty p { font-size: 0.875rem; color: var(--text3); }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: none;
+      place-items: center;
+    }
+    .modal-overlay.open { display: grid; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 450px;
+      margin: 1rem;
+    }
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      font-size: 1.2rem;
+    }
+    .modal-error {
+      display: none;
+      color: var(--red);
+      font-size: 0.825rem;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .content { animation: fadeUp 0.3s ease; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid  { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-col); }
+      .sidebar .logo-text,
+      .sidebar .nav-label,
+      .sidebar .nav-badge,
+      .sidebar .nav-section-label,
+      .sidebar .profile-info { opacity: 0; pointer-events: none; }
+      .main { margin-left: var(--sidebar-col); }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="../index.html">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-text">SmartIntern <span>AI</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item active" data-view="accueil" data-tooltip="Accueil" onclick="showView('accueil', this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="nav-label">Tableau de bord</span>
+      </a>
+      <a class="nav-item" data-view="offres" data-tooltip="Offres" onclick="showView('offres', this)">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="nav-label">Rechercher des offres</span>
+      </a>
+      <a class="nav-item" data-view="candidatures" data-tooltip="Candidatures" onclick="showView('candidatures', this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="nav-label">Mes candidatures</span>
+        <span class="nav-badge" id="candidatures-badge">0</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Mon stage</div>
+      <a class="nav-item" data-view="suivi" data-tooltip="Suivi" onclick="showView('suivi', this)">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="nav-label">Suivi du stage</span>
+      </a>
+      <a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports', this)">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span class="nav-label">Mes rapports</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Compte</div>
+      <a class="nav-item" data-view="profil" data-tooltip="Profil" onclick="showView('profil', this)">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-label">Mon profil & CV</span>
+      </a>
+      <a class="nav-item" data-view="notifications" data-tooltip="Notifications" onclick="showView('notifications', this)">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="nav-label">Notifications</span>
+        <span class="nav-badge" id="notifications-badge" style="background:var(--red)">0</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar" id="sidebar-avatar">...</div>
+      <div class="profile-info">
+        <div class="profile-name" id="sidebar-name">Chargement...</div>
+        <div class="profile-role" id="sidebar-role">Étudiant</div>
+      </div>
+    </div>
+
+    <div class="sidebar-toggle">
+      <button class="toggle-btn" onclick="toggleSidebar()" title="Réduire la sidebar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main" id="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Tableau de bord</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-icon-btn" title="Notifications" onclick="showView('notifications', null)">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="topbar-notif-dot" style="display:none;"></span>
+        </div>
+        <div class="topbar-avatar" id="topbar-avatar">...</div>
+        <div class="topbar-icon-btn" title="Déconnexion" onclick="logout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ACCUEIL -->
+      <div class="view active" id="view-accueil">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" id="welcome-title">Bonjour 👋</h1>
+            <p class="page-subtitle">Voici un résumé de votre activité sur SmartIntern AI</p>
+          </div>
+          <a class="btn-primary" onclick="showView('offres', document.querySelector('[data-view=offres]'))">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Explorer les offres
+          </a>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="stat-value" id="stat-candidatures">0</div>
+            <div class="stat-label">Candidatures envoyées</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="stat-value" id="stat-entretiens">0</div>
+            <div class="stat-label">Entretien planifié</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <div class="stat-value" id="stat-rapports-attente">0</div>
+            <div class="stat-label">Rapports à déposer</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+            <div class="stat-value" id="stat-offres-dispo">0</div>
+            <div class="stat-label">Offres disponibles</div>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Offres recommandées</div>
+                <div class="card-subtitle">Basées sur votre profil et spécialité</div>
+              </div>
+              <button class="card-action" onclick="showView('offres', document.querySelector('[data-view=offres]'))">Voir tout</button>
+            </div>
+            <div class="offre-list" id="offres-recommandees">
+              <div class="empty"><p>Chargement des offres...</p></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Candidatures récentes</div>
+                <button class="card-action" onclick="showView('candidatures', document.querySelector('[data-view=candidatures]'))">Tout voir</button>
+              </div>
+              <div class="cand-list" id="candidatures-recentes">
+                <div class="empty"><p>Aucune candidature pour le moment</p></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Notifications</div>
+                <button class="card-action" onclick="showView('notifications', document.querySelector('[data-view=notifications]'))">Tout voir</button>
+              </div>
+              <div class="notif-list" id="notifications-recentes">
+                <div class="empty"><p>Aucune notification</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFRES -->
+      <div class="view" id="view-offres">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Rechercher des offres</h1>
+            <p class="page-subtitle" id="offres-count">0 offres disponibles</p>
+          </div>
+        </div>
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Titre, entreprise, compétence…" id="search-offres" onkeyup="filterOffres()"/>
+        </div>
+        <div class="card">
+          <div class="offre-list" id="offres-list">
+            <div class="empty"><p>Chargement des offres...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATURES -->
+      <div class="view" id="view-candidatures">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mes candidatures</h1>
+            <p class="page-subtitle" id="candidatures-subtitle">0 candidature</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="cand-list" id="candidatures-list">
+            <div class="empty"><p>Chargement de vos candidatures...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUIVI -->
+      <div class="view" id="view-suivi">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Suivi du stage</h1>
+            <p class="page-subtitle" id="stage-title">Aucun stage en cours</p>
+          </div>
+          <a class="btn-primary" onclick="showView('rapports', document.querySelector('[data-view=rapports]'))">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Déposer un rapport
+          </a>
+        </div>
+        <div id="suivi-content">
+          <div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>
+        </div>
+      </div>
+
+      <!-- RAPPORTS -->
+      <div class="view" id="view-rapports">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mes rapports</h1>
+            <p class="page-subtitle" id="rapports-subtitle">0 rapport déposé</p>
+          </div>
+        </div>
+        <div id="rapports-content">
+          <div class="empty"><p>Chargement de vos rapports...</p></div>
+        </div>
+      </div>
+
+      <!-- PROFIL -->
+      <div class="view" id="view-profil">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mon profil & CV</h1>
+            <p class="page-subtitle">Gérez vos informations personnelles et votre CV</p>
+          </div>
+          <button class="btn-primary" onclick="saveProfil()">Enregistrer les modifications</button>
+        </div>
+        <div class="main-grid">
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Informations personnelles</div></div>
+              <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;">
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Nom</label>
+                  <input type="text" id="profil-nom" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Prénom</label>
+                  <input type="text" id="profil-prenom" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">E-mail</label>
+                  <input type="email" id="profil-email" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Université</label>
+                  <input type="text" id="profil-universite" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Niveau</label>
+                  <input type="text" id="profil-niveau" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Spécialité</label>
+                  <input type="text" id="profil-specialite" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Numéro carte étudiant</label>
+                  <input type="text" id="profil-carte" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Mon CV</div></div>
+              <div class="card-body">
+                <div id="cv-existant" style="display:none;align-items:center;gap:0.875rem;padding:0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;margin-bottom:1rem;">
+                  <div style="width:38px;height:38px;background:var(--red-soft);border-radius:8px;display:grid;place-items:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style="flex:1;"><div id="cv-nom" style="font-size:0.825rem;font-weight:600;color:var(--text);">—</div><div id="cv-date" style="font-size:0.72rem;color:var(--text3);">—</div></div>
+                  <button onclick="telechargerCv()" style="background:none;border:none;cursor:pointer;color:var(--text2);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+                  <button onclick="supprimerCv()" style="background:none;border:none;cursor:pointer;color:var(--red);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                </div>
+                <div class="cv-upload" id="cv-upload-zone" onclick="document.getElementById('cv-input').click()">
+                  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <p id="cv-upload-text">Glissez votre CV ici ou cliquez pour sélectionner</p>
+                  <span>PDF, JPG, PNG · max 5 Mo</span>
+                  <input type="file" id="cv-input" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadCv(this.files[0])"/>
+                </div>
+                <div id="cv-progress" style="display:none;margin-top:0.75rem;"><div style="height:4px;background:var(--border);border-radius:99px;overflow:hidden;"><div id="cv-progress-bar" style="height:100%;width:0%;background:var(--blue);border-radius:99px;transition:width 0.3s;"></div></div><div id="cv-progress-text" style="font-size:0.75rem;color:var(--text2);margin-top:4px;">Upload en cours…</div></div>
+                <div id="cv-message" style="display:none;margin-top:0.75rem;font-size:0.825rem;"></div>
+              </div>
+            </div>
+
+            <!-- Sécurité - Changer mot de passe -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Sécurité</div></div>
+              <div class="card-body">
+                <button class="btn-secondary" style="width:100%;" onclick="openPasswordModal()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Changer mon mot de passe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="view" id="view-notifications">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle" id="notifications-subtitle">0 non lue</p>
+          </div>
+          <button class="btn-secondary" onclick="marquerToutLu()">Tout marquer comme lu</button>
+        </div>
+        <div class="card">
+          <div class="notif-list" id="notifications-list">
+            <div class="empty"><p>Chargement des notifications...</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGER MOT DE PASSE -->
+<div class="modal-overlay" id="password-modal" onclick="closePasswordModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">
+      Changer mon mot de passe
+      <button class="modal-close" onclick="closePasswordModal()">✕</button>
+    </div>
+    <div id="password-error" class="modal-error"></div>
+    <div class="field">
+      <label>Mot de passe actuel</label>
+      <input type="password" id="old-password" placeholder="Entrez votre mot de passe actuel" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div class="field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="new-password" placeholder="Minimum 8 caractères" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div class="field">
+      <label>Confirmer le nouveau mot de passe</label>
+      <input type="password" id="confirm-password" placeholder="Retapez votre nouveau mot de passe" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem;">
+      <button class="btn-secondary" onclick="closePasswordModal()">Annuler</button>
+      <button class="btn-primary" onclick="changerMotDePasse()">Modifier</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/auth.js"></script>
+<script src="../js/api.js"></script>
+<script>
+requireAuth();
+
+if (getRole() !== 'ROLE_ETUDIANT') {
+  redirectByRole(getRole());
+}
+
+// ==================== VARIABLES ====================
+let toutesOffres = [];
+let toutesCandidatures = [];
+let toutesNotifications = [];
+
+// ==================== INITIALISATION ====================
+const prenom = getPrenom() || 'Utilisateur';
+const nom = getNom() || '';
+const initials = (prenom[0] + (nom[0] || '')).toUpperCase();
+
+document.getElementById('welcome-title').textContent = `Bonjour, ${prenom} 👋`;
+document.getElementById('sidebar-name').textContent = `${prenom} ${nom}`.trim();
+document.getElementById('sidebar-avatar').textContent = initials;
+document.getElementById('topbar-avatar').textContent = initials;
+
+// Récupérer et afficher les informations complètes du profil
+async function chargerProfil() {
+  try {
+    const user = await apiGetMe();
+
+    // Sidebar & topbar
+    const initials = (user.prenom[0] + user.nom[0]).toUpperCase();
+    document.getElementById('welcome-title').textContent  = `Bonjour, ${user.prenom} 👋`;
+    document.getElementById('sidebar-name').textContent   = `${user.prenom} ${user.nom}`;
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('topbar-avatar').textContent  = initials;
+
+    // Profil
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('p-nom',        user.nom);
+    setVal('p-prenom',     user.prenom);
+    setVal('p-email',      user.email);
+    setVal('p-universite', user.universite);
+    setVal('p-niveau',     user.niveau);
+    setVal('p-specialite', user.specialite);
+    setVal('p-carte',      user.carteEtudiant);
+
+    // Sauvegarder en localStorage aussi
+    localStorage.setItem('smartintern_email', user.email);
+
+  } catch (err) {
+    console.error('Erreur profil:', err);
+  }
+}
+
+// ==================== NAVIGATION ====================
+const viewTitles = {
+  accueil: 'Tableau de bord',
+  offres: 'Rechercher des offres',
+  candidatures: 'Mes candidatures',
+  suivi: 'Suivi du stage',
+  rapports: 'Mes rapports',
+  profil: 'Mon profil & CV',
+  notifications: 'Notifications'
+};
+
+window.showView = function(name, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  const target = navEl || document.querySelector(`[data-view="${name}"]`);
+  if (target) target.classList.add('active');
+  document.getElementById('topbar-title').textContent = viewTitles[name] || '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.toggleSidebar = function() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('main').classList.toggle('collapsed');
+};
+
+// ==================== OFFRES ====================
+async function chargerOffres() {
+  try {
+    toutesOffres = await apiGetOffres();
+    document.getElementById('offres-count').textContent = `${toutesOffres.length} offres disponibles`;
+    document.getElementById('stat-offres-dispo').textContent = toutesOffres.length;
+    afficherOffres(toutesOffres);
+
+    const recommandees = toutesOffres.slice(0, 3);
+    const recDiv = document.getElementById('offres-recommandees');
+    if (recommandees.length === 0) {
+      recDiv.innerHTML = '<div class="empty"><p>Aucune offre disponible</p></div>';
+    } else {
+      recDiv.innerHTML = recommandees.map(o => `
+        <div class="offre-item">
+          <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
+          <div class="offre-info">
+            <div class="offre-title">${o.titre || 'Sans titre'}</div>
+            <div class="offre-meta"><span>${o.entreprise || 'Entreprise'}</span><span>${o.localisation || 'Tunisie'}</span><span>${o.duree || 'N/A'}</span></div>
+          </div>
+          <span class="badge new">Nouveau</span>
+          <button class="btn-primary" style="padding:0.4rem 0.875rem;font-size:0.78rem;" onclick="postulerOffre(${o.id})">Postuler</button>
+        </div>
+      `).join('');
+    }
+  } catch (err) { console.error('Erreur offres:', err); }
+}
+
+function afficherOffres(offres) {
+  const container = document.getElementById('offres-list');
+  if (offres.length === 0) { container.innerHTML = '<div class="empty"><p>Aucune offre trouvée</p></div>'; return; }
+  container.innerHTML = offres.map(o => `
+    <div class="offre-item">
+      <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
+      <div class="offre-info">
+        <div class="offre-title">${o.titre || 'Sans titre'}</div>
+        <div class="offre-meta"><span>${o.entreprise || 'Entreprise'}</span><span>${o.localisation || 'Tunisie'}</span><span>${o.duree || 'N/A'}</span></div>
+      </div>
+      <span class="badge ${o.nouveau ? 'new' : 'open'}">${o.nouveau ? 'Nouveau' : 'Ouvert'}</span>
+      <button class="btn-primary" style="padding:0.4rem 0.875rem;font-size:0.78rem;" onclick="postulerOffre(${o.id})">Postuler</button>
+    </div>
+  `).join('');
+}
+
+function filterOffres() {
+  const searchTerm = document.getElementById('search-offres')?.value.toLowerCase() || '';
+  let filtered = toutesOffres;
+  if (searchTerm) filtered = toutesOffres.filter(o => (o.titre?.toLowerCase().includes(searchTerm) || o.entreprise?.toLowerCase().includes(searchTerm)));
+  afficherOffres(filtered);
+}
+
+async function postulerOffre(offreId) {
+  try {
+    await apiPostuler(offreId);
+    alert('Candidature envoyée avec succès !');
+    chargerCandidatures();
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+// ==================== CANDIDATURES ====================
+async function chargerCandidatures() {
+  try {
+    toutesCandidatures = await apiGetCandidatures();
+    const count = toutesCandidatures.length || 0;
+    document.getElementById('candidatures-subtitle').textContent = `${count} candidature${count > 1 ? 's' : ''}`;
+    document.getElementById('stat-candidatures').textContent = count;
+    document.getElementById('candidatures-badge').textContent = count;
+
+    const recentes = toutesCandidatures.slice(0, 2);
+    const recDiv = document.getElementById('candidatures-recentes');
+    if (recentes.length === 0) {
+      recDiv.innerHTML = '<div class="empty"><p>Aucune candidature pour le moment</p></div>';
+    } else {
+      recDiv.innerHTML = recentes.map(c => `
+        <div class="cand-item">
+          <div class="cand-top">
+            <div><div class="cand-title">${c.offreTitre || 'Stage'}</div><div class="cand-company">${c.entreprise || ''} · Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}</div></div>
+            <span class="badge ${c.statut === 'ACCEPTEE' ? 'accepted' : (c.statut === 'PENDING' ? 'pending' : '')}">${c.statut === 'ACCEPTEE' ? 'Acceptée' : (c.statut === 'PENDING' ? 'En attente' : 'En examen')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const container = document.getElementById('candidatures-list');
+    if (toutesCandidatures.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucune candidature trouvée</p></div>';
+    } else {
+      container.innerHTML = toutesCandidatures.map(c => `
+        <div class="cand-item">
+          <div class="cand-top">
+            <div><div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div><div class="cand-company">Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}</div></div>
+            <span class="badge ${c.statut === 'ACCEPTEE' ? 'accepted' : (c.statut === 'PENDING' ? 'pending' : '')}">${c.statut === 'ACCEPTEE' ? 'Acceptée' : (c.statut === 'PENDING' ? 'En attente' : 'En examen')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) { console.error('Erreur candidatures:', err); }
+}
+
+// ==================== STAGE ====================
+async function chargerStage() {
+  try {
+    const stages = await apiGetStage();
+    // Le backend retourne une liste — on prend le premier stage actif
+    const stage = Array.isArray(stages) ? stages[0] : stages;
+    if (stage && stage.id) {
+      document.getElementById('stage-title').textContent = `${stage.titre || 'Stage'} — ${stage.entreprise || ''}`;
+      const progress = Math.round((stage.semaineActuelle / stage.dureeSemaines) * 100);
+      document.getElementById('suivi-content').innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">Progression du stage</div><div class="card-subtitle">Semaine ${stage.semaineActuelle} / ${stage.dureeSemaines}</div></div>
+        <div class="card-body"><div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Avancement global</span><span style="color:var(--green)">${progress}%</span></div><div style="height:8px;background:var(--surface2);border-radius:99px;"><div style="height:100%;width:${progress}%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div></div></div></div>
+        <div class="card-header"><div class="card-title">Mes encadrants</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">${stage.encadrants?.map(e => `<div style="display:flex;align-items:center;gap:0.875rem;"><div class="profile-avatar" style="width:40px;height:40px;font-size:0.85rem;">${(e.prenom?.[0] || '') + (e.nom?.[0] || '')}</div><div><div style="font-weight:600;">${e.prenom} ${e.nom}</div><div style="font-size:0.72rem;color:var(--text3);">${e.role} · ${e.organisation}</div></div></div>`).join('')}</div></div>
+      `;
+    }
+  } catch (err) { console.error('Erreur stage:', err); }
+}
+
+// ==================== RAPPORTS ====================
+async function chargerRapports() {
+  try {
+    const rapports = await apiGetRapports();
+    const enAttente = rapports.filter(r => r.statut === 'PENDING').length;
+    document.getElementById('stat-rapports-attente').textContent = enAttente;
+    document.getElementById('rapports-subtitle').textContent = `${rapports.length} rapport${rapports.length > 1 ? 's' : ''} déposé${rapports.length > 1 ? 's' : ''}`;
+    const container = document.getElementById('rapports-content');
+    if (rapports.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucun rapport déposé</p></div>';
+    } else {
+      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Historique des rapports</div></div>${rapports.map(r => `<div class="rapport-item"><div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="rapport-info"><div class="rapport-title">${r.titre}</div><div class="rapport-date">Déposé le ${new Date(r.dateDepot).toLocaleDateString('fr-FR')}</div></div><span class="badge ${r.statut === 'VALIDE' ? 'accepted' : 'pending'}">${r.statut === 'VALIDE' ? 'Validé ✓' : 'En attente'}</span></div>`).join('')}</div>`;
+    }
+  } catch (err) { console.error('Erreur rapports:', err); }
+}
+
+// ==================== NOTIFICATIONS ====================
+async function chargerNotifications() {
+  try {
+    toutesNotifications = await apiGetNotifications();
+    const nonLues = toutesNotifications.filter(n => !n.lu).length;
+    document.getElementById('notifications-subtitle').textContent = `${nonLues} non lue${nonLues > 1 ? 's' : ''}`;
+    document.getElementById('notifications-badge').textContent = nonLues;
+    document.getElementById('topbar-notif-dot').style.display = nonLues > 0 ? 'block' : 'none';
+    const recentes = toutesNotifications.slice(0, 3);
+    const recDiv = document.getElementById('notifications-recentes');
+    if (recentes.length === 0) {
+      recDiv.innerHTML = '<div class="empty"><p>Aucune notification</p></div>';
+    } else {
+      recDiv.innerHTML = recentes.map(n => `<div class="notif-item ${!n.lu ? 'unread' : ''}"><div class="notif-dot-indicator"></div><div class="notif-text">${n.message}</div><div class="notif-time">${timeAgo(new Date(n.date))}</div></div>`).join('');
+    }
+    const container = document.getElementById('notifications-list');
+    if (toutesNotifications.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucune notification</p></div>';
+    } else {
+      container.innerHTML = toutesNotifications.map(n => `<div class="notif-item ${!n.lu ? 'unread' : ''}"><div class="notif-dot-indicator"></div><div class="notif-text">${n.message}</div><div class="notif-time">${timeAgo(new Date(n.date))}</div></div>`).join('');
+    }
+  } catch (err) { console.error('Erreur notifications:', err); }
+}
+
+function timeAgo(date) { const s = Math.floor((new Date() - date) / 1000); if (s < 60) return 'à l\'instant'; const m = Math.floor(s/60); if (m<60) return `${m}m`; const h = Math.floor(m/60); if (h<24) return `${h}h`; const d = Math.floor(h/24); if (d<7) return `${d}j`; return date.toLocaleDateString('fr-FR'); }
+
+async function marquerToutLu() { try { await apiMarkNotificationsRead(); chargerNotifications(); } catch(err) { alert(err.message); } }
+
+// ==================== PROFIL ====================
+async function saveProfil() {
+  try {
+    const data = {
+      universite: document.getElementById('profil-universite').value,
+      niveau: document.getElementById('profil-niveau').value,
+      specialite: document.getElementById('profil-specialite').value,
+      numeroCarte: document.getElementById('profil-carte').value
+    };
+    await apiUpdateProfile(data);
+    alert('Profil mis à jour avec succès !');
+    chargerProfil();
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+// ==================== CHANGER MOT DE PASSE ====================
+function openPasswordModal() {
+  document.getElementById('password-modal').classList.add('open');
+  document.getElementById('old-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+  document.getElementById('password-error').style.display = 'none';
+}
+
+function closePasswordModal() {
+  document.getElementById('password-modal').classList.remove('open');
+}
+
+function closePasswordModalOutside(e) {
+  if (e.target === document.getElementById('password-modal')) closePasswordModal();
+}
+
+async function changerMotDePasse() {
+  const oldPassword = document.getElementById('old-password').value;
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  const errorEl = document.getElementById('password-error');
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    errorEl.textContent = 'Veuillez remplir tous les champs';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    errorEl.textContent = 'Les nouveaux mots de passe ne correspondent pas';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    errorEl.textContent = 'Le mot de passe doit contenir au moins 8 caractères';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    await apiChangePassword(oldPassword, newPassword);
+    alert('Mot de passe modifié avec succès !');
+    closePasswordModal();
+  } catch (err) {
+    errorEl.textContent = err.message || 'Erreur lors du changement de mot de passe';
+    errorEl.style.display = 'block';
+  }
+}
+
+// ==================== CV ====================
+async function chargerInfoCv() {
+  try {
+    const info = await apiGetCvInfo();
+    if (info && info.hasCv) {
+      document.getElementById('cv-existant').style.display = 'flex';
+      document.getElementById('cv-nom').textContent = info.filename || 'cv.pdf';
+      // Le backend ne renvoie pas uploadedAt — on masque la date
+      const dateEl = document.getElementById('cv-date');
+      if (dateEl) dateEl.textContent = info.statutExtraction === 'EXTRAIT' ? 'CV analysé par l\'IA' : 'CV déposé';
+      document.getElementById('cv-upload-text').textContent = 'Mettre à jour mon CV';
+
+      // Afficher le score de complétude si disponible
+      if (info.scoreCompletude !== undefined) {
+        const scoreEl = document.getElementById('cv-score');
+        if (scoreEl) scoreEl.textContent = `Score IA : ${info.scoreCompletude}/100`;
+      }
+    }
+  } catch (err) { console.error('Erreur info CV:', err); }
+}
+
+let _cvPollInterval = null;
+
+function demarrerPollStatutCv() {
+  if (_cvPollInterval) return;
+  _cvPollInterval = setInterval(async () => {
+    try {
+      const statut = await apiGetCvStatut();
+      const message = document.getElementById('cv-message');
+      if (statut.statut === 'EXTRAIT') {
+        clearInterval(_cvPollInterval);
+        _cvPollInterval = null;
+        document.getElementById('cv-progress').style.display = 'none';
+        if (message) {
+          message.style.cssText = 'display:block;color:var(--green);font-size:0.825rem;margin-top:0.75rem;';
+          message.textContent = '✅ CV analysé par l\'IA avec succès !';
+        }
+        chargerInfoCv();
+      } else if (statut.statut === 'ERREUR') {
+        clearInterval(_cvPollInterval);
+        _cvPollInterval = null;
+        document.getElementById('cv-progress').style.display = 'none';
+        if (message) {
+          message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
+          message.textContent = '⚠️ Extraction IA échouée — votre CV est enregistré mais non analysé.';
+        }
+        chargerInfoCv();
+      }
+      // EN_COURS → on continue à poller
+    } catch (e) { /* silencieux */ }
+  }, 3000);
+}
+
+async function uploadCv(file) {
+  if (!file) return;
+  const progress = document.getElementById('cv-progress');
+  const progressBar = document.getElementById('cv-progress-bar');
+  const message = document.getElementById('cv-message');
+  if (progress) progress.style.display = 'block';
+  if (message) message.style.display = 'none';
+  if (progressBar) progressBar.style.width = '40%';
+  try {
+    if (progressBar) progressBar.style.width = '70%';
+    const res = await apiUploadCv(file);
+    // Le serveur répond 202 — extraction async lancée
+    if (progressBar) progressBar.style.width = '90%';
+    if (message) {
+      message.style.cssText = 'display:block;color:var(--blue);font-size:0.825rem;margin-top:0.75rem;';
+      message.textContent = '⏳ ' + (res.message || 'CV reçu — analyse IA en cours…');
+    }
+    chargerInfoCv();
+    demarrerPollStatutCv();
+  } catch (err) {
+    if (progressBar) progressBar.style.background = 'var(--red)';
+    if (message) {
+      message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
+      message.textContent = '❌ ' + err.message;
+    }
+    setTimeout(() => {
+      if (progress) progress.style.display = 'none';
+      if (progressBar) progressBar.style.background = 'var(--blue)';
+    }, 2000);
+  }
+}
+
+async function reanalyserCv() {
+  const message = document.getElementById('cv-message');
+  try {
+    if (message) {
+      message.style.cssText = 'display:block;color:var(--blue);font-size:0.825rem;margin-top:0.75rem;';
+      message.textContent = '⏳ Ré-analyse IA lancée…';
+    }
+    await apiReanalyseCv();
+    demarrerPollStatutCv();
+  } catch (err) {
+    if (message) {
+      message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
+      message.textContent = '❌ ' + err.message;
+    }
+  }
+}
+
+async function telechargerCv() {
+  try {
+    const blob = await apiDownloadCv();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = document.getElementById('cv-nom').textContent || 'cv.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+async function supprimerCv() {
+  alert('La suppression de CV sera disponible prochainement.');
+}
+
+const uploadZone = document.getElementById('cv-upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--blue)'; uploadZone.style.background = 'var(--blue-glow)'; });
+  uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; uploadZone.style.background = ''; });
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.style.borderColor = ''; uploadZone.style.background = ''; const file = e.dataTransfer.files[0]; if (file) uploadCv(file); });
+}
+
+// ==================== LANCEMENT ====================
+chargerProfil();
+chargerOffres();
+chargerCandidatures();
+chargerStage();
+chargerRapports();
+chargerNotifications();
+chargerInfoCv();
+</script>
+</body>
+</html>

@@ -4,6 +4,8 @@ import com.smartintern.backend.dto.OffreStageDto;
 import com.smartintern.backend.entity.*;
 import com.smartintern.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +79,12 @@ public class OffreStageService {
                 .filter(o -> o.getStatut() == OffreStage.Statut.ACTIVE)
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Page<OffreStageDto.OffreStageResponse> getAllOffresActivesPaginees(Pageable pageable) {
+        return offreStageRepository.findByStatutAndStatutValidation(
+                OffreStage.Statut.ACTIVE, OffreStage.StatutValidation.VALIDEE, pageable)
+                .map(this::toResponse);
     }
 
     // ── Admin : valider / rejeter une offre ──────────────────────────────────

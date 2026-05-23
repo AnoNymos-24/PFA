@@ -1,6 +1,8 @@
 package com.smartintern.backend.repository;
 
 import com.smartintern.backend.entity.OffreStage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,9 @@ public interface OffreStageRepository extends JpaRepository<OffreStage, Long> {
     List<OffreStage> findByEntrepriseId(Long entrepriseId);
     List<OffreStage> findByStatut(OffreStage.Statut statut);
     List<OffreStage> findByStatutValidation(OffreStage.StatutValidation statutValidation);
+
+    Page<OffreStage> findByStatutAndStatutValidation(
+            OffreStage.Statut statut, OffreStage.StatutValidation statutValidation, Pageable pageable);
 
     @Query("SELECT o FROM OffreStage o WHERE o.statut = 'ACTIVE' " +
            "AND o.statutValidation = 'VALIDEE' " +

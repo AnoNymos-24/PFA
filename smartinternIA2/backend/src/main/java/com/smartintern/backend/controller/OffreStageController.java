@@ -4,6 +4,9 @@ import com.smartintern.backend.dto.OffreStageDto;
 import com.smartintern.backend.service.OffreStageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -51,8 +54,21 @@ public class OffreStageController {
     // ── Étudiant ──────────────────────────────────────────────────────────────
 
     @GetMapping("/api/etudiant/offres")
-    public ResponseEntity<List<OffreStageDto.OffreStageResponse>> getAllOffresActives() {
-        return ResponseEntity.ok(offreStageService.getAllOffresActives());
+    public ResponseEntity<?> getAllOffresActives(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "datePublication") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        if (size == 0) {
+            // Rétrocompatibilité : retourne toute la liste
+            return ResponseEntity.ok(offreStageService.getAllOffresActives());
+        }
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Page<OffreStageDto.OffreStageResponse> result =
+                offreStageService.getAllOffresActivesPaginees(PageRequest.of(page, size, sort));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/api/etudiant/offres/search")
