@@ -1,0 +1,58 @@
+{
+  "id": "rapport_stage",
+  "type": "rapport_stage",
+  "name": "Rapport de stage",
+  "description": "Structure de rapport de fin de stage à remettre à l'établissement d'enseignement.",
+  "version": "1.0",
+  "sections": [
+    {
+      "id": "page_garde",
+      "title": "Page de garde",
+      "fields": [
+        { "id": "titre_rapport",    "label": "Titre du rapport",          "type": "text",   "required": true,
+          "placeholder": "ex. Rapport de stage de fin d'études" },
+        { "id": "etudiant_nom",     "label": "Nom & Prénom",              "type": "text",   "required": true },
+        { "id": "etudiant_filiere", "label": "Filière",                   "type": "text",   "required": true },
+        { "id": "etudiant_niveau",  "label": "Niveau",                    "type": "text",   "required": true },
+        { "id": "annee_universitaire","label": "Année universitaire",     "type": "text",   "required": true,
+          "placeholder": "ex. 2024-2025" },
+        { "id": "etab_nom",         "label": "Établissement",             "type": "text",   "required": true },
+        { "id": "entreprise_nom",   "label": "Entreprise d'accueil",      "type": "text",   "required": true },
+        { "id": "stage_periode",    "label": "Période du stage",          "type": "text",   "required": true,
+          "placeholder": "ex. Du 01/06/2025 au 31/08/2025" }
+      ]
+    },
+    {
+      "id": "presentation_entreprise",
+      "title": "Présentation de l'entreprise",
+      "fields": [
+        { "id": "entr_nom",          "label": "Nom",                      "type": "text",     "required": true },
+        { "id": "entr_secteur",      "label": "Secteur d'activité",       "type": "text",     "required": false },
+        { "id": "entr_description",  "label": "Description",              "type": "textarea", "required": false },
+        { "id": "entr_lieu",         "label": "Lieu",                     "type": "text",     "required": false },
+        { "id": "entr_effectif",     "label": "Effectif approximatif",    "type": "text",     "required": false }
+      ]
+    },
+    {
+      "id": "missions",
+      "title": "Missions effectuées",
+      "fields": [
+        { "id": "mission_intitule",    "label": "Intitulé du poste",        "type": "text",     "required": true },
+        { "id": "mission_description", "label": "Description des missions", "type": "textarea", "required": true,
+          "placeholder": "Décrivez les tâches et responsabilités confiées…" },
+        { "id": "mission_outils",      "label": "Outils et technologies utilisés", "type": "textarea", "required": false },
+        { "id": "mission_livrables",   "label": "Livrables produits",       "type": "textarea", "required": false }
+      ]
+    },
+    {
+      "id": "bilan",
+      "title": "Bilan et retour d'expérience",
+      "fields": [
+        { "id": "bilan_competences",  "label": "Compétences acquises",         "type": "textarea", "required": true },
+        { "id": "bilan_difficultes",  "label": "Difficultés rencontrées",      "type": "textarea", "required": false },
+        { "id": "bilan_acquis_perso", "label": "Apports personnels",           "type": "textarea", "required": false },
+        { "id": "bilan_conclusion",   "label": "Conclusion générale",          "type": "textarea", "required": true }
+      ]
+    }
+  ]
+}

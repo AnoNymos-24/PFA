@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(xargs wc -l)",
+      "Bash(py --list)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\app\\\\models\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\app\\\\utils\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\app\\\\modules\\\\cv_extraction\\\\extractors\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\app\\\\modules\\\\document_templates\\\\templates\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\app\\\\modules\\\\document_generation\\\\generators\")",
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\" | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\smartdoc-service\\\\\", \"\"\\) })",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\itoua\\\\Documents\\\\GitHub\\\\PFA\\\\smartinternIA2\\\\test-interface\")",
+      "Bash(git fetch *)",
+      "Bash(git add *)"
+    ]
+  }
+}

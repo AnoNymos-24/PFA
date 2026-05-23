@@ -1,0 +1,55 @@
+{
+  "id": "lettre_motivation",
+  "type": "lettre_motivation",
+  "name": "Lettre de motivation",
+  "description": "Lettre de candidature personnalisée pour postuler à une offre de stage.",
+  "version": "1.0",
+  "sections": [
+    {
+      "id": "candidat",
+      "title": "Informations du candidat",
+      "fields": [
+        { "id": "candidat_nom",     "label": "Nom",        "type": "text", "required": true },
+        { "id": "candidat_prenom",  "label": "Prénom",     "type": "text", "required": true },
+        { "id": "candidat_email",   "label": "Email",      "type": "text", "required": true },
+        { "id": "candidat_telephone","label": "Téléphone", "type": "text", "required": false },
+        { "id": "candidat_adresse", "label": "Adresse",   "type": "text", "required": false },
+        { "id": "date_lettre",      "label": "Date",       "type": "date", "required": true }
+      ]
+    },
+    {
+      "id": "destinataire",
+      "title": "Destinataire",
+      "fields": [
+        { "id": "dest_entreprise",   "label": "Nom de l'entreprise",    "type": "text", "required": true },
+        { "id": "dest_contact_nom",  "label": "Nom du responsable",     "type": "text", "required": false },
+        { "id": "dest_contact_poste","label": "Poste du responsable",   "type": "text", "required": false },
+        { "id": "dest_adresse",      "label": "Adresse de l'entreprise","type": "text", "required": false }
+      ]
+    },
+    {
+      "id": "objet",
+      "title": "Objet de la candidature",
+      "fields": [
+        { "id": "stage_poste_vise",  "label": "Poste visé",             "type": "text", "required": true },
+        { "id": "stage_date_debut",  "label": "Date de début souhaitée","type": "date", "required": false },
+        { "id": "stage_duree",       "label": "Durée du stage",         "type": "text", "required": false,
+          "placeholder": "ex. 3 mois" }
+      ]
+    },
+    {
+      "id": "contenu",
+      "title": "Corps de la lettre",
+      "fields": [
+        { "id": "paragraphe_intro",      "label": "Paragraphe d'introduction",   "type": "textarea", "required": true,
+          "placeholder": "Présentez-vous et expliquez l'objet de votre candidature…" },
+        { "id": "paragraphe_motivation", "label": "Motivation pour l'entreprise","type": "textarea", "required": true,
+          "placeholder": "Pourquoi cette entreprise en particulier ?…" },
+        { "id": "paragraphe_competences","label": "Compétences et apport",       "type": "textarea", "required": true,
+          "placeholder": "Quelles compétences apportez-vous ?…" },
+        { "id": "paragraphe_conclusion", "label": "Conclusion",                  "type": "textarea", "required": false,
+          "placeholder": "Formule de politesse et disponibilité pour un entretien…" }
+      ]
+    }
+  ]
+}

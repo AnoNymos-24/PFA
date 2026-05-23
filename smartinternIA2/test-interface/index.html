@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartIntern AI — Interface de Test</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #0d1117;
+  --bg2:      #161b22;
+  --bg3:      #1c2128;
+  --border:   #30363d;
+  --border2:  #21262d;
+  --text:     #e6edf3;
+  --muted:    #8b949e;
+  --blue:     #388bfd;
+  --blue-dim: #1f6feb33;
+  --green:    #3fb950;
+  --green-dim:#1a4731;
+  --yellow:   #d29922;
+  --yellow-dim:#341a00;
+  --red:      #f85149;
+  --red-dim:  #3d0c0b;
+  --purple:   #bc8cff;
+}
+html, body { height: 100%; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+       background: var(--bg); color: var(--text); font-size: 13px; display: flex; flex-direction: column; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.logo { font-weight: 700; font-size: 14px; color: var(--blue); white-space: nowrap; }
+.srv-group { display: flex; align-items: center; gap: 8px; }
+.srv-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.srv-input { background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+             padding: 4px 8px; border-radius: 6px; font-size: 11px; width: 195px; }
+.srv-input:focus { outline: none; border-color: var(--blue); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all .3s; }
+.dot.ok  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot.err { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+.spacer  { flex: 1; }
+.jwt-wrap { display: flex; align-items: center; gap: 6px; }
+.jwt-input { background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
+             padding: 4px 8px; border-radius: 6px; font-size: 10px; width: 230px;
+             font-family: monospace; }
+.jwt-input:focus { outline: none; border-color: var(--blue); }
+
+/* ── Tabs ────────────────────────────────────────────────────────── */
+.tabs { background: var(--bg2); border-bottom: 1px solid var(--border);
+        padding: 0 16px; display: flex; gap: 2px; flex-shrink: 0; }
+.tab { padding: 9px 14px; font-size: 12px; cursor: pointer; color: var(--muted);
+       border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ── Main layout ─────────────────────────────────────────────────── */
+.workspace { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.pane { display: none; flex: 1; overflow: hidden; }
+.pane.active { display: flex; }
+.split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; gap: 1px; background: var(--border2); }
+.panel { background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+.panel-head { background: var(--bg2); border-bottom: 1px solid var(--border);
+              padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.panel-head-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+
+/* ── Mini-tabs ───────────────────────────────────────────────────── */
+.mini-tabs { display: flex; gap: 4px; margin-left: auto; }
+.mtab { padding: 3px 10px; font-size: 11px; cursor: pointer; border-radius: 4px;
+        background: var(--bg3); border: 1px solid var(--border); color: var(--muted); transition: all .15s; }
+.mtab:hover { color: var(--text); }
+.mtab.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+
+/* ── Form ────────────────────────────────────────────────────────── */
+.fg { margin-bottom: 12px; }
+label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+input[type=text], input[type=email], input[type=password], input[type=number], select, textarea {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+  padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+textarea { resize: vertical; min-height: 70px; font-family: 'Consolas', monospace; font-size: 11px; }
+select option { background: var(--bg2); }
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px;
+       border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+       cursor: pointer; transition: all .15s; font-family: inherit; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+.btn-ghost  { background: var(--bg2); border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--muted); }
+.btn-danger { background: var(--red-dim); border: 1px solid #7f1d1d; color: var(--red); }
+.btn-danger:hover:not(:disabled) { background: #5c1414; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.spin { width: 13px; height: 13px; border: 2px solid var(--border); border-top-color: var(--blue);
+        border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Alerts ──────────────────────────────────────────────────────── */
+.alert { padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
+.alert-info   { background: var(--blue-dim);   border: 1px solid #1f6feb88; color: #79c0ff; }
+.alert-ok     { background: var(--green-dim);  border: 1px solid #196c2e;   color: #56d364; }
+.alert-warn   { background: var(--yellow-dim); border: 1px solid #4d2d00;   color: #e3b341; }
+.alert-err    { background: var(--red-dim);    border: 1px solid #67060388; color: #ff7b72; }
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; letter-spacing: .03em; }
+.b2xx  { background: var(--green-dim); color: var(--green); }
+.b3xx  { background: #1c3042; color: #60b8d4; }
+.b4xx  { background: var(--yellow-dim); color: var(--yellow); }
+.b5xx  { background: var(--red-dim); color: var(--red); }
+.b-err { background: var(--red-dim); color: #ff7b72; }
+
+/* ── Upload zone ─────────────────────────────────────────────────── */
+.upload-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 20px;
+               text-align: center; cursor: pointer; transition: all .15s; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-dim); }
+.upload-zone .u-icon { font-size: 24px; }
+.upload-zone .u-hint { color: var(--muted); font-size: 11px; margin-top: 6px; }
+.upload-zone .u-file { color: var(--blue); font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+/* ── JSON viewer ─────────────────────────────────────────────────── */
+.resp-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.resp-time { font-size: 10px; color: var(--muted); }
+pre.json-view {
+  background: #010409; border: 1px solid var(--border2); border-radius: 6px;
+  padding: 12px; font-size: 11px; font-family: 'Consolas', monospace;
+  line-height: 1.65; color: var(--muted); overflow: auto; max-height: 380px;
+}
+.jk { color: #79c0ff; }   /* key */
+.js { color: #a5d6ff; }   /* string value */
+.jn { color: #f2cc60; }   /* number */
+.jb { color: var(--purple); } /* bool */
+.jz { color: var(--muted); }  /* null */
+.jc { color: #8b949e; }   /* comment */
+
+/* ── Section heading ─────────────────────────────────────────────── */
+.sh { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em; padding: 10px 0 5px; border-bottom: 1px solid var(--border2); margin-bottom: 8px; }
+
+/* ── Console ─────────────────────────────────────────────────────── */
+.console { flex-shrink: 0; background: #010409; border-top: 1px solid var(--border);
+           height: 130px; display: flex; flex-direction: column; }
+.console-head { background: var(--bg2); border-bottom: 1px solid var(--border2);
+                padding: 4px 14px; display: flex; align-items: center; justify-content: space-between; }
+.console-title { font-size: 10px; color: var(--muted); }
+.console-body { flex: 1; overflow-y: auto; padding: 4px 14px; font-family: 'Consolas', monospace; font-size: 10px; }
+.log-row { display: flex; gap: 8px; padding: 2px 0; border-bottom: 1px solid #0d1117; align-items: baseline; }
+.lt { color: #3d444d; flex-shrink: 0; }
+.lm { flex-shrink: 0; font-weight: 700; }
+.lu { color: #8b949e; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ls { flex-shrink: 0; font-weight: 700; }
+.ld { color: #3d444d; flex-shrink: 0; }
+.GET    { color: var(--green); }
+.POST   { color: var(--blue); }
+.DELETE { color: var(--red); }
+.PATCH  { color: var(--yellow); }
+.s2xx   { color: var(--green); }
+.s4xx   { color: var(--yellow); }
+.s5xx   { color: var(--red); }
+.serr   { color: var(--red); }
+
+/* ── JWT block ───────────────────────────────────────────────────── */
+.token-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+             padding: 8px; font-family: 'Consolas', monospace; font-size: 10px; color: var(--muted);
+             word-break: break-all; max-height: 52px; overflow: auto; }
+
+/* ── Coherence result ────────────────────────────────────────────── */
+.coh-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+            padding: 10px 12px; margin-bottom: 8px; }
+.coh-item-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12px; }
+.coh-item-body { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.coh-ok   { border-color: #196c2e; }
+.coh-warn { border-color: #4d2d00; }
+.coh-err  { border-color: #670603; }
+
+/* ── Flow diagram ────────────────────────────────────────────────── */
+.flow { display: flex; align-items: center; gap: 6px; background: var(--bg2);
+        border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+.flow-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+            padding: 5px 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.flow-box.hl { border-color: var(--blue); color: var(--blue); }
+.flow-arrow { color: var(--muted); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════════════════ -->
+<div class="header">
+  <div class="logo">🧠 SmartIntern AI — Interface de Test</div>
+
+  <div class="srv-group">
+    <span class="srv-label">Backend</span>
+    <input class="srv-input" id="urlBackend" value="http://localhost:8081">
+    <div class="dot" id="dotBackend" title="Backend :8081"></div>
+  </div>
+
+  <div class="srv-group">
+    <span class="srv-label">SmartDoc</span>
+    <input class="srv-input" id="urlSmartdoc" value="http://localhost:8000">
+    <div class="dot" id="dotSmartdoc" title="SmartDoc :8000"></div>
+  </div>
+
+  <button class="btn btn-ghost btn-sm" onclick="pingAll()">↺ Ping</button>
+
+  <div class="spacer"></div>
+
+  <div class="jwt-wrap">
+    <span class="srv-label">JWT</span>
+    <input class="jwt-input" id="jwtToken" placeholder="Token après login…" title="Token Bearer">
+    <button class="btn btn-ghost btn-sm" onclick="clearJwt()" title="Effacer">✕</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TABS ═════════════════════════════════════ -->
+<div class="tabs">
+  <div class="tab active" data-pane="auth"      onclick="openTab(this)">🔐 Authentification</div>
+  <div class="tab"        data-pane="cv"        onclick="openTab(this)">📄 Extraction CV</div>
+  <div class="tab"        data-pane="templates" onclick="openTab(this)">📋 Modèles de documents</div>
+  <div class="tab"        data-pane="docgen"    onclick="openTab(this)">📝 Génération</div>
+  <div class="tab"        data-pane="coherence" onclick="openTab(this)">🔄 Cohérence</div>
+</div>
+
+<!-- ═══════════════════════ WORKSPACE ════════════════════════════════ -->
+<div class="workspace">
+
+  <!-- ──────────────── AUTH ──────────────── -->
+  <div class="pane active" id="pane-auth">
+    <div class="split">
+      <!-- Formulaire -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Requête</span>
+          <div class="mini-tabs">
+            <div class="mtab active" onclick="switchMini('auth','login',this)">Login</div>
+            <div class="mtab"        onclick="switchMini('auth','register',this)">Inscription</div>
+            <div class="mtab"        onclick="switchMini('auth','otp',this)">Verify OTP</div>
+            <div class="mtab"        onclick="switchMini('auth','forgot',this)">Reset MDP</div>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- LOGIN -->
+          <div id="auth-login">
+            <div class="alert alert-info">POST /api/auth/login → Backend :8081</div>
+            <div class="fg"><label>Email</label><input type="email" id="l-email" value="admin@smartintern.com"></div>
+            <div class="fg"><label>Mot de passe</label><input type="password" id="l-pwd" value="Admin@123"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="doLogin()">▶ Envoyer</button>
+              <button class="btn btn-ghost"   onclick="fillDemo('l-email','test@etudiant.com','l-pwd','Etudiant@1')">◈ Étudiant démo</button>
+            </div>
+          </div>
+
+          <!-- REGISTER -->
+          <div id="auth-register" style="display:none">
+            <div class="alert alert-info">POST /api/auth/register → Backend :8081</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="fg"><label>Prénom</label><input type="text" id="r-fn" value="Jean"></div>
+              <div class="fg"><label>Nom</label><input type="text" id="r-ln" value="Dupont"></div>
+            </div>
+            <div class="fg"><label>Email</label><input type="email" id="r-email" value="jean.dupont@test.com"></div>
+            <div class="fg"><label>Mot de passe <span style="color:var(--muted)">(min 8 car.)</span></label>
+              <input type="password" id="r-pwd" value="Password@123"></div>
+            <div class="fg"><label>Rôle</label>
+              <select id="r-role" onchange="toggleRoleFields()">
+                <option value="ETUDIANT">ETUDIANT</option>
+                <option value="ENTREPRISE">ENTREPRISE</option>
+                <option value="ENCADRANT_ACADEMIQUE">ENCADRANT_ACADEMIQUE</option>
+                <option value="ENCADRANT_ENTREPRISE">ENCADRANT_ENTREPRISE</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+            <!-- Champs rôle-dépendants -->
+            <div id="fields-etudiant">
+              <div class="sh">Champs Étudiant</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="fg"><label>Filière</label><input type="text" id="r-filiere" value="Informatique"></div>
+                <div class="fg"><label>Classe</label><input type="text" id="r-classe" value="L3"></div>
+              </div>
+              <div class="fg"><label>Code étudiant</label><input type="text" id="r-code" placeholder="ETU2025001"></div>
+            </div>
+            <div id="fields-encadrant" style="display:none">
+              <div class="sh">Champs Encadrant</div>
+              <div class="fg"><label>Domaine</label><input type="text" id="r-domaine" value="Informatique"></div>
+              <div class="fg"><label>ID Établissement / Entreprise</label><input type="number" id="r-org-id" value="1"></div>
+            </div>
+            <button class="btn btn-primary" onclick="doRegister()">▶ Inscrire</button>
+          </div>
+
+          <!-- VERIFY OTP -->
+          <div id="auth-otp" style="display:none">
+            <div class="alert alert-info">POST /api/auth/verify-otp → Backend :8081</div>
+            <div class="fg"><label>Email</label><input type="email" id="o-email" value="jean.dupont@test.com"></div>
+            <div class="fg"><label>Code OTP <span style="color:var(--muted)">(reçu par email)</span></label>
+              <input type="text" id="o-code" placeholder="1234" maxlength="8" style="letter-spacing:.2em;font-size:18px;text-align:center"></div>
+            <button class="btn btn-primary" onclick="doVerifyOtp()">✓ Vérifier</button>
+          </div>
+
+          <!-- FORGOT / RESET -->
+          <div id="auth-forgot" style="display:none">
+            <div class="alert alert-info">POST /api/auth/forgot-password → /reset-password → Backend :8081</div>
+            <div class="sh">Étape 1 — Demander le code</div>
+            <div class="fg"><label>Email</label><input type="email" id="f-email" value="jean.dupont@test.com"></div>
+            <button class="btn btn-ghost" onclick="doForgot()">📧 Envoyer code</button>
+            <div class="sh" style="margin-top:14px">Étape 2 — Réinitialiser</div>
+            <div class="fg"><label>Code reçu</label><input type="text" id="f-code" placeholder="Code OTP"></div>
+            <div class="fg"><label>Nouveau mot de passe</label><input type="password" id="f-newpwd" placeholder="min 8 caractères"></div>
+            <button class="btn btn-primary" onclick="doReset()">🔒 Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Réponse -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Réponse</span>
+          <div class="resp-meta" id="meta-auth"></div>
+        </div>
+        <div class="panel-body">
+          <pre class="json-view" id="resp-auth"><span class="jc">// La réponse s'affiche ici…</span></pre>
+          <div id="jwt-block" style="display:none;margin-top:12px">
+            <div class="sh">Token JWT extrait</div>
+            <div class="token-box" id="jwt-display"></div>
+            <div class="btn-group" style="margin-top:6px">
+              <button class="btn btn-ghost btn-sm" onclick="copyToClipboard(document.getElementById('jwt-display').textContent)">📋 Copier</button>
+              <button class="btn btn-ghost btn-sm" onclick="decodeJwt()">🔍 Décoder</button>
+            </div>
+          </div>
+          <pre class="json-view" id="resp-jwt-decoded" style="display:none;margin-top:10px"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── CV EXTRACTION ──────────────── -->
+  <div class="pane" id="pane-cv">
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Requête</span>
+          <div class="mini-tabs">
+            <div class="mtab active" onclick="switchMini('cv','direct',this)">SmartDoc direct</div>
+            <div class="mtab"        onclick="switchMini('cv','backend',this)">Via Backend</div>
+            <div class="mtab"        onclick="switchMini('cv','get',this)">Récupérer mon CV</div>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- DIRECT SmartDoc -->
+          <div id="cv-direct">
+            <div class="alert alert-info">POST /api/cv/extract → SmartDoc :8000 (sans JWT)</div>
+            <div class="fg">
+              <label>Fichier CV</label>
+              <div class="upload-zone" id="dz-cv-direct"
+                   onclick="$('cv-file-direct').click()"
+                   ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'cv-file-direct',this)">
+                <div class="u-icon">📄</div>
+                <div class="u-hint">PDF, JPG, PNG, WEBP, DOCX<br>Cliquer ou glisser-déposer</div>
+                <div class="u-file" id="cv-file-direct-lbl"></div>
+              </div>
+              <input type="file" id="cv-file-direct" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.webp,.docx"
+                     onchange="setFileLabel(this,'cv-file-direct-lbl')">
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="doCvExtract(false)">▶ Extraire + IA</button>
+              <button class="btn btn-ghost"   onclick="doCvExtract(true)">📝 Texte brut seulement</button>
+            </div>
+          </div>
+
+          <!-- VIA BACKEND -->
+          <div id="cv-backend" style="display:none">
+            <div class="alert alert-info">POST /api/etudiant/cv → Backend :8081 → SmartDoc :8000</div>
+            <div class="alert alert-warn">⚠ JWT requis — connectez-vous d'abord (onglet Auth)</div>
+            <div class="fg">
+              <label>Fichier CV <span style="color:var(--muted)">(PDF uniquement — 5MB max)</span></label>
+              <div class="upload-zone" id="dz-cv-backend"
+                   onclick="$('cv-file-backend').click()"
+                   ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'cv-file-backend',this)">
+                <div class="u-icon">🔗</div>
+                <div class="u-hint">PDF uniquement — le Backend le transmet à SmartDoc</div>
+                <div class="u-file" id="cv-file-backend-lbl"></div>
+              </div>
+              <input type="file" id="cv-file-backend" style="display:none" accept=".pdf"
+                     onchange="setFileLabel(this,'cv-file-backend-lbl')">
+            </div>
+            <button class="btn btn-primary" onclick="doCvUploadBackend()">▶ Uploader via Backend</button>
+          </div>
+
+          <!-- GET CV -->
+          <div id="cv-get" style="display:none">
+            <div class="alert alert-info">GET /api/etudiant/cv → Backend :8081</div>
+            <div class="alert alert-warn">⚠ JWT requis</div>
+            <button class="btn btn-primary" onclick="doGetCv()">▶ Récupérer infos CV</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Réponse</span>
+          <div class="resp-meta" id="meta-cv"></div>
+        </div>
+        <div class="panel-body">
+          <pre class="json-view" id="resp-cv"><span class="jc">// La réponse s'affiche ici…</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── TEMPLATES ──────────────── -->
+  <div class="pane" id="pane-templates">
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Requête</span>
+          <div class="mini-tabs">
+            <div class="mtab active" onclick="switchMini('tpl','create',this)">Créer</div>
+            <div class="mtab"        onclick="switchMini('tpl','list',this)">Lister</div>
+            <div class="mtab"        onclick="switchMini('tpl','detail',this)">Détail / Suppr.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- CRÉER -->
+          <div id="tpl-create">
+            <div class="alert alert-info">POST /api/templates → SmartDoc :8000</div>
+            <div class="alert alert-ok" style="font-size:11px">
+              📌 Préparez votre fichier Word :<br>
+              • Champs à remplir : <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">[nom_du_champ]</code><br>
+              • Zone QR code : rectangle / carré <strong style="color:#f85149">rouge</strong> dans le document
+            </div>
+            <div class="fg">
+              <label>Fichier Word (.docx)</label>
+              <div class="upload-zone" id="dz-tpl"
+                   onclick="$('tpl-file').click()"
+                   ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'tpl-file',this)">
+                <div class="u-icon">📋</div>
+                <div class="u-hint">Glisser le fichier .docx modèle ici<br>Les [champs] et zones rouges sont détectés automatiquement</div>
+                <div class="u-file" id="tpl-file-lbl"></div>
+              </div>
+              <input type="file" id="tpl-file" style="display:none" accept=".docx"
+                     onchange="setFileLabel(this,'tpl-file-lbl')">
+            </div>
+            <div class="fg">
+              <label>id_type_document <span style="color:var(--muted)">(entier — ex: 1=convention, 2=rapport…)</span></label>
+              <input type="number" id="tpl-type-id" value="1" min="1">
+            </div>
+            <button class="btn btn-primary" onclick="doCreateTemplate()">▶ Créer le modèle</button>
+          </div>
+
+          <!-- LISTER -->
+          <div id="tpl-list" style="display:none">
+            <div class="alert alert-info">GET /api/templates → SmartDoc :8000</div>
+            <div class="fg">
+              <label>Filtrer par id_type_document <span style="color:var(--muted)">(laisser vide = tous)</span></label>
+              <input type="number" id="tpl-filter-type" placeholder="Tous les types">
+            </div>
+            <button class="btn btn-primary" onclick="doListTemplates()">▶ Lister</button>
+          </div>
+
+          <!-- DÉTAIL / SUPPRIMER -->
+          <div id="tpl-detail" style="display:none">
+            <div class="alert alert-info">GET/DELETE /api/templates/{id} → SmartDoc :8000</div>
+            <div class="fg">
+              <label>id_modele_document</label>
+              <input type="number" id="tpl-detail-id" value="1" min="1">
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="doGetTemplate()">▶ Obtenir le détail</button>
+              <button class="btn btn-danger"  onclick="doDeleteTemplate()">🗑 Supprimer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Réponse</span>
+          <div class="resp-meta" id="meta-tpl"></div>
+        </div>
+        <div class="panel-body">
+          <pre class="json-view" id="resp-tpl"><span class="jc">// La réponse s'affiche ici…</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── GÉNÉRATION ──────────────── -->
+  <div class="pane" id="pane-docgen">
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Requête</span>
+          <div class="mini-tabs">
+            <div class="mtab active" onclick="switchMini('gen','generate',this)">Générer</div>
+            <div class="mtab"        onclick="switchMini('gen','caps',this)">Capacités</div>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- GENERATE -->
+          <div id="gen-generate">
+            <div class="alert alert-info">POST /api/documents/generate → SmartDoc :8000</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="fg">
+                <label>id_modele_document</label>
+                <input type="number" id="gen-modele-id" value="1" min="1">
+              </div>
+              <div class="fg">
+                <label>Format de sortie</label>
+                <select id="gen-format">
+                  <option value="pdf">PDF</option>
+                  <option value="docx">DOCX</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg">
+              <label>Données QR code <span style="color:var(--muted)">(optionnel — si zone rouge dans le modèle)</span></label>
+              <input type="text" id="gen-qr" placeholder="URL ou texte à encoder (ex: https://smartintern.ai/stage/42)">
+            </div>
+            <div class="fg">
+              <label>Nom fichier <span style="color:var(--muted)">(optionnel)</span></label>
+              <input type="text" id="gen-fname" placeholder="ex: convention_dupont_jean">
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadFields()" style="margin-bottom:10px">⬇ Charger les champs du modèle</button>
+
+            <div id="gen-fields-zone">
+              <div class="alert alert-warn" style="font-size:11px">Cliquez sur "Charger les champs" pour voir les champs à remplir.</div>
+            </div>
+
+            <div class="btn-group" style="margin-top:12px">
+              <button class="btn btn-primary" onclick="doGenerate()">▶ Générer le document</button>
+              <button class="btn btn-ghost"   onclick="clearGenFields()">⊘ Vider</button>
+            </div>
+          </div>
+
+          <!-- CAPACITÉS -->
+          <div id="gen-caps" style="display:none">
+            <div class="alert alert-info">GET /api/documents/capabilities → SmartDoc :8000</div>
+            <button class="btn btn-primary" onclick="doCaps()">▶ Vérifier</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Réponse</span>
+          <div class="resp-meta" id="meta-gen"></div>
+        </div>
+        <div class="panel-body">
+          <pre class="json-view" id="resp-gen"><span class="jc">// La réponse s'affiche ici…</span></pre>
+          <div id="gen-dl-zone" style="display:none;margin-top:12px">
+            <div class="sh">Document prêt</div>
+            <button class="btn btn-primary" id="gen-dl-btn" onclick="dlDoc()">⬇ Télécharger</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── COHÉRENCE ──────────────── -->
+  <div class="pane" id="pane-coherence">
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Tests de cohérence</span></div>
+        <div class="panel-body">
+
+          <div class="flow">
+            <div class="flow-box hl">Frontend</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Backend :8081</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box hl">SmartDoc :8000</div>
+          </div>
+
+          <!-- TEST 1 : Health -->
+          <div class="sh">Test 1 — Santé des services</div>
+          <button class="btn btn-ghost" onclick="testHealth()">❤ Ping tous les services</button>
+
+          <!-- TEST 2 : CV upload flow -->
+          <div class="sh" style="margin-top:14px">Test 2 — Flux upload CV (Backend ↔ SmartDoc)</div>
+          <div class="fg">
+            <label>Fichier CV</label>
+            <div class="upload-zone" id="dz-coh-cv"
+                 onclick="$('coh-cv-file').click()"
+                 ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'coh-cv-file',this)">
+              <div class="u-icon">🔄</div>
+              <div class="u-hint">CV PDF — testé en direct SmartDoc ET via Backend</div>
+              <div class="u-file" id="coh-cv-lbl"></div>
+            </div>
+            <input type="file" id="coh-cv-file" style="display:none" accept=".pdf"
+                   onchange="setFileLabel(this,'coh-cv-lbl')">
+          </div>
+          <button class="btn btn-primary" onclick="testCvFlow()">▶ Lancer le test flux CV</button>
+
+          <!-- TEST 3 : Doc generation flow -->
+          <div class="sh" style="margin-top:14px">Test 3 — Flux génération document</div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+            <div class="fg" style="margin:0">
+              <label>id_modele_document</label>
+              <input type="number" id="coh-tpl-id" value="1">
+            </div>
+          </div>
+          <div class="fg" style="margin-top:8px">
+            <label>Données JSON (dictionnaire {champ: valeur})</label>
+            <textarea id="coh-data" rows="4">{"nom": "Dupont", "prenom": "Jean", "date_debut": "01/06/2025", "entreprise": "Acme Corp"}</textarea>
+          </div>
+          <button class="btn btn-ghost" onclick="testDocFlow()">▶ Tester le flux génération</button>
+
+          <!-- TEST 4 : JWT decode -->
+          <div class="sh" style="margin-top:14px">Test 4 — Vérification JWT</div>
+          <button class="btn btn-ghost" onclick="testJwt()">🔍 Analyser le JWT actuel</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Résultats</span></div>
+        <div class="panel-body" id="coh-results">
+          <div class="alert alert-info">Les résultats des tests apparaissent ici.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /workspace -->
+
+<!-- ═══════════════════════ CONSOLE ══════════════════════════════════ -->
+<div class="console">
+  <div class="console-head">
+    <span class="console-title">▶ Console réseau</span>
+    <button class="btn btn-ghost btn-sm" onclick="clearLog()">Vider</button>
+  </div>
+  <div class="console-body" id="console-body"></div>
+</div>
+
+<!-- ═══════════════════════ SCRIPT ═══════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const B  = () => $('urlBackend').value.replace(/\/$/, '');
+const SD = () => $('urlSmartdoc').value.replace(/\/$/, '');
+const jwt = () => $('jwtToken').value.trim();
+
+let lastDlUrl = null;
+let genChamps = [];
+
+// ── JSON color ────────────────────────────────────────────────────────────
+function colorJson(obj) {
+  return JSON.stringify(obj, null, 2).replace(
+    /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    m => {
+      if (/^"/.test(m)) return /:$/.test(m) ? `<span class="jk">${m}</span>` : `<span class="js">${m}</span>`;
+      if (/true|false/.test(m)) return `<span class="jb">${m}</span>`;
+      if (/null/.test(m))       return `<span class="jz">${m}</span>`;
+      return `<span class="jn">${m}</span>`;
+    });
+}
+
+function showResp(key, data, status, ms) {
+  const cls = status >= 500 ? 'b5xx' : status >= 400 ? 'b4xx' : status >= 300 ? 'b3xx' : 'b2xx';
+  const meta = $(`meta-${key}`);
+  if (meta) meta.innerHTML = `<span class="badge ${cls}">${status}</span><span class="resp-time">${ms}ms</span>`;
+  $(`resp-${key}`).innerHTML = colorJson(data);
+}
+
+function showRespErr(key, msg, ms) {
+  const meta = $(`meta-${key}`);
+  if (meta) meta.innerHTML = `<span class="badge b-err">ERR</span><span class="resp-time">${ms}ms</span>`;
+  $(`resp-${key}`).innerHTML = `<span class="jc">// Erreur réseau\n// ${msg}\n// Vérifiez que le service est démarré.</span>`;
+}
+
+// ── Network ───────────────────────────────────────────────────────────────
+async function req(method, url, body = null, formData = false) {
+  const t0 = Date.now();
+  const h = {};
+  if (!formData && body) h['Content-Type'] = 'application/json';
+  if (jwt()) h['Authorization'] = `Bearer ${jwt()}`;
+  try {
+    const r = await fetch(url, {
+      method, headers: h,
+      body: body ? (formData ? body : JSON.stringify(body)) : undefined,
+    });
+    const ms = Date.now() - t0;
+    let d;
+    const ct = r.headers.get('content-type') || '';
+    if (ct.includes('json')) d = await r.json();
+    else if (ct.startsWith('application/')) d = { _binary: true, type: ct, bytes: r.headers.get('content-length') };
+    else d = { _text: await r.text() };
+    addLog(method, url, r.status, ms);
+    return { ok: r.ok, status: r.status, data: d, ms };
+  } catch (e) {
+    const ms = Date.now() - t0;
+    addLog(method, url, 0, ms, true);
+    return { ok: false, status: 0, data: null, ms, err: e.message };
+  }
+}
+
+// ── Console ───────────────────────────────────────────────────────────────
+function addLog(method, url, status, ms, isErr = false) {
+  const body = $('console-body');
+  const t    = new Date().toLocaleTimeString('fr-FR');
+  const sc   = isErr ? 'serr' : status >= 500 ? 's5xx' : status >= 400 ? 's4xx' : 's2xx';
+  const st   = isErr ? 'ERR' : status;
+  body.insertAdjacentHTML('beforeend',
+    `<div class="log-row"><span class="lt">${t}</span><span class="lm ${method}">${method}</span>` +
+    `<span class="lu">${url}</span><span class="ls ${sc}">${st}</span><span class="ld">${ms}ms</span></div>`);
+  body.scrollTop = body.scrollHeight;
+}
+function clearLog() { $('console-body').innerHTML = ''; }
+
+// ── Service ping ──────────────────────────────────────────────────────────
+async function pingAll() {
+  const ping = async (url, dotId) => {
+    const dot = $(dotId);
+    dot.className = 'dot';
+    try {
+      const r = await fetch(url + '/health', { signal: AbortSignal.timeout(4000) });
+      dot.className = r.ok ? 'dot ok' : 'dot err';
+    } catch { dot.className = 'dot err'; }
+  };
+  await Promise.all([ping(B(), 'dotBackend'), ping(SD(), 'dotSmartdoc')]);
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function openTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  $(`pane-${el.dataset.pane}`).classList.add('active');
+}
+
+function switchMini(group, name, el) {
+  const panel = el.closest('.panel');
+  panel.querySelectorAll(`[id^="${group}-"]`).forEach(d => d.style.display = 'none');
+  $(`${group}-${name}`).style.display = 'block';
+  el.closest('.mini-tabs').querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleRoleFields() {
+  const role = $('r-role').value;
+  $('fields-etudiant').style.display  = role === 'ETUDIANT' ? 'block' : 'none';
+  $('fields-encadrant').style.display = ['ENCADRANT_ACADEMIQUE','ENCADRANT_ENTREPRISE'].includes(role) ? 'block' : 'none';
+}
+
+// ── File upload helpers ───────────────────────────────────────────────────
+function setFileLabel(input, lblId) {
+  const f = input.files[0];
+  $(lblId).textContent = f ? `📎 ${f.name} — ${(f.size/1024).toFixed(1)} Ko` : '';
+}
+function dzOver(e, el)  { e.preventDefault(); el.classList.add('drag-over'); }
+function dzLeave(el)    { el.classList.remove('drag-over'); }
+function dzDrop(e, inputId, el) {
+  e.preventDefault(); el.classList.remove('drag-over');
+  const inp = $(inputId);
+  const dt  = new DataTransfer();
+  dt.items.add(e.dataTransfer.files[0]);
+  inp.files = dt.files;
+  const lbl = inputId + '-lbl';
+  if ($(lbl)) setFileLabel(inp, lbl);
+}
+
+function copyToClipboard(txt) { navigator.clipboard.writeText(txt); }
+function clearJwt() { $('jwtToken').value = ''; }
+function fillDemo(e, ev, p, pv) { $(e).value = ev; $(p).value = pv; }
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+function handleAuthResp(r) {
+  if (r.err)  { showRespErr('auth', r.err, r.ms); return; }
+  showResp('auth', r.data, r.status, r.ms);
+  const token = r.data?.token;
+  if (token) {
+    $('jwtToken').value = token;
+    $('jwt-display').textContent = token;
+    $('jwt-block').style.display = 'block';
+    $('resp-jwt-decoded').style.display = 'none';
+  }
+}
+
+async function doLogin() {
+  handleAuthResp(await req('POST', B()+'/api/auth/login',
+    { email: $('l-email').value, password: $('l-pwd').value }));
+}
+
+async function doRegister() {
+  const role = $('r-role').value;
+  const body = {
+    firstName: $('r-fn').value, lastName: $('r-ln').value,
+    email: $('r-email').value,  password: $('r-pwd').value,
+    role,
+  };
+  if (role === 'ETUDIANT') {
+    Object.assign(body, { filiere: $('r-filiere').value, classe: $('r-classe').value, codeEtudiant: $('r-code').value });
+  } else if (['ENCADRANT_ACADEMIQUE','ENCADRANT_ENTREPRISE'].includes(role)) {
+    Object.assign(body, { domaine: $('r-domaine').value });
+    if (role === 'ENCADRANT_ACADEMIQUE') body.etablissementId = parseInt($('r-org-id').value);
+    else body.entrepriseId = parseInt($('r-org-id').value);
+  }
+  handleAuthResp(await req('POST', B()+'/api/auth/register', body));
+}
+
+async function doVerifyOtp() {
+  handleAuthResp(await req('POST', B()+'/api/auth/verify-otp',
+    { email: $('o-email').value, code: $('o-code').value }));
+}
+
+async function doForgot() {
+  const r = await req('POST', B()+'/api/auth/forgot-password', { email: $('f-email').value });
+  showResp('auth', r.data, r.status, r.ms);
+}
+
+async function doReset() {
+  const r = await req('POST', B()+'/api/auth/reset-password',
+    { email: $('f-email').value, code: $('f-code').value, newPassword: $('f-newpwd').value });
+  showResp('auth', r.data, r.status, r.ms);
+}
+
+function decodeJwt() {
+  const token = $('jwt-display').textContent.trim();
+  if (!token) return;
+  try {
+    const [h, p] = token.split('.').slice(0,2).map(s => JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/'))));
+    const decoded = { header: h, payload: p, expires: new Date(p.exp * 1000).toLocaleString() };
+    const el = $('resp-jwt-decoded');
+    el.innerHTML = colorJson(decoded);
+    el.style.display = 'block';
+  } catch (e) { alert('JWT invalide : ' + e.message); }
+}
+
+// ── CV ────────────────────────────────────────────────────────────────────
+async function doCvExtract(textOnly) {
+  const f = $('cv-file-direct').files[0];
+  if (!f) { alert('Sélectionnez un fichier.'); return; }
+  const fd = new FormData(); fd.append('file', f);
+  const ep = textOnly ? '/api/cv/extract/text-only' : '/api/cv/extract';
+  const r = await req('POST', SD()+ep, fd, true);
+  if (r.err) { showRespErr('cv', r.err, r.ms); return; }
+  showResp('cv', r.data, r.status, r.ms);
+}
+
+async function doCvUploadBackend() {
+  const f = $('cv-file-backend').files[0];
+  if (!f) { alert('Sélectionnez un PDF.'); return; }
+  if (!jwt()) { alert('JWT manquant — connectez-vous d\'abord.'); return; }
+  const fd = new FormData(); fd.append('file', f);
+  const r = await req('POST', B()+'/api/etudiant/cv', fd, true);
+  if (r.err) { showRespErr('cv', r.err, r.ms); return; }
+  showResp('cv', r.data, r.status, r.ms);
+}
+
+async function doGetCv() {
+  if (!jwt()) { alert('JWT manquant.'); return; }
+  const r = await req('GET', B()+'/api/etudiant/cv');
+  if (r.err) { showRespErr('cv', r.err, r.ms); return; }
+  showResp('cv', r.data, r.status, r.ms);
+}
+
+// ── Templates ─────────────────────────────────────────────────────────────
+async function doCreateTemplate() {
+  const f = $('tpl-file').files[0];
+  if (!f) { alert('Sélectionnez un fichier .docx.'); return; }
+  const fd = new FormData();
+  fd.append('fichier', f);
+  fd.append('id_type_document', $('tpl-type-id').value);
+  const r = await req('POST', SD()+'/api/templates', fd, true);
+  if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
+  showResp('tpl', r.data, r.status, r.ms);
+  const id = r.data?.id_modele_document;
+  if (id) { $('tpl-detail-id').value = id; $('gen-modele-id').value = id; $('coh-tpl-id').value = id; }
+}
+
+async function doListTemplates() {
+  const t = $('tpl-filter-type').value;
+  const url = SD()+'/api/templates' + (t ? `?id_type_document=${t}` : '');
+  const r = await req('GET', url);
+  if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
+  showResp('tpl', r.data, r.status, r.ms);
+}
+
+async function doGetTemplate() {
+  const id = $('tpl-detail-id').value;
+  const r = await req('GET', `${SD()}/api/templates/${id}`);
+  if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
+  showResp('tpl', r.data, r.status, r.ms);
+}
+
+async function doDeleteTemplate() {
+  const id = $('tpl-detail-id').value;
+  if (!confirm(`Supprimer le modèle ${id} ?`)) return;
+  const r = await req('DELETE', `${SD()}/api/templates/${id}`);
+  if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
+  showResp('tpl', r.data, r.status, r.ms);
+}
+
+// ── Document generation ───────────────────────────────────────────────────
+async function loadFields() {
+  const id = $('gen-modele-id').value;
+  const r  = await req('GET', `${SD()}/api/templates/${id}`);
+  if (!r.ok) {
+    $('gen-fields-zone').innerHTML = `<div class="alert alert-err">Modèle ${id} introuvable — créez-le d'abord.</div>`;
+    return;
+  }
+  const tpl    = r.data?.template;
+  const champs = tpl?.champs_detectes || [];
+  const hasQr  = tpl?.a_zone_qrcode || false;
+  genChamps = champs;
+
+  let html = `<div class="sh">${champs.length} champ(s) détecté(s)</div>`;
+  if (hasQr) html += `<div class="alert alert-warn" style="font-size:11px">📌 Zone QR code présente — renseignez le champ "Données QR" ci-dessus.</div>`;
+  if (!champs.length) html += `<div class="alert alert-warn" style="font-size:11px">Aucun [champ] détecté dans ce modèle.</div>`;
+  champs.forEach(c => {
+    html += `<div class="fg"><label style="font-family:monospace;color:var(--blue)">[${c}]</label>
+               <input type="text" id="gf-${c}" placeholder="Valeur de ${c}"></div>`;
+  });
+  $('gen-fields-zone').innerHTML = html;
+}
+
+async function doGenerate() {
+  const id  = parseInt($('gen-modele-id').value);
+  const fmt = $('gen-format').value;
+  const qr  = $('gen-qr').value || null;
+  const fn  = $('gen-fname').value || null;
+  const data = {};
+  genChamps.forEach(c => { const v = $(`gf-${c}`)?.value; if (v) data[c] = v; });
+  const r = await req('POST', SD()+'/api/documents/generate',
+    { id_modele_document: id, data, qr_data: qr, output_format: fmt, filename: fn });
+  if (r.err) { showRespErr('gen', r.err, r.ms); return; }
+  showResp('gen', r.data, r.status, r.ms);
+  if (r.data?.document?.download_url) {
+    lastDlUrl = r.data.document.download_url;
+    $('gen-dl-btn').textContent = `⬇ Télécharger ${r.data.document.filename}`;
+    $('gen-dl-zone').style.display = 'block';
+  }
+}
+
+async function doCaps() {
+  const r = await req('GET', SD()+'/api/documents/capabilities');
+  if (r.err) { showRespErr('gen', r.err, r.ms); return; }
+  showResp('gen', r.data, r.status, r.ms);
+}
+
+function clearGenFields() {
+  genChamps = [];
+  $('gen-fields-zone').innerHTML = `<div class="alert alert-warn" style="font-size:11px">Cliquez sur "Charger les champs" pour voir les champs à remplir.</div>`;
+}
+
+function dlDoc() { if (lastDlUrl) window.open(SD() + lastDlUrl, '_blank'); }
+
+// ── Coherence tests ───────────────────────────────────────────────────────
+function cohItem(title, status, body) {
+  const cls  = status === 'ok' ? 'coh-ok' : status === 'warn' ? 'coh-warn' : 'coh-err';
+  const icon = status === 'ok' ? '✅' : status === 'warn' ? '⚠️' : '❌';
+  return `<div class="coh-item ${cls}">
+    <div class="coh-item-head">${icon} ${title}</div>
+    <div class="coh-item-body">${body}</div>
+  </div>`;
+}
+
+function resetCoh(loading = false) {
+  $('coh-results').innerHTML = loading
+    ? '<div class="alert alert-info">⏳ Test en cours…</div>'
+    : '';
+}
+function appendCoh(html) { $('coh-results').insertAdjacentHTML('beforeend', html); }
+
+async function testHealth() {
+  resetCoh(true);
+  $('coh-results').innerHTML = '';
+
+  // Backend
+  try {
+    const r = await fetch(B() + '/health', { signal: AbortSignal.timeout(4000) });
+    appendCoh(cohItem('Backend :8081 — Health', r.ok ? 'ok' : 'err',
+      r.ok ? `Service opérationnel` : `HTTP ${r.status} — vérifiez que Spring Boot est démarré`));
+    addLog('GET', B()+'/health', r.status, 0);
+  } catch (e) {
+    appendCoh(cohItem('Backend :8081 — Health', 'err', `Connexion refusée — démarrez avec <code>mvn spring-boot:run</code>`));
+  }
+
+  // SmartDoc
+  const r2 = await req('GET', SD()+'/health');
+  if (r2.err) {
+    appendCoh(cohItem('SmartDoc :8000 — Health', 'err',
+      `Connexion refusée — démarrez avec <code>python main.py</code>`));
+  } else {
+    const d = r2.data;
+    const cap = d?.capacites || {};
+    appendCoh(cohItem('SmartDoc :8000 — Health', r2.ok ? 'ok' : 'err',
+      r2.ok
+        ? `v${d?.version} opérationnel — ${r2.ms}ms<br>
+           OCR PDF : ${cap.ocr_pdf?'✅':'❌'} &nbsp;|&nbsp;
+           OCR Image : ${cap.ocr_image?'✅':'❌'} &nbsp;|&nbsp;
+           Analyse IA : ${cap.extraction_ia?'✅':'⚠️ ANTHROPIC_API_KEY manquante'} &nbsp;|&nbsp;
+           Génération DOCX : ${cap.generation_docx?'✅':'❌'} &nbsp;|&nbsp;
+           Génération PDF : ${cap.generation_pdf?'✅':'⚠️ LibreOffice absent'}`
+        : `HTTP ${r2.status}`));
+
+    if (!cap.extraction_ia) {
+      appendCoh(cohItem('Clé API Anthropic', 'warn',
+        'ANTHROPIC_API_KEY absente ou vide dans <code>smartdoc-service/.env</code>. '
+        + 'L\'extraction IA des CVs sera désactivée.'));
+    }
+  }
+}
+
+async function testCvFlow() {
+  const f = $('coh-cv-file').files[0];
+  if (!f) { alert('Sélectionnez un fichier CV (PDF).'); return; }
+  resetCoh(true);
+
+  // 1. Extraction directe SmartDoc
+  const fd1 = new FormData(); fd1.append('file', f);
+  const r1  = await req('POST', SD()+'/api/cv/extract', fd1, true);
+  let sd_data = null;
+  if (!r1.ok) {
+    appendCoh(cohItem('SmartDoc — Extraction directe', 'err',
+      `HTTP ${r1.status} — ${JSON.stringify(r1.data)}`));
+  } else {
+    sd_data = r1.data;
+    const cv = r1.data.cv_standardise?.profil;
+    appendCoh(cohItem('SmartDoc — Extraction directe', 'ok',
+      `${r1.ms}ms | Méthode : <b>${r1.data.methode_extraction}</b> | Pages : ${r1.data.nb_pages}<br>
+       Nom détecté : <b>${cv?.nom || '—'} ${cv?.prenom || ''}</b> |
+       Email : ${cv?.email || '—'} | Titre : ${cv?.titre_professionnel || '—'}`));
+  }
+
+  // 2. Upload via Backend
+  if (!jwt()) {
+    appendCoh(cohItem('Backend — Upload CV', 'warn',
+      'JWT absent — connectez-vous dans <b>Authentification</b> pour tester le flux complet.'));
+  } else {
+    const fd2 = new FormData(); fd2.append('file', f);
+    const r2  = await req('POST', B()+'/api/etudiant/cv', fd2, true);
+    if (!r2.ok) {
+      appendCoh(cohItem('Backend — Relai vers SmartDoc', 'err',
+        `HTTP ${r2.status} — ${r2.data?.message || JSON.stringify(r2.data)}`));
+    } else {
+      appendCoh(cohItem('Backend — Relai vers SmartDoc', 'ok',
+        `${r2.ms}ms | CV stocké : <b>${r2.data?.cvPath || '—'}</b><br>
+         analysé : ${r2.data?.analyzed ?? '—'}`));
+
+      // 3. Cohérence des données
+      if (sd_data) {
+        const nomSD  = (sd_data.cv_standardise?.profil?.nom  || '').toLowerCase();
+        const nomBE  = (r2.data?.cvStandardise?.profil?.nom  || r2.data?.nom || '').toLowerCase();
+        const match  = nomSD && nomBE && nomSD === nomBE;
+        appendCoh(cohItem('Cohérence SmartDoc ↔ Backend', match ? 'ok' : 'warn',
+          `Nom SmartDoc : <b>"${nomSD || '—'}"</b> &nbsp;↔&nbsp; Backend : <b>"${nomBE || '—'}"</b><br>
+          ${match ? '✅ Données identiques' : '⚠️ Valeurs différentes — vérifiez le mapping DTO dans <code>CvExtractionService</code>'}`));
+      }
+    }
+  }
+}
+
+async function testDocFlow() {
+  resetCoh(true);
+  const id = parseInt($('coh-tpl-id').value);
+  let dataObj = {};
+  try { dataObj = JSON.parse($('coh-data').value); }
+  catch { appendCoh(cohItem('JSON invalide', 'err', 'Le JSON des données est malformé.')); return; }
+
+  // 1. Vérifier le template
+  const r1 = await req('GET', `${SD()}/api/templates/${id}`);
+  if (!r1.ok) {
+    appendCoh(cohItem(`Modèle ${id} — Existence`, 'err',
+      `Introuvable — créez-le d'abord dans l'onglet <b>Modèles de documents</b>`));
+    return;
+  }
+  const tpl    = r1.data.template;
+  const champs = tpl.champs_detectes || [];
+  appendCoh(cohItem(`Modèle ${id} — Vérification`, 'ok',
+    `Champs : [${champs.join(', ') || 'aucun'}]<br>
+     Zone QR : ${tpl.a_zone_qrcode ? '✅ Présente' : 'Absente'} | Type : ${tpl.id_type_document}`));
+
+  // 2. Cohérence champs / données
+  const dataKeys  = Object.keys(dataObj);
+  const manquants = champs.filter(c => !dataKeys.includes(c));
+  const superflus = dataKeys.filter(k => !champs.includes(k));
+  appendCoh(cohItem('Cohérence champs ↔ données', manquants.length ? 'warn' : 'ok',
+    (manquants.length ? `⚠️ Champs manquants dans <code>data</code> : [${manquants.join(', ')}]<br>` : '✅ Tous les champs du template sont couverts<br>') +
+    (superflus.length ? `ℹ️ Clés supplémentaires ignorées : [${superflus.join(', ')}]` : '')));
+
+  // 3. Générer le document
+  const r3 = await req('POST', SD()+'/api/documents/generate',
+    { id_modele_document: id, data: dataObj, output_format: 'docx' });
+  if (!r3.ok) {
+    appendCoh(cohItem('Génération DOCX', 'err',
+      `HTTP ${r3.status} — ${r3.data?.detail || JSON.stringify(r3.data)}`));
+    return;
+  }
+  const doc = r3.data?.document;
+  appendCoh(cohItem('Génération DOCX', r3.ok ? 'ok' : 'err',
+    `${r3.ms}ms | Fichier : <b>${doc?.filename}</b> | Taille : ${(doc?.size_bytes/1024).toFixed(1)} Ko<br>` +
+    (r3.data?.champs_non_remplis?.length
+      ? `⚠️ Champs non remplis (valeurs absentes) : [${r3.data.champs_non_remplis.join(', ')}]`
+      : '✅ Tous les champs ont été remplis')));
+}
+
+async function testJwt() {
+  resetCoh(false);
+  const token = jwt();
+  if (!token) { appendCoh(cohItem('JWT — Analyse', 'warn', 'Aucun token présent — connectez-vous dans l\'onglet Authentification.')); return; }
+  try {
+    const [h, p] = token.split('.').slice(0,2).map(s => JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/'))));
+    const exp    = new Date(p.exp * 1000);
+    const now    = new Date();
+    const valid  = exp > now;
+    const diff   = Math.round((exp - now) / 1000 / 60);
+    appendCoh(cohItem('JWT — Structure', 'ok',
+      `Algorithme : <b>${h.alg}</b><br>Sujet (email) : <b>${p.sub}</b><br>Rôle(s) : <b>${p.roles || p.role || JSON.stringify(p.authorities) || '—'}</b>`));
+    appendCoh(cohItem('JWT — Expiration', valid ? 'ok' : 'err',
+      `Expire le : <b>${exp.toLocaleString()}</b><br>
+       ${valid ? `✅ Valide encore ${diff} minute(s)` : '❌ Token expiré — reconnectez-vous'}`));
+    appendCoh(cohItem('JWT — Payload complet', 'ok',
+      `<pre style="font-size:10px;color:var(--muted);white-space:pre-wrap">${JSON.stringify(p, null, 2)}</pre>`));
+  } catch (e) {
+    appendCoh(cohItem('JWT — Décodage', 'err', `Token malformé : ${e.message}`));
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+pingAll();
+setInterval(pingAll, 25000);
+</script>
+</body>
+</html>

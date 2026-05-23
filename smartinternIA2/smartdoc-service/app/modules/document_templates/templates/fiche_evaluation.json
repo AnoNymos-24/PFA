@@ -1,0 +1,46 @@
+{
+  "id": "fiche_evaluation",
+  "type": "fiche_evaluation",
+  "name": "Fiche d'évaluation de stage",
+  "description": "Formulaire d'évaluation du stagiaire rempli par l'encadrant entreprise.",
+  "version": "1.0",
+  "sections": [
+    {
+      "id": "identification",
+      "title": "Identification",
+      "fields": [
+        { "id": "etudiant_nom",    "label": "Nom & Prénom du stagiaire", "type": "text", "required": true },
+        { "id": "entreprise_nom",  "label": "Entreprise",               "type": "text", "required": true },
+        { "id": "stage_poste",     "label": "Poste occupé",             "type": "text", "required": true },
+        { "id": "stage_periode",   "label": "Période du stage",         "type": "text", "required": true },
+        { "id": "evaluateur_nom",  "label": "Évaluateur (nom & poste)", "type": "text", "required": true }
+      ]
+    },
+    {
+      "id": "criteres",
+      "title": "Grille d'évaluation (note /20)",
+      "fields": [
+        { "id": "note_ponctualite",   "label": "Ponctualité & assiduité",          "type": "number", "required": true },
+        { "id": "note_motivation",    "label": "Motivation & implication",         "type": "number", "required": true },
+        { "id": "note_qualite",       "label": "Qualité du travail rendu",         "type": "number", "required": true },
+        { "id": "note_autonomie",     "label": "Autonomie & prise d'initiative",   "type": "number", "required": true },
+        { "id": "note_communication", "label": "Communication & expression orale", "type": "number", "required": true },
+        { "id": "note_integration",   "label": "Intégration dans l'équipe",        "type": "number", "required": true },
+        { "id": "note_globale",       "label": "Note globale /20",                 "type": "number", "required": true },
+        { "id": "appreciation",       "label": "Appréciation générale",            "type": "select", "required": true,
+          "options": ["Excellent", "Très bien", "Bien", "Assez bien", "Passable", "Insuffisant"] }
+      ]
+    },
+    {
+      "id": "commentaires",
+      "title": "Commentaires",
+      "fields": [
+        { "id": "points_forts",       "label": "Points forts",            "type": "textarea", "required": false },
+        { "id": "points_amelioration","label": "Points à améliorer",      "type": "textarea", "required": false },
+        { "id": "recommandation",     "label": "Recommandation",          "type": "select",   "required": false,
+          "options": ["Recommandé fortement", "Recommandé", "Recommandé avec réserves", "Non recommandé"] },
+        { "id": "commentaire_libre",  "label": "Commentaire libre",       "type": "textarea", "required": false }
+      ]
+    }
+  ]
+}
