@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -48,12 +47,34 @@ public class ModeleDocumentService {
                 .orElseThrow(() -> new RuntimeException(
                         "Type de document non trouvé: " + request.getTypeDocumentId()));
 
-        String modeleId = UUID.randomUUID().toString();
-
-        // Appel microservice Python
+        // Appel microservice Python (POST /modeles/)
+        // Seul le fichier .docx et l'id du type sont envoyés.
+        // Le microservice analyse le document et retourne id_modele_document + champs_detectes.
         Map<String, Object> resultatPython = appellerMicroserviceCreerModele(
-                modeleId, request.getNom(), typeDocument.getCode(),
-                request.getDureeValiditeJours(), fichierModele, fichierHeader, fichierFooter);
+                typeDocument.getId(), fichierModele);
+
+        // Récupérer l'identifiant microservice (registre Python)
+        Object idMicroObj = resultatPython.get("id_modele_document");
+        Long idMicroservice = idMicroObj instanceof Number
+                ? ((Number) idMicroObj).longValue() : null;
+        if (idMicroservice == null) {
+            throw new RuntimeException(
+                    "Le microservice n'a pas retourné d'identifiant de modèle (id_modele_document).");
+        }
+
+        // URL du fichier modèle côté microservice
+        String urlFichierModele = (String) resultatPython.getOrDefault("url_fichier_modele", "");
+
+        // Sérialiser les champs détectés ([champ à remplir] dans le document Word)
+        String champsDynJson = null;
+        Object champsObj = resultatPython.get("champs_detectes");
+        if (champsObj != null) {
+            try {
+                champsDynJson = objectMapper.writeValueAsString(champsObj);
+            } catch (Exception e) {
+                log.warn("Impossible de sérialiser champs_detectes : {}", e.getMessage());
+            }
+        }
 
         // Sérialiser signatureNumerique en JSON
         String signatureJson = null;
@@ -61,45 +82,27 @@ public class ModeleDocumentService {
             try {
                 signatureJson = objectMapper.writeValueAsString(request.getSignatureNumerique());
             } catch (Exception e) {
-                log.warn("Impossible de sérialiser la signature: {}", e.getMessage());
+                log.warn("Impossible de sérialiser la signature : {}", e.getMessage());
             }
         }
 
-        // Sérialiser les champs dynamiques
-        String champsDynJson = null;
-        Object champsObj = resultatPython.get("champs_dynamiques");
-        if (champsObj != null) {
-            try {
-                champsDynJson = objectMapper.writeValueAsString(champsObj);
-            } catch (Exception e) {
-                log.warn("Impossible de sérialiser champsDynamiques: {}", e.getMessage());
-            }
-        }
-
-        String analyseIaJson = null;
-        Object analyseObj = resultatPython.get("analyse_complete");
-        if (analyseObj != null) {
-            try {
-                analyseIaJson = objectMapper.writeValueAsString(analyseObj);
-            } catch (Exception e) {
-                log.warn("Impossible de sérialiser analyseIa: {}", e.getMessage());
-            }
-        }
+        boolean aZoneQr = Boolean.TRUE.equals(resultatPython.get("a_zone_qrcode"));
 
         ModeleDocument modele = ModeleDocument.builder()
                 .nom(request.getNom())
-                .titreDocument((String) resultatPython.get("titre_document"))
-                .cheminModele((String) resultatPython.get("chemin_modele"))
-                .cheminHeader((String) resultatPython.get("chemin_header"))
-                .cheminFooter((String) resultatPython.get("chemin_footer"))
-                .cheminScript((String) resultatPython.get("chemin_script"))
+                .titreDocument(typeDocument.getNom())
+                .cheminModele(urlFichierModele)     // URL relative côté microservice
+                .cheminHeader(null)                 // Plus géré côté microservice
+                .cheminFooter(null)
+                .cheminScript(aZoneQr ? "zone_qr_detectee" : null) // indicateur zone QR
                 .champsDynamiques(champsDynJson)
-                .analyseIa(analyseIaJson)
+                .analyseIa(null)
                 .dureeValiditeJours(request.getDureeValiditeJours())
                 .dateExpiration(request.getDateExpiration())
                 .signatureNumerique(signatureJson)
                 .typeDocument(typeDocument)
                 .statut(ModeleDocument.Statut.ACTIF)
+                .idMicroservice(idMicroservice)
                 .build();
 
         modele = modeleDocumentRepository.save(modele);
@@ -186,60 +189,59 @@ public class ModeleDocumentService {
                 .nom(nom).code(code).description(description).build());
     }
 
-    // ── Appel microservice Python ─────────────────────────────────────────
+    // ── Appel microservice Python (nouveau endpoint POST /modeles/) ──────────
 
+    /**
+     * Envoie le fichier .docx au microservice et récupère l'id_modele_document
+     * (identifiant dans registry.json) ainsi que les champs détectés.
+     *
+     * Endpoint cible : POST /modeles/
+     * Form data :
+     *   - fichier           : le fichier Word (.docx)
+     *   - id_type_document  : Long (identifiant du type de document côté Python)
+     *
+     * Réponse attendue :
+     * {
+     *   "success": true,
+     *   "id_modele_document": 3,
+     *   "url_fichier_modele": "/modeles/files/template_3.docx",
+     *   "id_type_document": 1,
+     *   "champs_detectes": ["nom_etudiant", "date_debut", ...],
+     *   "a_zone_qrcode": true,
+     *   "message": "..."
+     * }
+     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> appellerMicroserviceCreerModele(
-            String modeleId, String nomModele, String typeDocument,
-            int dureeValiditeJours,
-            MultipartFile fichierModele, MultipartFile fichierHeader,
-            MultipartFile fichierFooter) {
+            Long typeDocumentId,
+            MultipartFile fichierModele) {
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("modele_id", modeleId);
-            body.add("nom_modele", nomModele);
-            body.add("type_document", typeDocument);
-            body.add("duree_validite_jours", dureeValiditeJours);
+            body.add("id_type_document", typeDocumentId);
+            body.add("fichier", toHttpEntity(fichierModele, MediaType.APPLICATION_OCTET_STREAM));
 
-            // Fichier modèle (obligatoire)
-            body.add("fichier_modele", toHttpEntity(fichierModele,
-                    MediaType.APPLICATION_PDF));
-
-            // Header (optionnel)
-            if (fichierHeader != null && !fichierHeader.isEmpty()) {
-                body.add("fichier_header", toHttpEntity(fichierHeader, MediaType.IMAGE_PNG));
-            }
-
-            // Footer (optionnel)
-            if (fichierFooter != null && !fichierFooter.isEmpty()) {
-                body.add("fichier_footer", toHttpEntity(fichierFooter, MediaType.IMAGE_PNG));
-            }
-
-            HttpEntity<MultiValueMap<String, Object>> request =
-                    new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                    cvServiceUrl + "/modeles/creer", request, Map.class);
+                    cvServiceUrl + "/modeles/", request, Map.class);
 
-            if (response.getBody() == null || !(Boolean) response.getBody().get("success")) {
-                throw new RuntimeException("Le microservice a retourné une erreur");
+            if (response.getBody() == null || !Boolean.TRUE.equals(response.getBody().get("success"))) {
+                String detail = response.getBody() != null
+                        ? String.valueOf(response.getBody().get("message")) : "réponse vide";
+                throw new RuntimeException("Microservice a retourné une erreur : " + detail);
             }
 
-            Map<String, Object> modeleData = (Map<String, Object>) response.getBody().get("modele");
-            if (modeleData == null) {
-                throw new RuntimeException("Réponse microservice invalide: 'modele' absent");
-            }
-            return modeleData;
+            return response.getBody();
 
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Erreur appel microservice /modeles/creer: {}", e.getMessage());
-            throw new RuntimeException("Microservice de création de modèle indisponible: " + e.getMessage());
+            log.error("Erreur appel microservice POST /modeles/ : {}", e.getMessage());
+            throw new RuntimeException("Microservice de création de modèle indisponible : " + e.getMessage());
         }
     }
 

@@ -87,12 +87,16 @@ class GenerateDocumentRequest(BaseModel):
     - qr_data            : texte/URL à encoder dans le QR code (optionnel)
     - output_format      : "docx" ou "pdf" (PDF nécessite LibreOffice)
     - filename           : nom personnalisé pour le fichier généré (optionnel)
+    - doc_id             : UUID pré-généré par le backend (optionnel).
+                           Si fourni, le fichier généré porte ce nom ;
+                           sinon un UUID est généré localement.
     """
     id_modele_document: int
     data:               dict[str, Any]
     qr_data:            Optional[str]  = None
     output_format:      OutputFormat   = OutputFormat.DOCX
     filename:           Optional[str]  = None
+    doc_id:             Optional[str]  = None
 
 
 class GeneratedDocumentInfo(BaseModel):

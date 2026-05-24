@@ -27,4 +27,8 @@ public class Etablissement {
 
     @Column(unique = true)
     private String identifiant;
+
+    /** URL ou chemin du logo de l'établissement (affiché sur la page d'authentification QR). */
+    @Column(name = "logo_url")
+    private String logoUrl;
 }

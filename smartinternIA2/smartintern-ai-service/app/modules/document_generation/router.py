@@ -64,6 +64,7 @@ async def generer(demande: GenerateDocumentRequest):
             qr_data=demande.qr_data,
             output_format=demande.output_format.value,
             filename=demande.filename,
+            doc_id=demande.doc_id,
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))

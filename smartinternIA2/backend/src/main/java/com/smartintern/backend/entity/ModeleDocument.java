@@ -88,6 +88,14 @@ public class ModeleDocument {
     @Column(name = "signature_numerique", columnDefinition = "TEXT")
     private String signatureNumerique;
 
+    /**
+     * Identifiant du modèle dans le registre du microservice Python (registry.json).
+     * Renseigné lors de la création via POST /modeles/ sur le microservice.
+     * Utilisé ensuite dans POST /documents/generer comme id_modele_document.
+     */
+    @Column(name = "id_microservice")
+    private Long idMicroservice;
+
     // ── Relations ──────────────────────────────────────────────────────────
 
     @ManyToOne(fetch = FetchType.LAZY)

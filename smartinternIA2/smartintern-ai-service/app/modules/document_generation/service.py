@@ -350,6 +350,7 @@ def generer_document(
     qr_data: Optional[str] = None,
     output_format: str = "docx",
     filename: Optional[str] = None,
+    doc_id: Optional[str] = None,
 ) -> tuple[dict, Path]:
     """
     Génère un document personnalisé à partir d'un modèle Word enregistré.
@@ -393,7 +394,8 @@ def generer_document(
         )
 
     # ── 2. Préparer les chemins de sortie ───────────────────────────────────
-    doc_id = str(uuid.uuid4())
+    # Utiliser le doc_id fourni par le backend (cohérence UUID lien d'auth ↔ fichier)
+    doc_id = doc_id or str(uuid.uuid4())
     settings.DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Nettoyer le nom de fichier fourni (caractères non-alphanumériques → _)

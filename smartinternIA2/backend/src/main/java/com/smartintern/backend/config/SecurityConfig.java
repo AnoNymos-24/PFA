@@ -35,7 +35,8 @@ public class SecurityConfig {
                 // ── Public : auth ──────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // ── Vérification de documents (QR code scannable publiquement) ──
+                // ── Authentification & vérification de documents (QR code scannable publiquement) ──
+                .requestMatchers("/api/documents/*/authentifier").permitAll()
                 .requestMatchers("/api/documents/*/verifier").permitAll()
 
                 // ── Étudiant ──────────────────────────────────────────────
