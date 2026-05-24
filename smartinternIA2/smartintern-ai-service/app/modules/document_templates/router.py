@@ -1,145 +1,209 @@
 """
-Routes FastAPI — Module de gestion des modèles de documents.
+Routes FastAPI — Module de gestion des modèles de documents Word.
 Préfixe : /modeles
+
+Endpoints :
+  POST   /modeles/            — Créer un modèle depuis un fichier .docx uploadé
+  POST   /modeles/from-url    — Créer un modèle depuis une URL ou chemin local
+  GET    /modeles/            — Lister tous les modèles (filtre optionnel : id_type_document)
+  GET    /modeles/{id}        — Détail d'un modèle
+  GET    /modeles/files/{fn}  — Télécharger le fichier .docx d'un modèle
+  DELETE /modeles/{id}        — Supprimer un modèle
 """
 
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
-from app.modules.document_templates.service import creer_modele, obtenir_champs_modele
+from app.models.document import (
+    CreateTemplateFromURLRequest,
+    CreateTemplateResponse,
+    TemplateDetailResponse,
+    TemplateListResponse,
+)
+from app.modules.document_templates.service import (
+    creer_modele_depuis_upload,
+    creer_modele_depuis_url,
+    lister_modeles,
+    obtenir_modele,
+    supprimer_modele,
+)
+from config import settings
 
 router = APIRouter(prefix="/modeles", tags=["📋 Modèles de documents"])
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# CRÉATION DE MODÈLE
+# ══════════════════════════════════════════════════════════════════════════
+
 @router.post(
-    "/creer",
-    summary="Créer un nouveau modèle de document",
+    "/",
+    response_model=CreateTemplateResponse,
     status_code=201,
+    summary="Créer un modèle depuis un fichier .docx uploadé",
 )
-async def creer_modele_document(
-    modele_id:             str           = Form(...,          description="Identifiant unique du modèle (UUID)"),
-    nom_modele:            str           = Form(...,          description="Nom lisible du modèle"),
-    type_document:         str           = Form(...,          description="Type de document (convention_stage, etc.)"),
-    duree_validite_jours:  int           = Form(default=365,  description="Durée de validité des documents générés"),
-    fichier_modele:        UploadFile    = File(...,          description="Fichier PDF ou DOCX servant de modèle"),
-    fichier_header:        Optional[UploadFile] = File(default=None, description="Image d'en-tête (PNG/JPG) — optionnel"),
-    fichier_footer:        Optional[UploadFile] = File(default=None, description="Image de pied de page (PNG/JPG) — optionnel"),
+async def creer_depuis_upload(
+    fichier: UploadFile = File(..., description="Fichier Word (.docx) servant de modèle"),
+    id_type_document: int = Form(..., description="Identifiant du type de document"),
 ):
     """
-    Crée un nouveau modèle de document avec analyse IA automatique.
+    Crée un modèle de document depuis un fichier Word uploadé.
 
-    **Processus :**
-    1. Sauvegarde header PNG/JPG (optionnel)
-    2. Sauvegarde footer PNG/JPG (optionnel)
-    3. Sauvegarde modèle PDF ou DOCX
-    4. Analyse IA → extraction des champs dynamiques + structure
-    5. Génération automatique d'un script Python réutilisable (ReportLab)
-    6. Retourne les métadonnées complètes pour persistance Java/MySQL
+    **Pipeline :**
+    1. Validation de l'extension (.docx obligatoire)
+    2. Attribution d'un `id_modele_document` auto-incrémenté
+    3. Sauvegarde → `templates_storage/template_{id}.docx`
+    4. Extraction des marqueurs `[champ à remplir]` (corps + tableaux + en-têtes/pieds)
+    5. Détection de la zone rouge QR (DrawingML + VML)
+    6. Persistance dans `registry.json`
 
-    **Formats acceptés :**
-    - `fichier_modele` : PDF, DOCX, DOC
-    - `fichier_header` / `fichier_footer` : PNG, JPG, JPEG
+    **Réponse :**
+    - `id_modele_document` : identifiant unique auto-généré
+    - `url_fichier_modele` : URL d'accès au fichier stocké
+    - `champs_detectes`    : liste des champs `[...]` trouvés dans le document
+    - `a_zone_qrcode`      : True si un carré rouge a été détecté
     """
-    from app.core.ai_client import ai_client
-    if not ai_client:
-        raise HTTPException(
-            status_code=503,
-            detail="Aucune clé API IA configurée. "
-                   "Renseignez NVIDIA_API_KEY et/ou OPENROUTER_API_KEY dans .env",
-        )
-
-    # ── Validation modèle ──────────────────────────────────────────────────
-    nom_fichier_modele = fichier_modele.filename or "modele.pdf"
-    from pathlib import Path
-    ext = Path(nom_fichier_modele).suffix.lower()
-    if ext not in (".pdf", ".docx", ".doc"):
-        raise HTTPException(
-            status_code=400,
-            detail="Modèle : seuls PDF, DOCX, DOC sont acceptés",
-        )
-
-    contenu_modele = await fichier_modele.read()
-    if len(contenu_modele) > 20 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Modèle trop volumineux (max 20 MB)")
-
-    # ── Validation header ──────────────────────────────────────────────────
-    contenu_header, nom_header = None, None
-    if fichier_header and fichier_header.filename:
-        ext_h = Path(fichier_header.filename).suffix.lower()
-        if ext_h not in (".png", ".jpg", ".jpeg"):
-            raise HTTPException(status_code=400, detail="Header : seuls PNG, JPG sont acceptés")
-        contenu_header = await fichier_header.read()
-        nom_header     = fichier_header.filename
-
-    # ── Validation footer ──────────────────────────────────────────────────
-    contenu_footer, nom_footer = None, None
-    if fichier_footer and fichier_footer.filename:
-        ext_f = Path(fichier_footer.filename).suffix.lower()
-        if ext_f not in (".png", ".jpg", ".jpeg"):
-            raise HTTPException(status_code=400, detail="Footer : seuls PNG, JPG sont acceptés")
-        contenu_footer = await fichier_footer.read()
-        nom_footer     = fichier_footer.filename
-
     try:
-        resultat = creer_modele(
-            modele_id=modele_id,
-            nom_modele=nom_modele,
-            type_document=type_document,
-            contenu_modele=contenu_modele,
-            nom_fichier_modele=nom_fichier_modele,
-            contenu_header=contenu_header,
-            nom_fichier_header=nom_header,
-            contenu_footer=contenu_footer,
-            nom_fichier_footer=nom_footer,
-            duree_validite_jours=duree_validite_jours,
+        record = await creer_modele_depuis_upload(fichier, id_type_document)
+        return CreateTemplateResponse(
+            success=True,
+            id_modele_document=record.id_modele_document,
+            url_fichier_modele=record.url_fichier_modele,
+            id_type_document=record.id_type_document,
+            champs_detectes=record.champs_detectes,
+            a_zone_qrcode=record.a_zone_qrcode,
+            message=(
+                f"Modèle #{record.id_modele_document} créé — "
+                f"{len(record.champs_detectes)} champ(s) détecté(s), "
+                f"zone QR : {'oui' if record.a_zone_qrcode else 'non'}"
+            ),
         )
-        return {
-            "success": True,
-            "message": f"Modèle '{nom_modele}' créé avec succès",
-            "modele": resultat,
-            "nb_champs_detectes": len(resultat.get("champs_dynamiques", [])),
-            "type_detecte": resultat.get("type_document"),
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur création modèle : {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {exc}")
+
+
+@router.post(
+    "/from-url",
+    response_model=CreateTemplateResponse,
+    status_code=201,
+    summary="Créer un modèle depuis une URL ou un chemin local",
+)
+async def creer_depuis_url(corps: CreateTemplateFromURLRequest):
+    """
+    Crée un modèle depuis :
+    - une URL HTTP/HTTPS (`https://...`) → le fichier est téléchargé
+    - un chemin local absolu             → le fichier est copié
+
+    Même pipeline d'analyse que l'upload direct.
+    """
+    try:
+        record = await creer_modele_depuis_url(
+            corps.url_fichier_modele,
+            corps.id_type_document,
+        )
+        return CreateTemplateResponse(
+            success=True,
+            id_modele_document=record.id_modele_document,
+            url_fichier_modele=record.url_fichier_modele,
+            id_type_document=record.id_type_document,
+            champs_detectes=record.champs_detectes,
+            a_zone_qrcode=record.a_zone_qrcode,
+            message=(
+                f"Modèle #{record.id_modele_document} créé depuis URL — "
+                f"{len(record.champs_detectes)} champ(s) détecté(s)"
+            ),
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {exc}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# CONSULTATION
+# ══════════════════════════════════════════════════════════════════════════
+
+@router.get(
+    "/",
+    response_model=TemplateListResponse,
+    summary="Lister les modèles de documents",
+)
+def lister(id_type_document: Optional[int] = None):
+    """
+    Retourne la liste de tous les modèles enregistrés.
+
+    **Filtre optionnel :** `?id_type_document=2` pour restreindre aux modèles
+    d'un type de document donné.
+    """
+    modeles = lister_modeles(id_type_document)
+    return TemplateListResponse(total=len(modeles), templates=modeles)
 
 
 @router.get(
-    "/{modele_id}/champs",
-    summary="Obtenir les champs dynamiques d'un modèle",
+    "/files/{filename}",
+    summary="Télécharger le fichier .docx d'un modèle",
+    response_class=FileResponse,
 )
-async def champs_modele(modele_id: str):
+def telecharger_fichier(filename: str):
     """
-    Retourne les informations d'un modèle (existence du script, chemin).
-    Interrogé par le backend Java pour afficher les champs dans le frontend.
+    Télécharge le fichier Word brut d'un modèle.
+    Le nom de fichier est de la forme `template_{id}.docx`.
     """
-    infos = obtenir_champs_modele(modele_id)
-    if not infos:
+    chemin = settings.TEMPLATES_STORAGE_DIR / filename
+    if not chemin.exists() or not filename.endswith(".docx"):
         raise HTTPException(
             status_code=404,
-            detail=f"Modèle {modele_id} introuvable",
+            detail=f"Fichier modèle '{filename}' introuvable",
         )
-    return infos
+    return FileResponse(
+        str(chemin),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        filename=filename,
+    )
 
 
 @router.get(
-    "/types",
-    summary="Lister les types de documents supportés",
+    "/{id_modele}",
+    response_model=TemplateDetailResponse,
+    summary="Détail d'un modèle",
 )
-async def types_documents():
-    """Référentiel des types de documents supportés par le service."""
+def detail_modele(id_modele: int):
+    """Retourne les métadonnées complètes d'un modèle (champs, QR, dates…)."""
+    record = obtenir_modele(id_modele)
+    if record is None:
+        return TemplateDetailResponse(
+            success=False,
+            template=None,
+            message=f"Modèle #{id_modele} introuvable",
+        )
+    return TemplateDetailResponse(success=True, template=record, message="")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# SUPPRESSION
+# ══════════════════════════════════════════════════════════════════════════
+
+@router.delete(
+    "/{id_modele}",
+    summary="Supprimer un modèle",
+    status_code=200,
+)
+def supprimer(id_modele: int):
+    """
+    Supprime un modèle et son fichier `.docx` associé.
+    Retourne 404 si le modèle n'existe pas.
+    """
+    supprime = supprimer_modele(id_modele)
+    if not supprime:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Modèle #{id_modele} introuvable — rien à supprimer",
+        )
     return {
-        "types": [
-            {"code": "convention_stage",       "label": "Convention de stage",         "categorie": "stage"},
-            {"code": "attestation_stage",       "label": "Attestation de stage",        "categorie": "stage"},
-            {"code": "lettre_recommandation",   "label": "Lettre de recommandation",    "categorie": "academique"},
-            {"code": "attestation_inscription", "label": "Attestation d'inscription",   "categorie": "academique"},
-            {"code": "releve_notes",            "label": "Relevé de notes",             "categorie": "academique"},
-            {"code": "demande_stage",           "label": "Demande de stage",            "categorie": "stage"},
-            {"code": "rapport_stage",           "label": "Rapport de stage",            "categorie": "stage"},
-            {"code": "fiche_evaluation",        "label": "Fiche d'évaluation",          "categorie": "evaluation"},
-            {"code": "certificat_formation",    "label": "Certificat de formation",     "categorie": "formation"},
-            {"code": "autre",                   "label": "Autre document",              "categorie": "autre"},
-        ]
+        "success": True,
+        "message": f"Modèle #{id_modele} supprimé avec succès",
     }

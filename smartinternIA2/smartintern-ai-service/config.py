@@ -32,15 +32,16 @@ class Settings:
     OPENROUTER_MODEL: str      = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-5")
     OPENROUTER_MAX_TOKENS: int = int(os.getenv("OPENROUTER_MAX_TOKENS", "1500"))
 
-    # ── Fichiers & stockage ────────────────────────────────────────────────
+    # ── Fichiers & stockage — documents générés ───────────────────────────
     MAX_FILE_SIZE_MB: int = int(os.getenv("MAX_FILE_SIZE_MB", "10"))
+    DOCUMENTS_DIR: Path   = BASE_DIR / "uploads" / "documents"
 
-    UPLOAD_BASE:   Path = BASE_DIR / "uploads"
-    MODELES_DIR:   Path = BASE_DIR / "uploads" / "modeles"
-    DOCUMENTS_DIR: Path = BASE_DIR / "uploads" / "documents"
-    HEADERS_DIR:   Path = BASE_DIR / "uploads" / "headers"
-    FOOTERS_DIR:   Path = BASE_DIR / "uploads" / "footers"
-    SCRIPTS_DIR:   Path = BASE_DIR / "uploads" / "scripts"
+    # ── Stockage des modèles Word (.docx) ─────────────────────────────────
+    # Chaque modèle uploadé est stocké dans templates_storage/template_{id}.docx
+    # Les métadonnées (champs, zone QR, id_type_document…) sont persistées
+    # dans templates_storage/registry.json (auto-incrémenté).
+    TEMPLATES_STORAGE_DIR:  Path = BASE_DIR / "templates_storage"
+    TEMPLATES_REGISTRY_FILE: Path = BASE_DIR / "templates_storage" / "registry.json"
 
     # ── Sécurité ───────────────────────────────────────────────────────────
     SIGNATURE_SECRET: str = os.getenv("SIGNATURE_SECRET", "SmartIntern_SecretKey_2024")
@@ -53,8 +54,5 @@ class Settings:
 settings = Settings()
 
 # Création des répertoires au démarrage
-for _d in [
-    settings.MODELES_DIR, settings.DOCUMENTS_DIR,
-    settings.HEADERS_DIR, settings.FOOTERS_DIR, settings.SCRIPTS_DIR,
-]:
+for _d in [settings.DOCUMENTS_DIR, settings.TEMPLATES_STORAGE_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
