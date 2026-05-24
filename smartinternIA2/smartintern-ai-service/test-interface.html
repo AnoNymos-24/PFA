@@ -385,7 +385,7 @@
     <!-- Loader -->
     <div class="loader" id="cv-loader">
       <div class="spinner"></div>
-      <p id="cv-loader-msg">Extraction en cours… Claude analyse votre CV ✨</p>
+      <p id="cv-loader-msg">Extraction en cours… Analyse IA de votre CV…</p>
     </div>
 
     <!-- Alert zone (erreurs réseau, sans détruire les résultats) -->
@@ -472,78 +472,41 @@
     <div class="card">
       <div class="card-title"><span class="icon">📋</span> Créer un modèle de document</div>
 
+      <div class="alert alert-info" style="font-size:13px">
+        📌 <strong>Préparez votre fichier Word (.docx) :</strong><br>
+        • Champs à remplir : <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">[nom_du_champ]</code> (entre crochets, dans le texte)<br>
+        • Zone QR code : rectangle/carré <strong style="color:#ef4444">rouge</strong> (DrawingML ou VML) dans le document
+      </div>
+
       <div class="form-grid">
         <div class="form-group">
-          <label>ID du modèle *</label>
-          <input id="m-id" placeholder="ex: conv-stage-2024" />
-        </div>
-        <div class="form-group">
-          <label>Nom du modèle *</label>
-          <input id="m-nom" placeholder="ex: Convention de stage ITEAM" />
-        </div>
-        <div class="form-group">
-          <label>Type de document *</label>
-          <select id="m-type">
-            <option value="">-- Choisir --</option>
-            <option value="convention_stage">Convention de stage</option>
-            <option value="attestation_stage">Attestation de stage</option>
-            <option value="lettre_recommandation">Lettre de recommandation</option>
-            <option value="attestation_inscription">Attestation d'inscription</option>
-            <option value="releve_notes">Relevé de notes</option>
-            <option value="demande_stage">Demande de stage</option>
-            <option value="rapport_stage">Rapport de stage</option>
-            <option value="fiche_evaluation">Fiche d'évaluation</option>
-            <option value="certificat_formation">Certificat de formation</option>
-            <option value="autre">Autre</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Durée de validité (jours)</label>
-          <input id="m-validite" type="number" value="365" min="1" max="3650" />
+          <label>id_type_document *  <span style="color:var(--text-muted);font-weight:400">(entier — correspond à TypeDocument.id côté Spring Boot)</span></label>
+          <input id="m-type-id" type="number" value="1" min="1" />
         </div>
       </div>
 
       <hr class="section-divider" />
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Fichier modèle (PDF ou DOCX) *</label>
-          <div class="drop-zone" style="padding:24px" onclick="document.getElementById('m-fichier').click()">
-            <input type="file" id="m-fichier" accept=".pdf,.docx,.doc" onchange="showFileName(this,'m-fichier-name')" />
-            <div style="font-size:24px;margin-bottom:6px">📄</div>
-            <div id="m-fichier-name" class="dz-name" style="font-size:13px">Choisir le modèle PDF/DOCX</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div class="form-group">
-            <label>En-tête (PNG/JPG) — optionnel</label>
-            <div class="drop-zone" style="padding:16px" onclick="document.getElementById('m-header').click()">
-              <input type="file" id="m-header" accept=".png,.jpg,.jpeg" onchange="showFileName(this,'m-header-name')" />
-              <div style="font-size:20px;margin-bottom:4px">🖼️</div>
-              <div id="m-header-name" style="font-size:12px;color:var(--text-muted)">Choisir l'en-tête</div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Pied de page (PNG/JPG) — optionnel</label>
-            <div class="drop-zone" style="padding:16px" onclick="document.getElementById('m-footer').click()">
-              <input type="file" id="m-footer" accept=".png,.jpg,.jpeg" onchange="showFileName(this,'m-footer-name')" />
-              <div style="font-size:20px;margin-bottom:4px">🖼️</div>
-              <div id="m-footer-name" style="font-size:12px;color:var(--text-muted)">Choisir le pied de page</div>
-            </div>
-          </div>
+      <div class="form-group">
+        <label>Fichier modèle (.docx) *</label>
+        <div class="drop-zone" style="padding:28px" onclick="document.getElementById('m-fichier').click()">
+          <input type="file" id="m-fichier" accept=".docx" onchange="showFileName(this,'m-fichier-name')" />
+          <div style="font-size:32px;margin-bottom:8px">📄</div>
+          <div id="m-fichier-name" class="dz-name" style="font-size:13px">Glisser-déposer ou cliquer — fichier .docx uniquement</div>
+          <p style="font-size:12px;margin-top:6px">Les marqueurs <code>[champ]</code> et les zones rouges sont détectés automatiquement</p>
         </div>
       </div>
 
       <div style="margin-top:20px;">
         <button class="btn btn-primary" onclick="creerModele()">
-          🤖 Analyser & Créer le modèle
+          📋 Analyser &amp; Créer le modèle
         </button>
       </div>
     </div>
 
     <div class="loader" id="modele-loader">
       <div class="spinner"></div>
-      <p>Claude analyse la structure du document… ✨</p>
+      <p>Analyse de la structure du document…</p>
     </div>
 
     <div id="modele-result" style="display:none;"></div>
@@ -555,74 +518,67 @@
   <div id="tab-generer" class="tab-panel">
 
     <div class="card">
-      <div class="card-title"><span class="icon">⚙️</span> Paramètres du document</div>
+      <div class="card-title"><span class="icon">⚙️</span> Paramètres de génération</div>
       <div class="form-grid">
         <div class="form-group">
-          <label>ID du modèle *</label>
-          <input id="g-modele-id" placeholder="ex: conv-stage-2024" />
+          <label>id_modele_document * <span style="color:var(--text-muted);font-weight:400">(entier retourné par POST /modeles/)</span></label>
+          <input id="g-modele-num" type="number" value="1" min="1" />
         </div>
         <div class="form-group">
-          <label>Chemin script Python *</label>
-          <input id="g-script" placeholder="uploads/scripts/conv-stage-2024_script.py" />
-        </div>
-        <div class="form-group">
-          <label>Type de document *</label>
-          <select id="g-type">
-            <option value="convention_stage">Convention de stage</option>
-            <option value="attestation_stage">Attestation de stage</option>
-            <option value="lettre_recommandation">Lettre de recommandation</option>
-            <option value="attestation_inscription">Attestation d'inscription</option>
-            <option value="releve_notes">Relevé de notes</option>
-            <option value="autre">Autre</option>
+          <label>Format de sortie</label>
+          <select id="g-format">
+            <option value="docx">DOCX (Word)</option>
+            <option value="pdf">PDF (LibreOffice requis)</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Nom de l'établissement</label>
-          <input id="g-etablissement" value="ITEAM University" />
+        <div class="form-group full">
+          <label>qr_data — Données QR code <span style="color:var(--text-muted);font-weight:400">(optionnel — inséré dans la zone rouge du modèle si présente)</span></label>
+          <input id="g-qr" placeholder="ex: https://smartintern.ai/api/documents/{uuid}/authentifier" />
         </div>
         <div class="form-group">
-          <label>Chemin en-tête (optionnel)</label>
-          <input id="g-header" placeholder="uploads/headers/..." />
+          <label>doc_id <span style="color:var(--text-muted);font-weight:400">(UUID optionnel — auto-généré si absent)</span></label>
+          <input id="g-doc-id" placeholder="ex: 550e8400-e29b-41d4-a716-446655440000" />
         </div>
         <div class="form-group">
-          <label>Chemin pied de page (optionnel)</label>
-          <input id="g-footer" placeholder="uploads/footers/..." />
+          <label>filename <span style="color:var(--text-muted);font-weight:400">(optionnel — sans extension)</span></label>
+          <input id="g-filename" placeholder="ex: convention_jean_dupont" />
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="icon">👤</span> Données du profil (JSON)</div>
+      <div class="card-title"><span class="icon">👤</span> Données du document (champs [...])</div>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
-        Renseigner les champs dynamiques définis dans le modèle.
+        Renseignez les valeurs des champs <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">[champ]</code>
+        détectés dans le modèle. Les champs ci-dessous sont les plus courants ; ajoutez les autres dans le JSON.
       </p>
       <div class="form-grid">
-        <div class="form-group"><label>Nom</label><input id="d-nom" placeholder="Dupont" /></div>
-        <div class="form-group"><label>Prénom</label><input id="d-prenom" placeholder="Jean" /></div>
-        <div class="form-group"><label>Email</label><input id="d-email" placeholder="jean@etudiant.fr" /></div>
-        <div class="form-group"><label>Téléphone</label><input id="d-tel" placeholder="+216 ..." /></div>
-        <div class="form-group"><label>Filière / Spécialité</label><input id="d-filiere" placeholder="Génie Logiciel" /></div>
-        <div class="form-group"><label>Classe</label><input id="d-classe" placeholder="3ING2" /></div>
-        <div class="form-group"><label>Nom entreprise</label><input id="d-entreprise" placeholder="TechCorp" /></div>
-        <div class="form-group"><label>Adresse entreprise</label><input id="d-adresse-ent" placeholder="Tunis, Tunisie" /></div>
-        <div class="form-group"><label>Date début stage</label><input id="d-debut" type="date" /></div>
-        <div class="form-group"><label>Date fin stage</label><input id="d-fin" type="date" /></div>
+        <div class="form-group"><label>nom</label><input id="d-nom" placeholder="Dupont" /></div>
+        <div class="form-group"><label>prenom</label><input id="d-prenom" placeholder="Jean" /></div>
+        <div class="form-group"><label>email</label><input id="d-email" placeholder="jean@etudiant.fr" /></div>
+        <div class="form-group"><label>telephone</label><input id="d-tel" placeholder="+216 ..." /></div>
+        <div class="form-group"><label>filiere</label><input id="d-filiere" placeholder="Génie Logiciel" /></div>
+        <div class="form-group"><label>classe</label><input id="d-classe" placeholder="3ING2" /></div>
+        <div class="form-group"><label>nom_entreprise</label><input id="d-entreprise" placeholder="TechCorp" /></div>
+        <div class="form-group"><label>adresse_entreprise</label><input id="d-adresse-ent" placeholder="Tunis, Tunisie" /></div>
+        <div class="form-group"><label>date_debut_stage</label><input id="d-debut" type="date" /></div>
+        <div class="form-group"><label>date_fin_stage</label><input id="d-fin" type="date" /></div>
         <div class="form-group full">
-          <label>Données supplémentaires (JSON)</label>
-          <textarea id="d-extra" placeholder='{"encadrant": "M. Ben Ali", "sujet": "Développement web"}'></textarea>
+          <label>Données supplémentaires (JSON) <span style="color:var(--text-muted);font-weight:400">— autres champs [champ] du document</span></label>
+          <textarea id="d-extra" placeholder='{"encadrant": "M. Ben Ali", "sujet": "Développement web", "matricule": "ETU2025001"}'></textarea>
         </div>
       </div>
 
       <div style="margin-top:20px;">
         <button class="btn btn-primary" onclick="genererDocument()">
-          📄 Générer le document PDF
+          📄 Générer le document
         </button>
       </div>
     </div>
 
     <div class="loader" id="gen-loader">
       <div class="spinner"></div>
-      <p>Génération du PDF en cours…</p>
+      <p>Génération du document en cours…</p>
     </div>
 
     <div id="gen-result" style="display:none;"></div>
@@ -771,12 +727,12 @@ function hideCvAlert() {
 
 async function extractCV(textOnly = false) {
   if (!cvFile) return;
-  const endpoint = textOnly ? '/extract/text-only' : '/extract';
+  const endpoint = textOnly ? '/cv/extract/text-only' : '/cv/extract';
   setLoader('cv-loader', true);
   hideCvAlert();
   document.getElementById('cv-loader-msg').textContent = textOnly
     ? 'Extraction du texte brut…'
-    : 'Extraction en cours… Claude analyse votre CV ✨';
+    : 'Extraction en cours… Analyse IA de votre CV…';
 
   const fd = new FormData();
   fd.append('file', cvFile);
@@ -939,34 +895,31 @@ function renderCvResult(data, textOnly) {
 // TAB 2 : CRÉER UN MODÈLE
 // ═══════════════════════════════════════════════════════════════════════
 async function creerModele() {
-  const id    = document.getElementById('m-id').value.trim();
-  const nom   = document.getElementById('m-nom').value.trim();
-  const type  = document.getElementById('m-type').value;
-  const valid = document.getElementById('m-validite').value;
-  const fich  = document.getElementById('m-fichier').files[0];
+  const typeId = parseInt(document.getElementById('m-type-id').value);
+  const fich   = document.getElementById('m-fichier').files[0];
 
-  if (!id || !nom || !type || !fich) {
-    alert('Veuillez remplir tous les champs obligatoires et joindre le fichier modèle.');
+  if (!fich) {
+    alert('Sélectionnez un fichier modèle (.docx).');
+    return;
+  }
+  if (!fich.name.toLowerCase().endsWith('.docx')) {
+    alert('Seuls les fichiers .docx sont acceptés.');
+    return;
+  }
+  if (!typeId || typeId < 1) {
+    alert('Veuillez renseigner un id_type_document valide (entier ≥ 1).');
     return;
   }
 
   const fd = new FormData();
-  fd.append('modele_id', id);
-  fd.append('nom_modele', nom);
-  fd.append('type_document', type);
-  fd.append('duree_validite_jours', valid);
-  fd.append('fichier_modele', fich);
-
-  const header = document.getElementById('m-header').files[0];
-  if (header) fd.append('fichier_header', header);
-  const footer = document.getElementById('m-footer').files[0];
-  if (footer) fd.append('fichier_footer', footer);
+  fd.append('id_type_document', typeId);
+  fd.append('fichier', fich);
 
   setLoader('modele-loader', true);
   document.getElementById('modele-result').style.display = 'none';
 
   try {
-    const r = await fetch(apiUrl() + '/modeles/creer', { method: 'POST', body: fd });
+    const r = await fetch(apiUrl() + '/modeles/', { method: 'POST', body: fd });
     const data = await r.json();
     setLoader('modele-loader', false);
 
@@ -974,8 +927,8 @@ async function creerModele() {
     el.style.display = 'block';
 
     if (data.success) {
-      const m = data.modele ?? {};
-      const champs = m.champs_dynamiques ?? [];
+      const champs = data.champs_detectes ?? [];
+      const hasQr  = data.a_zone_qrcode ?? false;
       el.innerHTML = `
         <div class="alert alert-success">✅ ${data.message}</div>
         <div class="card">
@@ -983,20 +936,17 @@ async function creerModele() {
           <div class="result-grid">
             <div class="result-section">
               <h4>Informations</h4>
-              ${infoRow('ID Modèle', m.modele_id)}
-              ${infoRow('Nom', m.nom_modele)}
-              ${infoRow('Type', m.type_document)}
-              ${infoRow('Script', m.chemin_script)}
-              ${infoRow('Header', m.chemin_header || '—')}
-              ${infoRow('Footer', m.chemin_footer || '—')}
-              ${infoRow('Validité', (m.duree_validite_jours ?? 365) + ' jours')}
+              ${infoRow('id_modele_document', data.id_modele_document)}
+              ${infoRow('id_type_document', data.id_type_document)}
+              ${infoRow('Fichier modèle', data.url_fichier_modele)}
+              ${infoRow('Zone QR code', hasQr ? '✅ Détectée (rectangle rouge)' : '❌ Non détectée')}
             </div>
             <div class="result-section">
-              <h4>Champs dynamiques détectés (${champs.length})</h4>
-              <div class="tag-list">${champs.map(c => tag('{{' + c + '}}', 'orange')).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucun champ détecté</em>'}</div>
+              <h4>Champs [champ] détectés (${champs.length})</h4>
+              <div class="tag-list">${champs.map(c => tag('[' + c + ']', 'orange')).join('') || '<em style="color:var(--text-muted);font-size:13px">Aucun [champ] détecté dans le document</em>'}</div>
               <hr class="section-divider"/>
-              <h4>Remplir automatiquement l'onglet Génération</h4>
-              <button class="btn btn-outline btn-sm" onclick="prefillGeneration(${JSON.stringify(m).replace(/"/g,'&quot;')})">
+              <h4>Utiliser dans l'onglet Génération</h4>
+              <button class="btn btn-outline btn-sm" onclick="prefillGeneration(${data.id_modele_document})">
                 → Pré-remplir l'onglet Génération
               </button>
             </div>
@@ -1017,13 +967,9 @@ async function creerModele() {
   }
 }
 
-function prefillGeneration(m) {
-  document.getElementById('g-modele-id').value = m.modele_id ?? '';
-  document.getElementById('g-script').value    = m.chemin_script ?? '';
-  document.getElementById('g-type').value      = m.type_document ?? 'autre';
-  if (m.chemin_header) document.getElementById('g-header').value = m.chemin_header;
-  if (m.chemin_footer) document.getElementById('g-footer').value = m.chemin_footer;
-  // Switch to tab
+function prefillGeneration(idModele) {
+  document.getElementById('g-modele-num').value = idModele;
+  // Switch to Génération tab
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-generer').classList.add('active');
@@ -1034,48 +980,45 @@ function prefillGeneration(m) {
 // TAB 3 : GÉNÉRER UN DOCUMENT
 // ═══════════════════════════════════════════════════════════════════════
 async function genererDocument() {
-  const modeleId   = document.getElementById('g-modele-id').value.trim();
-  const script     = document.getElementById('g-script').value.trim();
-  const type       = document.getElementById('g-type').value;
-  const etab       = document.getElementById('g-etablissement').value.trim();
-  const header     = document.getElementById('g-header').value.trim();
-  const footer     = document.getElementById('g-footer').value.trim();
+  const modeleNum = parseInt(document.getElementById('g-modele-num').value);
+  const format    = document.getElementById('g-format').value;
+  const qrData    = document.getElementById('g-qr').value.trim() || null;
+  const docId     = document.getElementById('g-doc-id').value.trim() || null;
+  const filename  = document.getElementById('g-filename').value.trim() || null;
 
-  if (!modeleId || !script || !type) {
-    alert('Veuillez renseigner l\'ID du modèle, le chemin script et le type de document.');
+  if (!modeleNum || modeleNum < 1) {
+    alert('Veuillez renseigner un id_modele_document valide (entier ≥ 1).');
     return;
   }
 
-  // Construire donnees_profil
+  // Construire data (champs [champ] du document)
   let extra = {};
   const extraRaw = document.getElementById('d-extra').value.trim();
   if (extraRaw) { try { extra = JSON.parse(extraRaw); } catch { alert('JSON supplémentaire invalide.'); return; } }
 
-  const donneesProfil = {
-    ...extra,
-    nom: document.getElementById('d-nom').value.trim(),
-    prenom: document.getElementById('d-prenom').value.trim(),
-    email: document.getElementById('d-email').value.trim(),
-    telephone: document.getElementById('d-tel').value.trim(),
-    filiere: document.getElementById('d-filiere').value.trim(),
-    classe: document.getElementById('d-classe').value.trim(),
-    nom_entreprise: document.getElementById('d-entreprise').value.trim(),
-    adresse_entreprise: document.getElementById('d-adresse-ent').value.trim(),
-    date_debut_stage: document.getElementById('d-debut').value,
-    date_fin_stage: document.getElementById('d-fin').value,
+  const data = { ...extra };
+  const addField = (key, inputId) => {
+    const v = document.getElementById(inputId)?.value?.trim();
+    if (v) data[key] = v;
   };
-  // Supprimer les vides
-  Object.keys(donneesProfil).forEach(k => { if (!donneesProfil[k]) delete donneesProfil[k]; });
+  addField('nom',                'd-nom');
+  addField('prenom',             'd-prenom');
+  addField('email',              'd-email');
+  addField('telephone',          'd-tel');
+  addField('filiere',            'd-filiere');
+  addField('classe',             'd-classe');
+  addField('nom_entreprise',     'd-entreprise');
+  addField('adresse_entreprise', 'd-adresse-ent');
+  addField('date_debut_stage',   'd-debut');
+  addField('date_fin_stage',     'd-fin');
 
   const payload = {
-    modeleId,
-    cheminScript: script,
-    typeDocument: type,
-    nomEtablissement: etab || 'SmartIntern',
-    dureeValiditeJours: 365,
-    donneesProfil,
-    ...(header ? { cheminHeader: header } : {}),
-    ...(footer ? { cheminFooter: footer } : {}),
+    id_modele_document: modeleNum,
+    data,
+    qr_data:       qrData,
+    output_format: format,
+    doc_id:        docId,
+    filename:      filename,
   };
 
   setLoader('gen-loader', true);
@@ -1087,43 +1030,42 @@ async function genererDocument() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = await r.json();
+    const resp = await r.json();
     setLoader('gen-loader', false);
 
     const el = document.getElementById('gen-result');
     el.style.display = 'block';
 
-    if (data.success) {
-      const doc = data.document ?? {};
-      const uuid = doc.docUuid ?? doc.doc_uuid ?? '';
+    if (resp.success) {
+      const doc    = resp.document ?? {};
+      const dlUrl  = doc.download_url ?? '';
+      const docUid = doc.document_id ?? '';
       el.innerHTML = `
-        <div class="alert alert-success">✅ ${data.message}</div>
+        <div class="alert alert-success">✅ ${resp.message}</div>
         <div class="card">
           <div class="doc-result">
             <div class="doc-icon">📄</div>
-            <h3>Document généré</h3>
-            <div class="doc-uuid">${uuid}</div>
+            <h3>${doc.filename ?? 'Document généré'}</h3>
+            <div class="doc-uuid">${docUid}</div>
             <div class="doc-meta">
-              <span>📅 ${doc.dateGeneration ?? doc.date_generation ?? '—'}</span>
-              <span>⏰ Expire : ${doc.dateExpiration ?? doc.date_expiration ?? '—'}</span>
-              <span>📦 ${Math.round((doc.tailleOctets ?? 0) / 1024)} Ko</span>
-              <span>🏛️ ${doc.nomEtablissement ?? '—'}</span>
+              <span>📦 Format : ${(doc.format ?? '').toUpperCase()}</span>
+              <span>📏 ${Math.round((doc.size_bytes ?? 0) / 1024)} Ko</span>
             </div>
+            ${resp.champs_non_remplis?.length
+              ? `<div class="alert alert-warn" style="margin-top:12px;font-size:12px;text-align:left">⚠️ Champs non remplis (valeurs absentes dans <code>data</code>) : [${resp.champs_non_remplis.join(', ')}]</div>`
+              : ''}
             <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-              <a href="${apiUrl()}/documents/telecharger/${uuid}" target="_blank"
-                 class="btn btn-success">⬇️ Télécharger le PDF</a>
-              <button class="btn btn-outline" onclick="prefillVerif('${uuid}')">
-                🔍 Vérifier ce document
-              </button>
+              <a href="${apiUrl()}${dlUrl}" target="_blank" class="btn btn-success">⬇️ Télécharger</a>
+              <button class="btn btn-outline" onclick="prefillVerif('${docUid}')">🔍 Vérifier</button>
             </div>
           </div>
           <details style="margin-top:16px">
             <summary>🔧 JSON complet</summary>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
+            <pre>${JSON.stringify(resp, null, 2)}</pre>
           </details>
         </div>`;
     } else {
-      el.innerHTML = `<div class="alert alert-error">❌ ${data.detail ?? JSON.stringify(data)}</div>`;
+      el.innerHTML = `<div class="alert alert-error">❌ ${resp.detail ?? JSON.stringify(resp)}</div>`;
     }
   } catch(e) {
     setLoader('gen-loader', false);

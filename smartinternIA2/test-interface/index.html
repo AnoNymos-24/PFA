@@ -364,7 +364,7 @@ pre.json-view {
 
           <!-- DIRECT SmartDoc -->
           <div id="cv-direct">
-            <div class="alert alert-info">POST /api/cv/extract → SmartDoc :8000 (sans JWT)</div>
+            <div class="alert alert-info">POST /cv/extract → SmartDoc :8000 (sans JWT)</div>
             <div class="fg">
               <label>Fichier CV</label>
               <div class="upload-zone" id="dz-cv-direct"
@@ -439,7 +439,7 @@ pre.json-view {
 
           <!-- CRÉER -->
           <div id="tpl-create">
-            <div class="alert alert-info">POST /api/templates → SmartDoc :8000</div>
+            <div class="alert alert-info">POST /modeles/ → SmartDoc :8000</div>
             <div class="alert alert-ok" style="font-size:11px">
               📌 Préparez votre fichier Word :<br>
               • Champs à remplir : <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">[nom_du_champ]</code><br>
@@ -466,7 +466,7 @@ pre.json-view {
 
           <!-- LISTER -->
           <div id="tpl-list" style="display:none">
-            <div class="alert alert-info">GET /api/templates → SmartDoc :8000</div>
+            <div class="alert alert-info">GET /modeles/ → SmartDoc :8000</div>
             <div class="fg">
               <label>Filtrer par id_type_document <span style="color:var(--muted)">(laisser vide = tous)</span></label>
               <input type="number" id="tpl-filter-type" placeholder="Tous les types">
@@ -476,7 +476,7 @@ pre.json-view {
 
           <!-- DÉTAIL / SUPPRIMER -->
           <div id="tpl-detail" style="display:none">
-            <div class="alert alert-info">GET/DELETE /api/templates/{id} → SmartDoc :8000</div>
+            <div class="alert alert-info">GET/DELETE /modeles/{id} → SmartDoc :8000</div>
             <div class="fg">
               <label>id_modele_document</label>
               <input type="number" id="tpl-detail-id" value="1" min="1">
@@ -516,7 +516,7 @@ pre.json-view {
 
           <!-- GENERATE -->
           <div id="gen-generate">
-            <div class="alert alert-info">POST /api/documents/generate → SmartDoc :8000</div>
+            <div class="alert alert-info">POST /documents/generer → SmartDoc :8000</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="fg">
                 <label>id_modele_document</label>
@@ -552,7 +552,7 @@ pre.json-view {
 
           <!-- CAPACITÉS -->
           <div id="gen-caps" style="display:none">
-            <div class="alert alert-info">GET /api/documents/capabilities → SmartDoc :8000</div>
+            <div class="alert alert-info">GET /health → SmartDoc :8000 (état + capacités)</div>
             <button class="btn btn-primary" onclick="doCaps()">▶ Vérifier</button>
           </div>
         </div>
@@ -850,7 +850,7 @@ async function doCvExtract(textOnly) {
   const f = $('cv-file-direct').files[0];
   if (!f) { alert('Sélectionnez un fichier.'); return; }
   const fd = new FormData(); fd.append('file', f);
-  const ep = textOnly ? '/api/cv/extract/text-only' : '/api/cv/extract';
+  const ep = textOnly ? '/cv/extract/text-only' : '/cv/extract';
   const r = await req('POST', SD()+ep, fd, true);
   if (r.err) { showRespErr('cv', r.err, r.ms); return; }
   showResp('cv', r.data, r.status, r.ms);
@@ -880,7 +880,7 @@ async function doCreateTemplate() {
   const fd = new FormData();
   fd.append('fichier', f);
   fd.append('id_type_document', $('tpl-type-id').value);
-  const r = await req('POST', SD()+'/api/templates', fd, true);
+  const r = await req('POST', SD()+'/modeles/', fd, true);
   if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
   showResp('tpl', r.data, r.status, r.ms);
   const id = r.data?.id_modele_document;
@@ -889,7 +889,7 @@ async function doCreateTemplate() {
 
 async function doListTemplates() {
   const t = $('tpl-filter-type').value;
-  const url = SD()+'/api/templates' + (t ? `?id_type_document=${t}` : '');
+  const url = SD()+'/modeles/' + (t ? `?id_type_document=${t}` : '');
   const r = await req('GET', url);
   if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
   showResp('tpl', r.data, r.status, r.ms);
@@ -897,7 +897,7 @@ async function doListTemplates() {
 
 async function doGetTemplate() {
   const id = $('tpl-detail-id').value;
-  const r = await req('GET', `${SD()}/api/templates/${id}`);
+  const r = await req('GET', `${SD()}/modeles/${id}`);
   if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
   showResp('tpl', r.data, r.status, r.ms);
 }
@@ -905,7 +905,7 @@ async function doGetTemplate() {
 async function doDeleteTemplate() {
   const id = $('tpl-detail-id').value;
   if (!confirm(`Supprimer le modèle ${id} ?`)) return;
-  const r = await req('DELETE', `${SD()}/api/templates/${id}`);
+  const r = await req('DELETE', `${SD()}/modeles/${id}`);
   if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
   showResp('tpl', r.data, r.status, r.ms);
 }
@@ -913,7 +913,7 @@ async function doDeleteTemplate() {
 // ── Document generation ───────────────────────────────────────────────────
 async function loadFields() {
   const id = $('gen-modele-id').value;
-  const r  = await req('GET', `${SD()}/api/templates/${id}`);
+  const r  = await req('GET', `${SD()}/modeles/${id}`);
   if (!r.ok) {
     $('gen-fields-zone').innerHTML = `<div class="alert alert-err">Modèle ${id} introuvable — créez-le d'abord.</div>`;
     return;
@@ -940,7 +940,7 @@ async function doGenerate() {
   const fn  = $('gen-fname').value || null;
   const data = {};
   genChamps.forEach(c => { const v = $(`gf-${c}`)?.value; if (v) data[c] = v; });
-  const r = await req('POST', SD()+'/api/documents/generate',
+  const r = await req('POST', SD()+'/documents/generer',
     { id_modele_document: id, data, qr_data: qr, output_format: fmt, filename: fn });
   if (r.err) { showRespErr('gen', r.err, r.ms); return; }
   showResp('gen', r.data, r.status, r.ms);
@@ -952,7 +952,7 @@ async function doGenerate() {
 }
 
 async function doCaps() {
-  const r = await req('GET', SD()+'/api/documents/capabilities');
+  const r = await req('GET', SD()+'/health');
   if (r.err) { showRespErr('gen', r.err, r.ms); return; }
   showResp('gen', r.data, r.status, r.ms);
 }
@@ -962,7 +962,7 @@ function clearGenFields() {
   $('gen-fields-zone').innerHTML = `<div class="alert alert-warn" style="font-size:11px">Cliquez sur "Charger les champs" pour voir les champs à remplir.</div>`;
 }
 
-function dlDoc() { if (lastDlUrl) window.open(SD() + lastDlUrl, '_blank'); }
+function dlDoc() { if (lastDlUrl) window.open(lastDlUrl.startsWith('http') ? lastDlUrl : SD() + lastDlUrl, '_blank'); }
 
 // ── Coherence tests ───────────────────────────────────────────────────────
 function cohItem(title, status, body) {
@@ -1028,7 +1028,7 @@ async function testCvFlow() {
 
   // 1. Extraction directe SmartDoc
   const fd1 = new FormData(); fd1.append('file', f);
-  const r1  = await req('POST', SD()+'/api/cv/extract', fd1, true);
+  const r1  = await req('POST', SD()+'/cv/extract', fd1, true);
   let sd_data = null;
   if (!r1.ok) {
     appendCoh(cohItem('SmartDoc — Extraction directe', 'err',
@@ -1078,7 +1078,7 @@ async function testDocFlow() {
   catch { appendCoh(cohItem('JSON invalide', 'err', 'Le JSON des données est malformé.')); return; }
 
   // 1. Vérifier le template
-  const r1 = await req('GET', `${SD()}/api/templates/${id}`);
+  const r1 = await req('GET', `${SD()}/modeles/${id}`);
   if (!r1.ok) {
     appendCoh(cohItem(`Modèle ${id} — Existence`, 'err',
       `Introuvable — créez-le d'abord dans l'onglet <b>Modèles de documents</b>`));
@@ -1099,7 +1099,7 @@ async function testDocFlow() {
     (superflus.length ? `ℹ️ Clés supplémentaires ignorées : [${superflus.join(', ')}]` : '')));
 
   // 3. Générer le document
-  const r3 = await req('POST', SD()+'/api/documents/generate',
+  const r3 = await req('POST', SD()+'/documents/generer',
     { id_modele_document: id, data: dataObj, output_format: 'docx' });
   if (!r3.ok) {
     appendCoh(cohItem('Génération DOCX', 'err',

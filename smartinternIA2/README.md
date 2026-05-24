@@ -39,68 +39,93 @@ SmartIntern AI centralise et automatise l'ensemble du cycle de vie d'un stage : 
 
 ```
 smartinternIA2/
-├── backend/                    # Spring Boot 3.2.5 (port 8081)
+├── backend/                         # Spring Boot 3.2.5 (port 8081)
 │   ├── src/main/java/com/smartintern/backend/
-│   │   ├── config/             # AppConfig (@EnableAsync, CORS, RestTemplate, Executor)
-│   │   │                       # SecurityConfig (JWT stateless, BCrypt)
-│   │   ├── controller/         # AuthController, OtpController, CvController,
-│   │   │                       # OffreStageController, CandidatureController,
-│   │   │                       # StageController, DocumentController
-│   │   ├── dto/                # AuthDto, OffreStageDto, CandidatureDto, StageDto,
-│   │   │                       # ModeleDocumentDto
-│   │   ├── entity/             # User, Etudiant, Entreprise, OffreStage, Candidature,
-│   │   │                       # Stage, CvStandardise, Profil, Experience, Formation,
-│   │   │                       # Competence, Langue, Document, DocumentGenere,
-│   │   │                       # ModeleDocument, TypeDocument
-│   │   ├── repository/         # Spring Data JPA repositories
-│   │   ├── security/           # JwtUtils, JwtFilter, UserDetailsService
-│   │   └── service/            # AuthService, CvExtractionService, AsyncCvService,
-│   │                           # CvStandardiseService, OffreStageService,
-│   │                           # CandidatureService, StageService,
-│   │                           # DocumentService, ModeleDocumentService, EmailService
+│   │   ├── config/                  # AppConfig (RestTemplate, CORS, Executor)
+│   │   │                            # SecurityConfig (JWT stateless, BCrypt)
+│   │   ├── controller/              # AuthController, CvController,
+│   │   │                            # OffreStageController, CandidatureController,
+│   │   │                            # StageController, DocumentController
+│   │   ├── dto/                     # AuthDto, OffreStageDto, CandidatureDto,
+│   │   │                            # StageDto, ModeleDocumentDto, DocumentDto
+│   │   ├── entity/                  # User, Etudiant, Entreprise, Etablissement,
+│   │   │                            # OffreStage, Candidature, Stage, CvStandardise,
+│   │   │                            # Document, DocumentGenere, ModeleDocument, TypeDocument
+│   │   ├── repository/              # Spring Data JPA repositories
+│   │   ├── security/                # JwtUtils, JwtAuthFilter, UserDetailsServiceImpl
+│   │   └── service/                 # AuthService, CvExtractionService, AsyncCvService,
+│   │                                # DocumentService, ModeleDocumentService,
+│   │                                # DocumentExpirationTask (@Scheduled), EmailService
 │   └── src/main/resources/
 │       └── application.properties
-├── smartintern-cv-service/     # Python FastAPI (port 8000)
-│   ├── main.py                 # Endpoints: /extract-cv, /modeles/creer, /documents/generer
-│   └── .env                    # OPENROUTER_API_KEY, OPENROUTER_MODEL
-└── frontend/                   # HTML/CSS/JS vanilla
+├── smartintern-ai-service/          # Python FastAPI (port 8000)
+│   ├── main.py                      # /health + montage des routers
+│   ├── app/modules/
+│   │   ├── cv_extraction/           # /cv/extract, /cv/extract/text-only
+│   │   ├── document_templates/      # /modeles/*
+│   │   └── document_generation/     # /documents/*
+│   ├── test-interface.html          # Interface de test microservice
+│   └── .env                         # Clés API (NVIDIA_API_KEY, OPENROUTER_API_KEY)
+├── test-interface/
+│   └── index.html                   # Interface de test full-stack (ports 8081+8000)
+└── frontend/                        # HTML/CSS/JS vanilla
     ├── js/
-    │   ├── auth.js             # Session, JWT, redirectByRole
-    │   └── api.js              # Toutes les fonctions fetch vers le backend
+    │   ├── auth.js                  # Session, JWT, redirectByRole
+    │   └── api.js                   # Toutes les fonctions fetch vers le backend
     └── pages/
         ├── login.html
         ├── register.html
         ├── verify-email.html
-        ├── first-login.html
         ├── etudiant-dashboard.html
         ├── entreprise-dashboard.html
-        ├── admin-dashboard.html
-        ├── encadrant-academique-dashboard.html
-        └── encadrant-entreprise-dashboard.html
+        └── admin-dashboard.html
 ```
 
 ### Flux CV (asynchrone)
 
 ```
-POST /api/etudiant/cv  →  202 Accepted  →  extraction IA en background
+POST /api/etudiant/cv  →  202 Accepted  →  extraction IA en background (@Async)
                                          ↓
 GET /api/etudiant/cv/statut  →  {statut: "EN_COURS" | "EXTRAIT" | "ERREUR"}
                                          ↓ (poll toutes les 3s)
 GET /api/etudiant/cv  →  {hasCv, filename, statutExtraction, cvData, scoreCompletude}
 ```
 
+### Flux Génération de documents (nouveau — avec QR auth)
+
+```
+POST /api/etudiant/documents/generer (ou /api/admin/documents/generer)
+  1. Spring Boot pré-génère docUuid = UUID.randomUUID()
+  2. authUrl = "{app.base.url}/api/documents/{docUuid}/authentifier"
+  3. Spring Boot appelle le microservice :
+     POST /documents/generer { id_modele_document, data{}, qr_data=authUrl, doc_id=docUuid }
+  4. Microservice remplit le template Word, insère QR dans la zone rouge
+  5. Spring Boot persiste Document + DocumentGenere en MySQL
+  6. Réponse : { docUuid, urlAuthentification, urlTelechargement }
+
+Scan QR code → GET /api/documents/{uuid}/authentifier (PUBLIC)
+  → Retourne : type, dates, matricule, nom, établissement, logo, statut
+  → HTTP 410 si expiré / HTTP 404 si révoqué
+
+Expiration automatique :
+  DocumentExpirationTask (@Scheduled cron="0 0 * * * *")
+  → Toutes les heures, passe les documents échus au statut EXPIRE
+```
+
 ### Variables d'environnement requises
 
 ```bash
-# backend/.env
+# backend/.env (ou application.properties)
 JWT_SECRET=<secret HS256 min 32 chars>
 DB_PASSWORD=<mysql password>
 GMAIL_APP_PASSWORD=<google app password>
 CV_SERVICE_URL=http://localhost:8000
+APP_BASE_URL=http://localhost:8081        # URL publique pour les liens d'auth QR
 
-# smartintern-cv-service/.env
-OPENROUTER_API_KEY=<your key>
-OPENROUTER_MODEL=anthropic/claude-sonnet-4-5
+# smartintern-ai-service/.env
+NVIDIA_API_KEY=nvapi-...                  # Provider IA primaire
+OPENROUTER_API_KEY=sk-or-...             # Provider IA fallback
+SIGNATURE_SECRET=ChangezCetteValeurEnProduction
 ```
 
 ---
@@ -112,19 +137,20 @@ OPENROUTER_MODEL=anthropic/claude-sonnet-4-5
 mysql -u root -p < schema.sql
 
 # 2. Microservice Python (port 8000)
-cd smartintern-cv-service
+cd smartintern-ai-service
 pip install -r requirements.txt
-cp env.example .env   # remplir les clés
-uvicorn main:app --reload
+cp .env.example .env   # remplir NVIDIA_API_KEY ou OPENROUTER_API_KEY
+uvicorn main:app --reload --port 8000
 
 # 3. Backend Spring Boot (port 8081)
 cd backend
-cp .env.example .env  # remplir les secrets
+# remplir application.properties (db, jwt, mail, cv.service.url, app.base.url)
 mvn spring-boot:run
 
-# 4. Frontend
-# Ouvrir frontend/pages/login.html dans un navigateur
-# ou utiliser Live Server (VS Code)
+# 4. Interface de test
+# Microservice seul : ouvrir smartintern-ai-service/test-interface.html
+# Full-stack       : ouvrir test-interface/index.html
+# Frontend réel    : ouvrir frontend/pages/login.html
 ```
 
 ---
@@ -137,35 +163,10 @@ mvn spring-boot:run
 |---------|----------|------|------|-------------|
 | POST | `/register` | `{firstName, lastName, email, password, role, ...extra}` | — | Inscription |
 | POST | `/login` | `{email, password}` | — | Connexion → `{token, id, firstName, lastName, role, statut}` |
-| POST | `/verify-otp` | `{email, code}` | — | Vérification OTP → `{token, id, firstName, lastName, role, statut}` |
+| POST | `/verify-otp` | `{email, code}` | — | Vérification OTP → `{token, ...}` |
 | POST | `/resend-otp` | `{email}` | — | Renvoyer code OTP |
 | POST | `/forgot-password` | `{email}` | — | Demande reset mot de passe |
 | POST | `/reset-password` | `{email, code, newPassword}` | — | Reset mot de passe |
-
-> **Note :** La réponse de `/verify-otp` inclut le token JWT. Le frontend appelle `saveSession(data)` pour persister la session.
-
-> **Champs de réponse :** `firstName` (prénom), `lastName` (nom), `role` sans préfixe (`"ETUDIANT"`, `"ENTREPRISE"`, etc.). `auth.js` normalise automatiquement en `ROLE_*`.
-
-### Utilisateur (`/api/users/`)
-
-| Méthode | Endpoint | Auth | Description |
-|---------|----------|------|-------------|
-| GET | `/me` | JWT | Profil courant |
-| PUT | `/me` | JWT | Mise à jour profil |
-| PUT | `/change-password` | JWT | `{oldPassword, newPassword}` |
-
-### Offres de Stage
-
-| Méthode | Endpoint | Auth | Description |
-|---------|----------|------|-------------|
-| GET | `/api/etudiant/offres` | JWT | Liste paginée (`?page=0&size=20&sortBy=datePublication&sortDir=desc`) |
-| GET | `/api/etudiant/offres/search` | JWT | Recherche (`?domaine=&localisation=&typeStage=&niveauRequis=`) |
-| GET | `/api/entreprise/offres` | JWT | Offres de mon entreprise |
-| POST | `/api/entreprise/offres` | JWT | Créer une offre |
-| PUT | `/api/entreprise/offres/{id}` | JWT | Modifier une offre |
-| DELETE | `/api/entreprise/offres/{id}` | JWT | Supprimer une offre |
-| GET | `/api/admin/offres/en-attente` | JWT | Offres en attente de validation |
-| PATCH | `/api/admin/offres/{id}/valider` | JWT | `{approuve: true/false}` |
 
 ### CV (`/api/etudiant/cv`)
 
@@ -175,6 +176,19 @@ mvn spring-boot:run
 | GET | `/api/etudiant/cv` | JWT | `{hasCv, filename, statutExtraction, cvData, scoreCompletude}` |
 | GET | `/api/etudiant/cv/statut` | JWT | `{statut: "EN_COURS"\|"EXTRAIT"\|"ERREUR", pret: bool}` |
 | POST | `/api/etudiant/cv/reanalyse` | JWT | Ré-analyse du CV existant → **202** |
+
+### Offres de Stage
+
+| Méthode | Endpoint | Auth | Description |
+|---------|----------|------|-------------|
+| GET | `/api/etudiant/offres` | JWT | Liste paginée |
+| GET | `/api/etudiant/offres/search` | JWT | Recherche (`?domaine=&localisation=&typeStage=`) |
+| GET | `/api/entreprise/offres` | JWT | Offres de mon entreprise |
+| POST | `/api/entreprise/offres` | JWT | Créer une offre |
+| PUT | `/api/entreprise/offres/{id}` | JWT | Modifier une offre |
+| DELETE | `/api/entreprise/offres/{id}` | JWT | Supprimer une offre |
+| GET | `/api/admin/offres/en-attente` | JWT | Offres en attente de validation |
+| PATCH | `/api/admin/offres/{id}/valider` | JWT | `{approuve: true/false}` |
 
 ### Candidatures
 
@@ -192,30 +206,89 @@ mvn spring-boot:run
 | GET | `/api/etudiant/stages` | JWT | Mes stages |
 | GET | `/api/encadrant-academique/stages` | JWT | Stages encadrés académiquement |
 | GET | `/api/encadrant-entreprise/stages` | JWT | Stages encadrés côté entreprise |
-| POST | `/api/admin/stages/depuis-candidature/{candidatureId}` | JWT | Créer stage depuis candidature acceptée |
+| POST | `/api/admin/stages/depuis-candidature/{candidatureId}` | JWT | Créer stage depuis candidature |
 | PATCH | `/api/admin/stages/{id}/encadrants` | JWT | Assigner les encadrants |
 
 ### Documents
 
 | Méthode | Endpoint | Auth | Description |
 |---------|----------|------|-------------|
-| GET | `/api/etudiant/documents` | JWT | Mes documents générés |
-| POST | `/api/documents/generer` | JWT | `{modeleId, donneesProfil, nomEtablissement}` |
-| POST | `/api/documents/{uuid}/regenerer` | JWT | `{donneesProfil, nomEtablissement}` |
-| GET | `/api/documents/{uuid}/telecharger` | JWT | Télécharger PDF |
-| GET | `/api/documents/{uuid}/verifier` | — | Vérification d'authenticité (public) |
+| POST | `/api/etudiant/documents/generer` | JWT (ETUDIANT) | Génère son propre document (unicité par type) |
+| POST | `/api/admin/documents/generer` | JWT (ADMIN) | Génère pour n'importe quel utilisateur (sans limite) |
+| GET | `/api/etudiant/documents` | JWT | Historique de ses documents générés |
+| GET | `/api/documents/{uuid}/authentifier` | **PUBLIC** | Page d'authentification QR (→ 410 si expiré, 404 si révoqué) |
+| GET | `/api/documents/{uuid}/telecharger` | JWT | Télécharger le fichier DOCX ou PDF |
 
-### Modèles (Admin)
+#### Corps — `POST /api/etudiant/documents/generer`
+```json
+{
+  "typeDocumentId": 1,
+  "donneesSupplementaires": { "date_debut": "2025-06-01", "sujet": "Dev web" },
+  "outputFormat": "docx"
+}
+```
+> Le `userId` est ignoré (auto-résolu depuis le JWT). Contrainte : un étudiant ne peut générer qu'une fois par type de document.
+
+#### Corps — `POST /api/admin/documents/generer`
+```json
+{
+  "typeDocumentId": 1,
+  "userId": 42,
+  "donneesSupplementaires": { "sujet": "Stage en IA" },
+  "outputFormat": "docx"
+}
+```
+
+#### Réponse `DocumentGenerationResponse`
+```json
+{
+  "success": true,
+  "docUuid": "550e8400-e29b-41d4-a716-446655440000",
+  "urlTelechargement": "/api/documents/550e8400-.../telecharger",
+  "urlAuthentification": "http://localhost:8081/api/documents/550e8400-.../authentifier",
+  "typeDocument": "CONVENTION_STAGE",
+  "format": "docx",
+  "statut": "VALIDE",
+  "dateCreation": "2025-06-01T10:00:00",
+  "dateExpiration": "2026-06-01T10:00:00",
+  "tailleOctets": 54321,
+  "message": "Document généré avec succès"
+}
+```
+
+#### Réponse `GET /api/documents/{uuid}/authentifier` (PUBLIC)
+```json
+{
+  "docUuid": "550e8400-...",
+  "typeDocument": "CONVENTION_STAGE",
+  "nomTypeDocument": "Convention de stage",
+  "dateCreation": "2025-06-01T10:00:00",
+  "dateExpiration": "2026-06-01T10:00:00",
+  "matricule": "ETU2025001",
+  "nomComplet": "Jean Dupont",
+  "email": "jean@etudiant.fr",
+  "nomEtablissement": "ITEAM University",
+  "logoEtablissement": "https://...",
+  "statut": "VALIDE",
+  "valide": true,
+  "expire": false
+}
+```
+
+### Modèles de documents (Admin)
 
 | Méthode | Endpoint | Auth | Description |
 |---------|----------|------|-------------|
 | GET | `/api/admin/modeles` | JWT | `?statut=ACTIF\|ARCHIVE` (optionnel) |
-| POST | `/api/admin/modeles` | JWT | Multipart: `request` + `fichierModele` + `fichierHeader?` + `fichierFooter?` |
+| POST | `/api/admin/modeles` | JWT | Multipart: `request` (JSON part) + `fichierModele` (.docx) |
 | GET | `/api/admin/modeles/{id}` | JWT | Détail modèle |
-| PATCH | `/api/admin/modeles/{id}` | JWT | Mise à jour |
-| DELETE | `/api/admin/modeles/{id}` | JWT | Archiver |
-| GET | `/api/admin/types-documents` | JWT | Liste des types |
+| PATCH | `/api/admin/modeles/{id}` | JWT | Mise à jour (nom, durée validité, dateExpiration) |
+| DELETE | `/api/admin/modeles/{id}` | JWT | Archiver le modèle |
+| GET | `/api/admin/types-documents` | JWT | Liste des types de documents |
 | POST | `/api/admin/types-documents` | JWT | `{nom, code, description}` |
+| GET | `/api/admin/modeles/{id}/documents` | JWT | Documents générés depuis ce modèle |
+
+> **Important :** La création d'un modèle (`POST /api/admin/modeles`) appelle automatiquement le microservice `POST /modeles/` pour analyser le fichier .docx et détecter les champs `[champ]` et la zone QR rouge. Le `id_modele_document` retourné est stocké dans `ModeleDocument.idMicroservice`.
 
 ### Administration
 
@@ -226,11 +299,8 @@ mvn spring-boot:run
 | GET | `/api/admin/users/role/{role}` | JWT | Par rôle |
 | PUT | `/api/admin/users/{id}/validate` | JWT | Valider |
 | PUT | `/api/admin/users/{id}/disable` | JWT | Désactiver |
-| PUT | `/api/admin/users/{id}/enable` | JWT | Activer |
 | GET | `/api/admin/etudiants` | JWT | Tous les étudiants |
-| GET | `/api/admin/etudiants/risque` | JWT | Étudiants à risque (IA) |
 | GET | `/api/admin/entreprises` | JWT | Toutes les entreprises |
-| PUT | `/api/admin/entreprises/{id}/validate` | JWT | Valider une entreprise |
 | GET | `/api/admin/stages` | JWT | Tous les stages |
 
 ---
@@ -246,7 +316,7 @@ mvn spring-boot:run
 | `isLoggedIn()` | Vérifie présence du token |
 | `logout()` | Vide localStorage → login.html |
 | `requireAuth()` | Redirige vers login si non connecté |
-| `redirectByRole(role)` | Redirige vers le dashboard selon le rôle (accepte `"ETUDIANT"` ou `"ROLE_ETUDIANT"`) |
+| `redirectByRole(role)` | Redirige vers le dashboard selon le rôle |
 
 ### `js/api.js` — Fonctions principales
 
@@ -254,54 +324,49 @@ mvn spring-boot:run
 // Auth
 apiLogin(email, password)
 apiRegister(firstName, lastName, email, password, role, extra)
-apiVerifyOtp(email, code)      // alias: apiVerifyEmail
-apiResendOtp(email)             // alias: apiResendCode
+apiVerifyOtp(email, code)
+apiResendOtp(email)
 apiForgotPassword(email)
 apiResetPassword(email, code, newPassword)
 apiChangePassword(oldPassword, newPassword)
 
 // CV
-apiUploadCv(file)               // → 202, puis poll statut
-apiGetCvInfo()                  // {hasCv, filename, statutExtraction, scoreCompletude}
-apiGetCvStatut()                // {statut: "EN_COURS"|"EXTRAIT"|"ERREUR", pret}
-apiReanalyseCv()                // → 202
+apiUploadCv(file)              // → 202, puis poll statut
+apiGetCvInfo()                 // {hasCv, filename, statutExtraction, scoreCompletude}
+apiGetCvStatut()               // {statut: "EN_COURS"|"EXTRAIT"|"ERREUR", pret}
+apiReanalyseCv()               // → 202
 
 // Offres
-apiGetOffres({page, size, sortBy, sortDir})   // étudiant
+apiGetOffres({page, size, sortBy, sortDir})
 apiRechercherOffres({domaine, localisation, typeStage, niveauRequis})
-apiMesOffres()                  // entreprise
+apiMesOffres()                 // entreprise
 apiPublierOffre(data)
 apiModifierOffre(id, data)
 apiSupprimerOffre(id)
-apiCloturerOffre(id)
 
 // Candidatures
 apiPostuler(offreId, lettreMotivation)
-apiGetCandidatures()            // étudiant
-apiGetCandidaturesParOffre(offreId)  // entreprise, par offre
-apiGetCandidaturesRecues()      // entreprise, toutes (agrégation frontend)
+apiGetCandidatures()           // étudiant
+apiGetCandidaturesParOffre(offreId)
 apiDeciderCandidature(id, statut, commentaire)
 
 // Stages
-apiGetStage()                   // étudiant
+apiGetStage()                  // étudiant
 apiGetStagesEncadrantAcademique()
 apiGetStagesEncadrantEntreprise()
 
 // Documents
 apiGetMesDocuments()
-apiGenererDocument(modeleId, donneesProfil, nomEtablissement)
-apiTelechargerDocument(uuid)    // → Blob
-apiVerifierDocument(uuid)       // public
+apiGenererDocument(typeDocumentId, donneesSupplementaires, outputFormat)
+apiTelechargerDocument(uuid)   // → Blob téléchargement
+apiAuthentifierDocument(uuid)  // public — page d'auth QR
 
-// Admin
-apiGetAdminStats()
-apiGetAllUsers() / apiGetUsersByRole(role)
-apiValidateUser(id) / apiDisableUser(id) / apiEnableUser(id)
-apiGetOffresEnAttente() / apiValiderOffre(id, approuve)
-apiGetAllEtudiants() / apiGetEtudiantsARisque()
-apiGetAllEntreprises() / apiValidateEntreprise(id)
-apiCreerStageDepuisCandidature(candidatureId)
-apiGetModeles() / apiCreerModele(formData) / apiUpdateModele(id, data)
+// Admin — Modèles
+apiGetModeles()
+apiCreerModele(formData)       // multipart: request + fichierModele
+apiUpdateModele(id, data)
+apiArchiverModele(id)
+apiGetTypesDocuments()
 ```
 
 ---
@@ -311,33 +376,39 @@ apiGetModeles() / apiCreerModele(formData) / apiUpdateModele(id, data)
 ### Backend ✅ Implémenté
 
 - Authentification JWT + OTP email (inscription, connexion, vérification, reset)
-- Gestion des offres de stage (CRUD entreprise, listing paginé étudiant, validation admin)
-- Upload CV + extraction IA **asynchrone** (ThreadPoolTaskExecutor, @Async, polling statut)
+- Upload CV + extraction IA **asynchrone** (`@Async`, `@EnableAsync`, polling statut)
 - Structuration CV en base (CvStandardise, Profil, Experience, Formation, Competence, Langue)
+- Offres de stage (CRUD entreprise, listing paginé étudiant, validation admin)
 - Candidatures (postuler, décision entreprise)
 - Stages (création depuis candidature, assignation encadrants)
-- Génération documents via microservice Python (conventions, attestations)
-- Gestion des modèles de documents (admin)
+- **Génération documents** avec QR auth (unicité étudiant, admin illimité)
+  - Pré-génération UUID côté Spring Boot → cohérence avec nom de fichier microservice
+  - Lien public `{baseUrl}/api/documents/{uuid}/authentifier` encodé dans le QR
+  - Retourne type, dates, matricule, nom, établissement, logo
+  - HTTP 410 si expiré, HTTP 404 si révoqué
+- **Expiration automatique** (`DocumentExpirationTask`, `@Scheduled`, `@EnableScheduling`)
+- Gestion des modèles (admin) — délègue au microservice `POST /modeles/`
 - Secrets externalisés via variables d'environnement
 
 ### Microservice Python ✅ Implémenté
 
-- Extraction CV (OpenRouter / Claude Sonnet) : `/extract-cv`
-- Création modèles : `/modeles/creer`
-- Génération documents : `/documents/generer`, `/documents/regenerer`
+- Extraction CV (NVIDIA NIM + OpenRouter fallback) : `POST /cv/extract`
+- Gestion modèles Word : `POST /modeles/`, `GET /modeles/`, `GET /modeles/{id}`, `DELETE /modeles/{id}`
+- Génération documents : `POST /documents/generer` (python-docx, QR insertion zone rouge, HMAC)
+- Téléchargement : `GET /documents/telecharger/{filename}`
+- Vérification : `GET /documents/verifier/{uuid}` (HMAC legacy)
 
 ### Frontend ✅ Connecté
 
 - `auth.js` : mapping correct `firstName`/`lastName`/`id` → localStorage, normalisation rôles
-- `api.js` : tous les endpoints corrigés avec les bons prefixes de rôle
+- `api.js` : tous les endpoints corrigés avec les bons préfixes de rôle
 - `verify-email.html` : appelle `saveSession()` après vérification OTP
-- `register.html` : envoie `firstName`/`lastName` dans l'ordre correct
 - `etudiant-dashboard.html` : upload CV async + polling statut
 
 ### Non encore implémenté
 
-- Rapports de stage (RapportController manquant côté backend)
-- Endpoint entreprise pour lister tous ses stagiaires (actuellement stub)
+- Rapports de stage (controller manquant)
 - Notifications en temps réel (retournent liste vide)
+- Dashboard statistiques admin (`/admin/stats` non implémenté)
 - Signing de conventions (endpoints frontend commentés)
-- Dashboard statistiques admin (endpoint `/admin/stats` non implémenté)
+- Endpoint entreprise pour lister tous ses stagiaires (stub)
