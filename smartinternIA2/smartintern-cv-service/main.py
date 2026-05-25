@@ -25,6 +25,7 @@ load_dotenv()
 import pdfplumber
 import fitz
 import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 from PIL import Image
 import openai
 from openai import OpenAI
@@ -424,17 +425,18 @@ def extraire_depuis_pdf(chemin: str) -> tuple[str, int, str]:
         logger.warning(f"pdfplumber erreur: {e}")
 
     logger.info("PDF scanne detecte -> OCR")
-    doc = fitz.open(chemin)
-    nb_pages = len(doc)
-    texte_pages_ocr = []
-    for page in doc:
-        mat = fitz.Matrix(200 / 72, 200 / 72)
-        pix = page.get_pixmap(matrix=mat, colorspace=fitz.csRGB)
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_img:
-            pix.save(tmp_img.name)
-            img = Image.open(tmp_img.name)
-            texte_pages_ocr.append(pytesseract.image_to_string(img, lang="fra+eng"))
-            os.unlink(tmp_img.name)
+    with fitz.open(chemin) as doc:
+        nb_pages = len(doc)
+        texte_pages_ocr = []
+        for page in doc:
+            mat = fitz.Matrix(200 / 72, 200 / 72)
+            pix = page.get_pixmap(matrix=mat, colorspace=fitz.csRGB)
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_img:
+                tmp_img_name = tmp_img.name
+            pix.save(tmp_img_name)
+            with Image.open(tmp_img_name) as img:
+                texte_pages_ocr.append(pytesseract.image_to_string(img, lang="fra+eng"))
+            os.unlink(tmp_img_name)
     texte = "\n\n--- PAGE ---\n\n".join(texte_pages_ocr).strip()
     return texte, nb_pages, "pdf_ocr"
 
