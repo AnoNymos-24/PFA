@@ -39,6 +39,14 @@ public class CandidatureController {
         return ResponseEntity.ok(candidatureService.getCandidaturesParOffre(offreId));
     }
 
+    // ── Entreprise : profil complet d'un candidat (EN-05) ────────────────────
+    @GetMapping("/api/entreprise/candidatures/{id}/etudiant")
+    public ResponseEntity<CandidatureDto.CandidatDetailResponse> getCandidatDetail(
+            @PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(
+                candidatureService.getCandidatDetail(id, authentication.getName()));
+    }
+
     // ── Entreprise : décision sur une candidature ─────────────────────────────
     @PatchMapping("/api/entreprise/candidatures/{id}/decision")
     public ResponseEntity<CandidatureDto.CandidatureResponse> decider(

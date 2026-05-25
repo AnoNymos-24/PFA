@@ -43,6 +43,20 @@ public class Stage {
     @Column(name = "evaluation_finale")
     private String evaluationFinale;
 
+    @Builder.Default
+    @Column(name = "convention_signee_entreprise")
+    private boolean conventionSigneeEntreprise = false;
+
+    @Column(name = "date_signature_entreprise")
+    private java.time.LocalDate dateSignatureEntreprise;
+
+    @Builder.Default
+    @Column(name = "convention_signee_encadrant")
+    private boolean conventionSigneeEncadrant = false;
+
+    @Column(name = "date_signature_encadrant")
+    private java.time.LocalDate dateSignatureEncadrant;
+
     // La candidature dont est issu ce stage
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "candidature_id", unique = true)

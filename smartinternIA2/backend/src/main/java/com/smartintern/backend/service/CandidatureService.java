@@ -87,6 +87,39 @@ public class CandidatureService {
         return toResponse(candidature);
     }
 
+    // ── Entreprise : profil complet d'un candidat (EN-05) ────────────────────
+    public CandidatureDto.CandidatDetailResponse getCandidatDetail(Long candidatureId, String email) {
+        Candidature candidature = candidatureRepository.findById(candidatureId)
+                .orElseThrow(() -> new RuntimeException("Candidature non trouvée"));
+
+        if (!candidature.getOffre().getCreateur().getEmail().equals(email)) {
+            throw new RuntimeException("Non autorisé");
+        }
+
+        Etudiant etudiant = candidature.getEtudiant();
+        CvStandardise cv = etudiant.getCvStandardise();
+
+        return CandidatureDto.CandidatDetailResponse.builder()
+                .etudiantId(etudiant.getId())
+                .firstName(etudiant.getFirstName())
+                .lastName(etudiant.getLastName())
+                .email(etudiant.getEmail())
+                .telephone(etudiant.getTelephone())
+                .filiere(etudiant.getFiliere())
+                .classe(etudiant.getClasse())
+                .dateNaissance(etudiant.getDateNaissance())
+                .nationalite(etudiant.getNationalite())
+                .cvStatutExtraction(cv != null ? cv.getStatutExtraction().name() : null)
+                .cvScoreCompletude(cv != null ? cv.getScoreCompletude() : null)
+                .cvNiveauQualite(cv != null ? cv.getNiveauQualite() : null)
+                .cvDonneesJson(cv != null ? cv.getDonneesJsonBrutes() : null)
+                .candidatureId(candidature.getId())
+                .statutCandidature(candidature.getStatut().name())
+                .lettreMotivation(candidature.getLettreMotivation())
+                .dateCandidature(candidature.getDateCandidature())
+                .build();
+    }
+
     // ── Mapping ───────────────────────────────────────────────────────────────
     private CandidatureDto.CandidatureResponse toResponse(Candidature c) {
         return CandidatureDto.CandidatureResponse.builder()

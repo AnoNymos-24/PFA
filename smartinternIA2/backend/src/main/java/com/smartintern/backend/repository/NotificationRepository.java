@@ -1,0 +1,11 @@
+package com.smartintern.backend.repository;
+
+import com.smartintern.backend.entity.Notification;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
+    long countByUserIdAndLuFalse(Long userId);
+}

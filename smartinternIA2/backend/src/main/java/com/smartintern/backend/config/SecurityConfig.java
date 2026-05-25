@@ -58,6 +58,9 @@ public class SecurityConfig {
                 // ── Documents — génération et téléchargement (tout utilisateur authentifié) ──
                 .requestMatchers("/api/documents/**").authenticated()
 
+                // ── Notifications (tout utilisateur authentifié) ───────────
+                .requestMatchers("/api/notifications/**").authenticated()
+
                 // ── Tout le reste nécessite une authentification ───────────
                 .anyRequest().authenticated()
             )

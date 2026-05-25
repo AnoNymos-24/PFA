@@ -51,4 +51,30 @@ public class StageController {
             Authentication authentication) {
         return ResponseEntity.ok(stageService.getStagesEncadrantEntreprise(authentication.getName()));
     }
+
+    // ── EN-06 : Entreprise signe la convention ────────────────────────────────
+    @PatchMapping("/api/entreprise/stages/{id}/signer-convention")
+    public ResponseEntity<StageDto.StageResponse> signerConventionEntreprise(
+            @PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(
+                stageService.signerConventionEntreprise(id, authentication.getName()));
+    }
+
+    // ── EE-03 : Encadrant entreprise signe la convention ─────────────────────
+    @PatchMapping("/api/encadrant-entreprise/stages/{id}/signer-convention")
+    public ResponseEntity<StageDto.StageResponse> signerConventionEncadrant(
+            @PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(
+                stageService.signerConventionEncadrant(id, authentication.getName()));
+    }
+
+    // ── EE-04 : Définir la mission du stagiaire ───────────────────────────────
+    @PatchMapping("/api/encadrant-entreprise/stages/{id}/mission")
+    public ResponseEntity<StageDto.StageResponse> definirMission(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body,
+            Authentication authentication) {
+        return ResponseEntity.ok(
+                stageService.definirMission(id, body.get("mission"), authentication.getName()));
+    }
 }

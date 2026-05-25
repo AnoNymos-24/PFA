@@ -20,10 +20,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
+    private final JwtBlacklist jwtBlacklist;
 
-    public JwtAuthFilter(JwtUtils jwtUtils, @Lazy UserDetailsService userDetailsService) {
+    public JwtAuthFilter(JwtUtils jwtUtils, @Lazy UserDetailsService userDetailsService,
+                         JwtBlacklist jwtBlacklist) {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
+        this.jwtBlacklist = jwtBlacklist;
     }
 
     @Override
@@ -37,6 +40,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
         final String jwt = authHeader.substring(7);
+        if (jwtBlacklist.isBlacklisted(jwt)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         final String email = jwtUtils.extractEmail(jwt);
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
