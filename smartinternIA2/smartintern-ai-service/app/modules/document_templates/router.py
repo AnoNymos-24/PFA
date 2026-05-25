@@ -47,6 +47,7 @@ router = APIRouter(prefix="/modeles", tags=["📋 Modèles de documents"])
 async def creer_depuis_upload(
     fichier: UploadFile = File(..., description="Fichier Word (.docx) servant de modèle"),
     id_type_document: int = Form(..., description="Identifiant du type de document"),
+    duree_validite_jours: int = Form(365, description="Durée de validité des documents générés (en jours, défaut 365)"),
 ):
     """
     Crée un modèle de document depuis un fichier Word uploadé.
@@ -60,13 +61,14 @@ async def creer_depuis_upload(
     6. Persistance dans `registry.json`
 
     **Réponse :**
-    - `id_modele_document` : identifiant unique auto-généré
-    - `url_fichier_modele` : URL d'accès au fichier stocké
-    - `champs_detectes`    : liste des champs `[...]` trouvés dans le document
-    - `a_zone_qrcode`      : True si un carré rouge a été détecté
+    - `id_modele_document`    : identifiant unique auto-généré
+    - `url_fichier_modele`    : URL d'accès au fichier stocké
+    - `champs_detectes`       : liste des champs `[...]` trouvés dans le document
+    - `a_zone_qrcode`         : True si un carré rouge a été détecté
+    - `duree_validite_jours`  : durée de validité transmise au Spring Boot
     """
     try:
-        record = await creer_modele_depuis_upload(fichier, id_type_document)
+        record = await creer_modele_depuis_upload(fichier, id_type_document, duree_validite_jours)
         return CreateTemplateResponse(
             success=True,
             id_modele_document=record.id_modele_document,
@@ -74,9 +76,11 @@ async def creer_depuis_upload(
             id_type_document=record.id_type_document,
             champs_detectes=record.champs_detectes,
             a_zone_qrcode=record.a_zone_qrcode,
+            duree_validite_jours=record.duree_validite_jours,
             message=(
                 f"Modèle #{record.id_modele_document} créé — "
                 f"{len(record.champs_detectes)} champ(s) détecté(s), "
+                f"validité : {record.duree_validite_jours}j, "
                 f"zone QR : {'oui' if record.a_zone_qrcode else 'non'}"
             ),
         )
@@ -104,6 +108,7 @@ async def creer_depuis_url(corps: CreateTemplateFromURLRequest):
         record = await creer_modele_depuis_url(
             corps.url_fichier_modele,
             corps.id_type_document,
+            corps.duree_validite_jours,
         )
         return CreateTemplateResponse(
             success=True,
@@ -112,9 +117,11 @@ async def creer_depuis_url(corps: CreateTemplateFromURLRequest):
             id_type_document=record.id_type_document,
             champs_detectes=record.champs_detectes,
             a_zone_qrcode=record.a_zone_qrcode,
+            duree_validite_jours=record.duree_validite_jours,
             message=(
                 f"Modèle #{record.id_modele_document} créé depuis URL — "
-                f"{len(record.champs_detectes)} champ(s) détecté(s)"
+                f"{len(record.champs_detectes)} champ(s) détecté(s), "
+                f"validité : {record.duree_validite_jours}j"
             ),
         )
     except HTTPException:

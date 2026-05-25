@@ -349,10 +349,10 @@
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('cv')">📄 Extraction CV</button>
-    <button class="tab" onclick="switchTab('modele')">📋 Créer un Modèle</button>
-    <button class="tab" onclick="switchTab('generer')">⚙️ Générer Document</button>
-    <button class="tab" onclick="switchTab('verifier')">🔍 Vérifier Document</button>
+    <button class="tab active" onclick="switchTab('cv', this)">📄 Extraction CV</button>
+    <button class="tab" onclick="switchTab('modele', this)">📋 Créer un Modèle</button>
+    <button class="tab" onclick="switchTab('generer', this)">⚙️ Générer Document</button>
+    <button class="tab" onclick="switchTab('verifier', this)">🔍 Vérifier Document</button>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════════
@@ -478,10 +478,87 @@
         • Zone QR code : rectangle/carré <strong style="color:#ef4444">rouge</strong> (DrawingML ou VML) dans le document
       </div>
 
+      <!-- ── Référentiel des variables disponibles ── -->
+      <details style="margin-bottom:20px;">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--primary-light);padding:10px 14px;background:var(--surface2);border-radius:8px;list-style:none;display:flex;align-items:center;gap:8px;">
+          📖 Variables disponibles pour les documents (cliquer pour développer)
+        </summary>
+        <div style="background:var(--surface2);border-radius:0 0 8px 8px;padding:16px;font-size:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:2px;">
+          <div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">👤 Étudiant</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#f59e0b">[nom_etudiant]</code> — Nom de famille</span>
+              <span><code style="color:#f59e0b">[prenom_etudiant]</code> — Prénom</span>
+              <span><code style="color:#f59e0b">[cin_etudiant]</code> — N° CIN / Passeport</span>
+              <span><code style="color:#f59e0b">[email_etudiant]</code> — Email</span>
+              <span><code style="color:#f59e0b">[telephone_etudiant]</code> — Téléphone</span>
+              <span><code style="color:#f59e0b">[code_etudiant]</code> — Code étudiant</span>
+              <span><code style="color:#f59e0b">[filiere_etudiant]</code> — Filière</span>
+              <span><code style="color:#f59e0b">[classe_etudiant]</code> — Classe / Niveau</span>
+              <span><code style="color:#f59e0b">[date_naissance_etudiant]</code> — Date de naissance</span>
+              <span><code style="color:#f59e0b">[nationalite_etudiant]</code> — Nationalité</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">🏫 Établissement</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#34d399">[nom_etablissement]</code> — Nom (ex: iTeam University)</span>
+              <span><code style="color:#34d399">[adresse_etablissement]</code> — Adresse</span>
+            </div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;margin-top:12px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">🏢 Entreprise</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#34d399">[nom_entreprise]</code> — Raison sociale</span>
+              <span><code style="color:#34d399">[adresse_entreprise]</code> — Adresse</span>
+              <span><code style="color:#34d399">[telephone_entreprise]</code> — Téléphone</span>
+              <span><code style="color:#34d399">[domaine_entreprise]</code> — Domaine d'activité</span>
+              <span><code style="color:#34d399">[site_web_entreprise]</code> — Site web</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">📅 Stage</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#60a5fa">[date_debut_stage]</code> — Date de début</span>
+              <span><code style="color:#60a5fa">[date_fin_stage]</code> — Date de fin</span>
+              <span><code style="color:#60a5fa">[duree_mois_stage]</code> — Durée en mois</span>
+              <span><code style="color:#60a5fa">[sujet_stage]</code> — Sujet / Thème</span>
+              <span><code style="color:#60a5fa">[mission_stage]</code> — Description missions</span>
+            </div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;margin-top:12px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">👨‍🏫 Encadrants</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#60a5fa">[nom_encadrant_academique]</code></span>
+              <span><code style="color:#60a5fa">[prenom_encadrant_academique]</code></span>
+              <span><code style="color:#60a5fa">[nom_encadrant_entreprise]</code></span>
+              <span><code style="color:#60a5fa">[prenom_encadrant_entreprise]</code></span>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--primary-light);margin-bottom:8px;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">📄 Document</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span><code style="color:#f87171">[date_document]</code> — Date du jour</span>
+              <span><code style="color:#f87171">[annee_universitaire]</code> — ex: 2024-2025</span>
+              <span><code style="color:#f87171">[ville]</code> — Ville (Tunis)</span>
+              <span><code style="color:#f87171">[uuid_document]</code> — UUID unique</span>
+              <span><code style="color:#f87171">[url_verification]</code> — Lien QR auth</span>
+            </div>
+            <div style="margin-top:12px;padding:10px;background:rgba(79,70,229,.1);border-radius:6px;font-size:11px;color:var(--text-muted);">
+              💡 <strong>Demande de stage — variables clés :</strong><br>
+              <code>[date_document]</code>, <code>[prenom_etudiant]</code>, <code>[nom_etudiant]</code>,
+              <code>[cin_etudiant]</code>, <code>[filiere_etudiant]</code>, <code>[classe_etudiant]</code>,
+              <code>[annee_universitaire]</code>, <code>[nom_entreprise]</code>, <code>[adresse_entreprise]</code>,
+              <code>[sujet_stage]</code>
+            </div>
+          </div>
+        </div>
+      </details>
+
       <div class="form-grid">
         <div class="form-group">
           <label>id_type_document *  <span style="color:var(--text-muted);font-weight:400">(entier — correspond à TypeDocument.id côté Spring Boot)</span></label>
           <input id="m-type-id" type="number" value="1" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Durée de validité (jours) <span style="color:var(--text-muted);font-weight:400">(défaut 365 — transmis au Spring Boot via duree_validite_jours)</span></label>
+          <input id="m-validite" type="number" value="365" min="1" max="3650" />
         </div>
       </div>
 
@@ -641,11 +718,11 @@
 // ═══════════════════════════════════════════════════════════════════════
 const apiUrl = () => document.getElementById('api-url').value.replace(/\/+$/, '');
 
-function switchTab(name) {
+function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 function showFileName(input, targetId) {
@@ -895,8 +972,9 @@ function renderCvResult(data, textOnly) {
 // TAB 2 : CRÉER UN MODÈLE
 // ═══════════════════════════════════════════════════════════════════════
 async function creerModele() {
-  const typeId = parseInt(document.getElementById('m-type-id').value);
-  const fich   = document.getElementById('m-fichier').files[0];
+  const typeId   = parseInt(document.getElementById('m-type-id').value);
+  const validite = parseInt(document.getElementById('m-validite').value) || 365;
+  const fich     = document.getElementById('m-fichier').files[0];
 
   if (!fich) {
     alert('Sélectionnez un fichier modèle (.docx).');
@@ -913,6 +991,7 @@ async function creerModele() {
 
   const fd = new FormData();
   fd.append('id_type_document', typeId);
+  fd.append('duree_validite_jours', validite);
   fd.append('fichier', fich);
 
   setLoader('modele-loader', true);
@@ -939,6 +1018,7 @@ async function creerModele() {
               ${infoRow('id_modele_document', data.id_modele_document)}
               ${infoRow('id_type_document', data.id_type_document)}
               ${infoRow('Fichier modèle', data.url_fichier_modele)}
+              ${infoRow('Validité documents', (data.duree_validite_jours ?? 365) + ' jours')}
               ${infoRow('Zone QR code', hasQr ? '✅ Détectée (rectangle rouge)' : '❌ Non détectée')}
             </div>
             <div class="result-section">

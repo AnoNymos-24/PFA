@@ -458,8 +458,12 @@ pre.json-view {
                      onchange="setFileLabel(this,'tpl-file-lbl')">
             </div>
             <div class="fg">
-              <label>id_type_document <span style="color:var(--muted)">(entier — ex: 1=convention, 2=rapport…)</span></label>
+              <label>id_type_document <span style="color:var(--muted)">(entier — ex: 1=demande_stage, 2=convention…)</span></label>
               <input type="number" id="tpl-type-id" value="1" min="1">
+            </div>
+            <div class="fg">
+              <label>Durée de validité (jours) <span style="color:var(--muted)">(défaut 365 — stocké dans duree_validite_jours)</span></label>
+              <input type="number" id="tpl-validite" value="365" min="1" max="3650">
             </div>
             <button class="btn btn-primary" onclick="doCreateTemplate()">▶ Créer le modèle</button>
           </div>
@@ -880,6 +884,7 @@ async function doCreateTemplate() {
   const fd = new FormData();
   fd.append('fichier', f);
   fd.append('id_type_document', $('tpl-type-id').value);
+  fd.append('duree_validite_jours', $('tpl-validite')?.value || '365');
   const r = await req('POST', SD()+'/modeles/', fd, true);
   if (r.err) { showRespErr('tpl', r.err, r.ms); return; }
   showResp('tpl', r.data, r.status, r.ms);

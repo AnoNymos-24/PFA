@@ -178,6 +178,7 @@ def _sauvegarder_registre(registre: dict) -> None:
 async def creer_modele_depuis_upload(
     fichier: UploadFile,
     id_type_document: int,
+    duree_validite_jours: int = 365,
 ) -> DocumentTemplateRecord:
     """
     Crée un modèle de document depuis un fichier .docx uploadé.
@@ -247,6 +248,7 @@ async def creer_modele_depuis_upload(
         champs_detectes=champs,
         a_zone_qrcode=a_qr,
         qrcode_taille_cm=taille_qr,
+        duree_validite_jours=duree_validite_jours,
         date_creation=datetime.now().isoformat(),
     )
 
@@ -259,6 +261,7 @@ async def creer_modele_depuis_upload(
 async def creer_modele_depuis_url(
     url_fichier_modele: str,
     id_type_document: int,
+    duree_validite_jours: int = 365,
 ) -> DocumentTemplateRecord:
     """
     Crée un modèle depuis une URL HTTP/HTTPS ou un chemin local.
@@ -311,6 +314,7 @@ async def creer_modele_depuis_url(
         champs_detectes=champs,
         a_zone_qrcode=a_qr,
         qrcode_taille_cm=taille_qr,
+        duree_validite_jours=duree_validite_jours,
         date_creation=datetime.now().isoformat(),
     )
 

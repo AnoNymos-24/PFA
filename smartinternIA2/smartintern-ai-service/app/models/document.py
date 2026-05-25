@@ -25,8 +25,9 @@ class DocumentTemplateRecord(BaseModel):
     Enregistrement persisté d'un modèle de document.
 
     Champs fournis par l'utilisateur :
-      - id_type_document   : identifiant entier du type de document
-      - url_fichier_modele : URL d'accès au fichier .docx stocké (auto-calculée)
+      - id_type_document      : identifiant entier du type de document
+      - url_fichier_modele    : URL d'accès au fichier .docx stocké (auto-calculée)
+      - duree_validite_jours  : durée de validité des docs générés (jours, défaut 365)
 
     Champs calculés automatiquement :
       - id_modele_document : identifiant auto-incrémenté
@@ -36,26 +37,28 @@ class DocumentTemplateRecord(BaseModel):
       - qrcode_taille_cm   : taille en cm de la zone rouge détectée
       - date_creation      : horodatage ISO 8601
     """
-    id_modele_document: int
-    url_fichier_modele: str
-    id_type_document:   int
-    fichier_local:      str
-    champs_detectes:    list[str]
-    a_zone_qrcode:      bool
-    qrcode_taille_cm:   float = 3.0
-    date_creation:      str
+    id_modele_document:    int
+    url_fichier_modele:    str
+    id_type_document:      int
+    fichier_local:         str
+    champs_detectes:       list[str]
+    a_zone_qrcode:         bool
+    qrcode_taille_cm:      float         = 3.0
+    duree_validite_jours:  int           = 365
+    date_creation:         str
 
 
 # ── Réponses API modèles ───────────────────────────────────────────────────
 
 class CreateTemplateResponse(BaseModel):
-    success:             bool
-    id_modele_document:  Optional[int]  = None
-    url_fichier_modele:  Optional[str]  = None
-    id_type_document:    Optional[int]  = None
-    champs_detectes:     list[str]      = []
-    a_zone_qrcode:       bool           = False
-    message:             str            = ""
+    success:                bool
+    id_modele_document:     Optional[int]  = None
+    url_fichier_modele:     Optional[str]  = None
+    id_type_document:       Optional[int]  = None
+    champs_detectes:        list[str]      = []
+    a_zone_qrcode:          bool           = False
+    duree_validite_jours:   int            = 365
+    message:                str            = ""
 
 
 class TemplateListResponse(BaseModel):
@@ -118,8 +121,9 @@ class GenerateDocumentResponse(BaseModel):
 
 class CreateTemplateFromURLRequest(BaseModel):
     """Corps de la requête pour créer un modèle depuis une URL ou un chemin local."""
-    url_fichier_modele: str
-    id_type_document:   int
+    url_fichier_modele:   str
+    id_type_document:     int
+    duree_validite_jours: int = 365
 
 
 # ── Vérification QR (héritage génération précédente) ─────────────────────
