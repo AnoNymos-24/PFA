@@ -96,6 +96,51 @@ public class StageService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    // ── EN-06 : Entreprise signe la convention de stage ───────────────────────
+    public StageDto.StageResponse signerConventionEntreprise(Long stageId, String email) {
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new RuntimeException("Stage non trouvé"));
+        if (stage.getCandidature() == null
+                || !stage.getCandidature().getOffre().getCreateur().getEmail().equals(email)) {
+            throw new RuntimeException("Non autorisé");
+        }
+        stage.setConventionSigneeEntreprise(true);
+        stage.setDateSignatureEntreprise(java.time.LocalDate.now());
+        stageRepository.save(stage);
+        return toResponse(stage);
+    }
+
+    // ── EE-03 : Encadrant entreprise signe la convention ─────────────────────
+    public StageDto.StageResponse signerConventionEncadrant(Long stageId, String email) {
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new RuntimeException("Stage non trouvé"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        if (stage.getEncadrantEntreprise() == null
+                || !stage.getEncadrantEntreprise().getId().equals(user.getId())) {
+            throw new RuntimeException("Non autorisé : vous n'êtes pas l'encadrant de ce stage");
+        }
+        stage.setConventionSigneeEncadrant(true);
+        stage.setDateSignatureEncadrant(java.time.LocalDate.now());
+        stageRepository.save(stage);
+        return toResponse(stage);
+    }
+
+    // ── EE-04 : Encadrant entreprise définit la mission du stagiaire ──────────
+    public StageDto.StageResponse definirMission(Long stageId, String mission, String email) {
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new RuntimeException("Stage non trouvé"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        if (stage.getEncadrantEntreprise() == null
+                || !stage.getEncadrantEntreprise().getId().equals(user.getId())) {
+            throw new RuntimeException("Non autorisé : vous n'êtes pas l'encadrant de ce stage");
+        }
+        stage.setMission(mission);
+        stageRepository.save(stage);
+        return toResponse(stage);
+    }
+
     // ── Mapping ───────────────────────────────────────────────────────────────
     private StageDto.StageResponse toResponse(Stage s) {
         return StageDto.StageResponse.builder()
@@ -118,6 +163,10 @@ public class StageService {
                         ? s.getEncadrantEntreprise().getFirstName() + " " + s.getEncadrantEntreprise().getLastName()
                         : null)
                 .candidatureId(s.getCandidature() != null ? s.getCandidature().getId() : null)
+                .conventionSigneeEntreprise(s.isConventionSigneeEntreprise())
+                .dateSignatureEntreprise(s.getDateSignatureEntreprise())
+                .conventionSigneeEncadrant(s.isConventionSigneeEncadrant())
+                .dateSignatureEncadrant(s.getDateSignatureEncadrant())
                 .build();
     }
 }

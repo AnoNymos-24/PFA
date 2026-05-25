@@ -164,6 +164,13 @@ public class OffreStageService {
                 .build();
     }
 
+    // ── Étudiant : détail d'une offre par ID ─────────────────────────────────
+    public OffreStageDto.OffreStageResponse getOffreById(Long id) {
+        OffreStage offre = offreStageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Offre non trouvée"));
+        return toResponse(offre);
+    }
+
     // ── Admin : liste par statut validation ────────────────────────────────
     public List<OffreStageDto.OffreStageResponse> getAllOffresParStatutValidation(String statut) {
         return offreStageRepository

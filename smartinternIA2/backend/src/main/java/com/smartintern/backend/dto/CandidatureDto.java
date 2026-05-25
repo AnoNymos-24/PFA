@@ -48,4 +48,31 @@ public class CandidatureDto {
         private String statut;
         private String commentaire;
     }
+
+    // ── EN-05 : profil complet du candidat vu par l'entreprise ────────────────
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CandidatDetailResponse {
+        private Long etudiantId;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String telephone;
+        private String filiere;
+        private String classe;
+        private LocalDate dateNaissance;
+        private String nationalite;
+        // CV
+        private String cvStatutExtraction;
+        private Float cvScoreCompletude;
+        private String cvNiveauQualite;
+        private String cvDonneesJson;
+        // Candidature
+        private Long candidatureId;
+        private String statutCandidature;
+        private String lettreMotivation;
+        private LocalDate dateCandidature;
+    }
 }

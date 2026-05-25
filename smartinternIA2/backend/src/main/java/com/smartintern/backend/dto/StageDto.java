@@ -42,5 +42,9 @@ public class StageDto {
         private String encadrantAcademiqueNom;
         private String encadrantEntrepriseNom;
         private Long candidatureId;
+        private boolean conventionSigneeEntreprise;
+        private LocalDate dateSignatureEntreprise;
+        private boolean conventionSigneeEncadrant;
+        private LocalDate dateSignatureEncadrant;
     }
 }

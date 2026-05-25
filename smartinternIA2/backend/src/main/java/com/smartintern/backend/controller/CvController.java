@@ -98,7 +98,8 @@ public class CvController {
                 fileBytes,
                 file.getOriginalFilename(),
                 authentication.getName(),
-                filename);
+                filename,
+                contentType);
 
         log.info("CV uploadé pour {} → extraction async lancée ({})", etudiant.getEmail(), filename);
 
@@ -204,11 +205,19 @@ public class CvController {
 
         cvStandardiseService.initialiserEnCours(authentication.getName(), etudiant.getCvPath());
 
+        String existingFilename = etudiant.getCvPath();
+        String existingContentType = existingFilename.endsWith(".jpg") || existingFilename.endsWith(".jpeg")
+                ? "image/jpeg"
+                : existingFilename.endsWith(".png") ? "image/png"
+                : existingFilename.endsWith(".webp") ? "image/webp"
+                : "application/pdf";
+
         asyncCvService.extraireEtPersister(
                 fileBytes,
-                etudiant.getCvPath(),
+                existingFilename,
                 authentication.getName(),
-                etudiant.getCvPath());
+                existingFilename,
+                existingContentType);
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Ré-analyse IA lancée en arrière-plan",

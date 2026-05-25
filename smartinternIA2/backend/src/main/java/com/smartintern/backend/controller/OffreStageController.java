@@ -71,6 +71,12 @@ public class OffreStageController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/api/etudiant/offres/{id}")
+    public ResponseEntity<OffreStageDto.OffreStageResponse> getOffreById(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(offreStageService.getOffreById(id));
+    }
+
     @GetMapping("/api/etudiant/offres/search")
     public ResponseEntity<List<OffreStageDto.OffreStageResponse>> searchOffres(
             @RequestParam(required = false) String domaine,
