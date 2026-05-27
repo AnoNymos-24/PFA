@@ -33,3 +33,7 @@ pydantic==2.8.2
 
 # ── HTTP Client ───────────────────────────────────────────────────────────
 requests==2.34.2
+
+# ── Matching & Recommandation IA ─────────────────────────────────────────
+rapidfuzz==3.10.0
+scikit-learn==1.5.2
