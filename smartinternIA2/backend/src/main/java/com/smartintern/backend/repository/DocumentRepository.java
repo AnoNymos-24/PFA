@@ -24,11 +24,12 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
      * Vérifie si un utilisateur possède déjà un document VALIDE du même type.
      * Utilisé pour empêcher les étudiants de générer deux fois le même document.
      */
-    @Query("SELECT COUNT(d) > 0 FROM Document d " +
+    @Query("SELECT CASE WHEN COUNT(d) > 0 THEN TRUE ELSE FALSE END FROM Document d " +
            "WHERE d.user.id = :userId " +
            "AND d.typeDocument = :typeDocument " +
-           "AND d.statut = com.smartintern.backend.entity.Document.Statut.VALIDE")
+           "AND d.statut = :statut")
     boolean existsDocumentValideByUserIdAndTypeDocument(
             @Param("userId") Long userId,
-            @Param("typeDocument") String typeDocument);
+            @Param("typeDocument") String typeDocument,
+            @Param("statut") Document.Statut statut);
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,8 @@ public class OffreStageService {
                 .statutValidation(OffreStage.StatutValidation.EN_ATTENTE) // Nécessite validation admin
                 .entreprise(entreprise)
                 .createur(createur)
+                .competencesRequises(request.getCompetencesRequises() != null
+                        ? request.getCompetencesRequises() : new ArrayList<>())
                 .build();
 
         offreStageRepository.save(offre);
@@ -123,6 +126,8 @@ public class OffreStageService {
         offre.setDateExpiration(request.getDateExpiration());
         offre.setNombrePlaces(request.getNombrePlaces());
         offre.setRemuneration(request.getRemuneration());
+        if (request.getCompetencesRequises() != null)
+            offre.setCompetencesRequises(request.getCompetencesRequises());
         // Re-soumettre à validation après modification
         offre.setStatutValidation(OffreStage.StatutValidation.EN_ATTENTE);
 
@@ -161,6 +166,7 @@ public class OffreStageService {
                 .entrepriseId(o.getEntreprise() != null ? o.getEntreprise().getId() : null)
                 .entrepriseNom(o.getEntreprise() != null ? o.getEntreprise().getNom() : null)
                 .createdAt(o.getCreatedAt())
+                .competencesRequises(o.getCompetencesRequises())
                 .build();
     }
 
@@ -176,6 +182,16 @@ public class OffreStageService {
         return offreStageRepository
                 .findByStatutValidation(OffreStage.StatutValidation.valueOf(statut))
                 .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    // ── Entreprise : fermer une offre ────────────────────────────────────────
+    public OffreStageDto.OffreStageResponse fermerOffre(Long id, String email) {
+        OffreStage offre = offreStageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Offre non trouvée"));
+        if (!offre.getCreateur().getEmail().equals(email))
+            throw new RuntimeException("Non autorisé");
+        offre.setStatut(OffreStage.Statut.FERMEE);
+        return toResponse(offreStageRepository.save(offre));
     }
 
     // ── Utilitaire : récupérer l'entreprise_id d'un user ────────────────────

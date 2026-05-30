@@ -14,6 +14,7 @@ public interface OffreStageRepository extends JpaRepository<OffreStage, Long> {
 
     List<OffreStage> findByEntrepriseId(Long entrepriseId);
     List<OffreStage> findByStatut(OffreStage.Statut statut);
+    long countByStatut(OffreStage.Statut statut);
     List<OffreStage> findByStatutValidation(OffreStage.StatutValidation statutValidation);
 
     Page<OffreStage> findByStatutAndStatutValidation(

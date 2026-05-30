@@ -3,6 +3,7 @@ package com.smartintern.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Diagramme : Stage
@@ -30,6 +31,11 @@ public class Stage {
 
     @Column(name = "duree_mois")
     private int dureeMois;
+
+    /** Semaine courante du stage — mise à jour chaque lundi par StageProgressionScheduler */
+    @Builder.Default
+    @Column(name = "semaine_actuelle")
+    private int semaineActuelle = 1;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -82,7 +88,28 @@ public class Stage {
     @JoinColumn(name = "encadrant_entreprise_id")
     private EncadrantEntreprise encadrantEntreprise;
 
+    // ── Champs v7 : évaluation finale ────────────────────────────────────────
+
+    /** Observation libre rédigée par l'entreprise en fin de stage */
+    @Column(name = "observation_finale_entreprise", columnDefinition = "TEXT")
+    private String observationFinaleEntreprise;
+
+    /** Date à laquelle l'évaluation finale a été clôturée */
+    @Column(name = "date_cloture_evaluation")
+    private LocalDateTime dateClotureEvaluation;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "statut_evaluation")
+    private StatutEvaluation statutEvaluation = StatutEvaluation.NON_DEMARREE;
+
+    // ── Énumérations ─────────────────────────────────────────────────────────
+
     public enum Statut {
         EN_COURS, TERMINE, ABANDONNE, SUSPENDU
+    }
+
+    public enum StatutEvaluation {
+        NON_DEMARREE, EN_COURS, CLOTUREE
     }
 }

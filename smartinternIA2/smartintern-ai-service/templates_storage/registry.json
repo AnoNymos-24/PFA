@@ -1,0 +1,35 @@
+{
+  "next_id": 4,
+  "templates": {
+    "1": {
+      "id_modele_document": 1,
+      "url_fichier_modele": "/modeles/files/template_1.docx",
+      "id_type_document": 1,
+      "fichier_local": "C:\\Users\\itoua\\Documents\\GitHub\\PFA\\smartinternIA2\\smartintern-ai-service\\templates_storage\\template_1.docx",
+      "champs_detectes": [],
+      "a_zone_qrcode": false,
+      "qrcode_taille_cm": 3.0,
+      "date_creation": "2026-05-24T11:23:50.076424"
+    },
+    "2": {
+      "id_modele_document": 2,
+      "url_fichier_modele": "/modeles/files/template_2.docx",
+      "id_type_document": 1,
+      "fichier_local": "C:\\Users\\itoua\\Documents\\GitHub\\PFA\\smartinternIA2\\smartintern-ai-service\\templates_storage\\template_2.docx",
+      "champs_detectes": [],
+      "a_zone_qrcode": false,
+      "qrcode_taille_cm": 3.0,
+      "date_creation": "2026-05-24T11:26:37.955446"
+    },
+    "3": {
+      "id_modele_document": 3,
+      "url_fichier_modele": "/modeles/files/template_3.docx",
+      "id_type_document": 1,
+      "fichier_local": "C:\\Users\\itoua\\Documents\\GitHub\\PFA\\smartinternIA2\\smartintern-ai-service\\templates_storage\\template_3.docx",
+      "champs_detectes": [],
+      "a_zone_qrcode": false,
+      "qrcode_taille_cm": 3.0,
+      "date_creation": "2026-05-24T12:17:59.623473"
+    }
+  }
+}

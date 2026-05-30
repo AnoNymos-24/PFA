@@ -55,6 +55,10 @@ public class User {
     @Column(name = "otp_expiry")
     private LocalDateTime otpExpiry;
 
+    /** Dénormalisé — mis à jour à chaque login réussi */
+    @Column(name = "derniere_connexion")
+    private LocalDateTime derniereConnexion;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

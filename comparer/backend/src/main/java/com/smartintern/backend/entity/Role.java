@@ -1,0 +1,26 @@
+package com.smartintern.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "roles")
+@Data
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(unique = true, nullable = false)
+    private RoleName name;
+
+    public enum RoleName {
+        ROLE_ADMIN,
+        ROLE_ETUDIANT,
+        ROLE_ENTREPRISE,
+        ROLE_ENCADRANT_ENTREPRISE,
+        ROLE_ENCADRANT_ACADEMIQUE
+    }
+}

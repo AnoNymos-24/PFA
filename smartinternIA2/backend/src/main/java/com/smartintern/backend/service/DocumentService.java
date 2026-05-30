@@ -93,7 +93,7 @@ public class DocumentService {
         // ── 4. Unicité étudiant (un seul document par type) ──────────────────
         if (!isAdmin) {
             boolean dejaGenere = documentRepository.existsDocumentValideByUserIdAndTypeDocument(
-                    utilisateur.getId(), typeDoc.getCode());
+                    utilisateur.getId(), typeDoc.getCode(), Document.Statut.VALIDE);
             if (dejaGenere) {
                 throw new RuntimeException(
                         "Vous avez déjà généré un document de type « " + typeDoc.getNom() + " ». "

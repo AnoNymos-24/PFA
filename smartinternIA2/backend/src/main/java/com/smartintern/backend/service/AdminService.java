@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +20,8 @@ public class AdminService {
     private final EtudiantRepository etudiantRepository;
     private final EntrepriseRepository entrepriseRepository;
     private final DemandeStageRepository demandeStageRepository;
+    private final OffreStageRepository offreStageRepository;
+    private final StageRepository stageRepository;
 
     // ── Lister tous les utilisateurs ──────────────────────────────────────────
     public List<UserDto.UserResponse> getAllUsers() {
@@ -80,6 +83,17 @@ public class AdminService {
 
         demandeStageRepository.save(demande);
         return toDemandeResponse(demande);
+    }
+
+    // ── Admin : statistiques globales ────────────────────────────────────────
+    public Map<String, Long> getStats() {
+        return Map.of(
+            "totalEtudiants",   userRepository.countByRole(User.Role.ETUDIANT),
+            "totalEntreprises", userRepository.countByRole(User.Role.ENTREPRISE),
+            "totalOffres",      offreStageRepository.count(),
+            "offresActives",    offreStageRepository.countByStatut(OffreStage.Statut.ACTIVE),
+            "totalStages",      stageRepository.count()
+        );
     }
 
     // ── Admin : lister toutes les demandes de stage ───────────────────────────

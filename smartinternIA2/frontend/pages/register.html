@@ -901,12 +901,14 @@
 
     setLoading('btn-etudiant', true);
     try {
-      // firstName = prenom, lastName = nom (mapping backend)
+      // firstName=prenom, lastName=nom  (backend attend camelCase anglais)
+      // filiere←specialite, classe←niveau, codeEtudiant←carte
       const data = await apiRegister(prenom, nom, email, password, 'ETUDIANT', {
-        universite, carteEtudiant: carte, niveau, specialite
+        filiere: specialite, classe: niveau, codeEtudiant: carte
       });
-      saveSession(data);
+      // token="PENDING_VERIFICATION" après inscription → on stocke juste l'email pour l'OTP
       localStorage.setItem('pending_email', email);
+      localStorage.setItem('smartintern_prenom', data.firstName || prenom);
       window.location.href = 'verify-email.html';
     } catch (err) {
       showErr('etudiant', err.message);
@@ -938,13 +940,12 @@
 
     setLoading('btn-entreprise', true);
     try {
-      // firstName = prenom, lastName = nom (mapping backend)
+      // firstName=prenom, lastName=nom — seul telephone est accepté dans le DTO
       const data = await apiRegister(prenom, nom, email, password, 'ENTREPRISE', {
-        raisonSociale: raison, matriculeFiscal: matricule,
-        secteur, adresse, ville, telephone: tel
+        telephone: tel
       });
-      saveSession(data);
       localStorage.setItem('pending_email', email);
+      localStorage.setItem('smartintern_prenom', data.firstName || prenom);
       window.location.href = 'verify-email.html';
     } catch (err) {
       showErr('entreprise', err.message);

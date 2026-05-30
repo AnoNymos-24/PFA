@@ -50,15 +50,17 @@ public class CvStandardiseService {
             log.warn("Impossible de sérialiser le CV en JSON brut: {}", e.getMessage());
         }
 
+        float scoreFinal = cvResponse.getScore() != null
+                ? (float) cvResponse.getScore().getScoreSur100()
+                : (cvDto != null && cvDto.getProfil() != null ? calculerScore(cvDto) : 0f);
+
         CvStandardise cv = CvStandardise.builder()
                 .etudiant(etudiant)
                 .fichierOriginal(fichierOriginal)
-                .scoreCompletude(cvDto != null && cvDto.getProfil() != null
-                        ? calculerScore(cvDto) : 0f)
+                .scoreCompletude(scoreFinal)
                 .statutExtraction(CvStandardise.StatutExtraction.EXTRAIT)
                 .donneesJsonBrutes(jsonBrut)
-                .niveauQualite(determinerNiveauQualite(
-                        cvDto != null && cvDto.getProfil() != null ? calculerScore(cvDto) : 0f))
+                .niveauQualite(determinerNiveauQualite(scoreFinal))
                 .build();
 
         cv = cvStandardiseRepository.save(cv);

@@ -6,7 +6,7 @@
 **Stack :** Java Spring Boot 3.2.5 + Python FastAPI + HTML/CSS/JS + MySQL  
 **Dépôt :** https://github.com/AnoNymos-24/PFA.git  
 **Branche active :** `feature/version6` (fusion version5 + travail personnel)  
-**Date analyse :** 25 mai 2026
+**Date analyse :** 28 mai 2026
 
 ---
 
@@ -17,6 +17,10 @@
 3. [Démarrage Rapide](#3-démarrage-rapide)
 4. [Variables de Documents (Templates)](#4-variables-de-documents-templates)
 5. [API Reference](#5-api-reference)
+   - Auth, CV, Offres, Candidatures, Stages, Rapports, Notifications, Administration
+   - Cahier des charges, Sprints, Tâches ← **NEW v6**
+   - Logs d'activité & Sessions ← **NEW v6**
+   - Matching & Recommandations ← **NEW v6**
 6. [Frontend — Pages & Fonctions](#6-frontend--pages--fonctions)
 7. [Analyse du Backlog](#7-analyse-du-backlog)
 8. [Avancement par Sprint](#8-avancement-par-sprint)
@@ -49,35 +53,53 @@ smartinternIA2/
 │   ├── src/main/java/com/smartintern/backend/
 │   │   ├── config/                  # AppConfig, SecurityConfig, GlobalExceptionHandler
 │   │   ├── controller/
-│   │   │   ├── AuthController       # /api/auth/* (register, login, logout)
-│   │   │   ├── CvController         # /api/etudiant/cv (upload PDF/IMG, statut, reanalyse)
-│   │   │   ├── OffreStageController # /api/etudiant|entreprise|admin/offres
-│   │   │   ├── CandidatureController# /api/etudiant|entreprise/candidatures
-│   │   │   ├── StageController      # /api/admin|etudiant|encadrant-*/stages
-│   │   │   ├── RapportStageController  # /api/etudiant|encadrant-academique/rapports ← NEW
-│   │   │   ├── DocumentController   # /api/etudiant|admin/documents + /api/documents/{uuid}
-│   │   │   ├── AdminController      # /api/admin/users, /api/admin/demandes-stage ← NEW
-│   │   │   ├── NotificationController  # /api/notifications/* ← NEW
-│   │   │   └── OtpController        # /api/auth/verify-otp, reset-password
+│   │   │   ├── AuthController            # /api/auth/* (register, login, logout)
+│   │   │   ├── CvController              # /api/etudiant/cv (upload PDF/IMG, statut, reanalyse)
+│   │   │   ├── OffreStageController      # /api/etudiant|entreprise|admin/offres
+│   │   │   ├── CandidatureController     # /api/etudiant|entreprise/candidatures
+│   │   │   ├── StageController           # /api/admin|etudiant|encadrant-*/stages
+│   │   │   ├── RapportStageController    # /api/etudiant|encadrant-academique/rapports ← v5
+│   │   │   ├── DocumentController        # /api/etudiant|admin/documents + /api/documents/{uuid}
+│   │   │   ├── AdminController           # /api/admin/users, demandes-stage ← v5
+│   │   │   ├── NotificationController    # /api/notifications/* ← v5
+│   │   │   ├── OtpController             # /api/auth/verify-otp, reset-password
+│   │   │   ├── LogActiviteController     # /api/admin/logs (AL-01..AL-03) ← v6
+│   │   │   ├── SessionConnexionController# /api/admin/sessions (SC-01..SC-03) ← v6
+│   │   │   ├── CahierDesChargesController# /api/encadrant-entreprise|etudiant/cahier-des-charges ← v6
+│   │   │   ├── SprintController          # /api/encadrant-entreprise|etudiant/sprints ← v6
+│   │   │   ├── TacheController           # /api/encadrant-entreprise|etudiant/taches ← v6
+│   │   │   ├── MatchingEtudiantController  # /api/etudiant/recommandations ← v6
+│   │   │   └── MatchingEntrepriseController# /api/entreprise/recommandations ← v6
 │   │   ├── entity/
 │   │   │   ├── User, Etudiant, Entreprise, Etablissement, EncadrantAcademique, EncadrantEntreprise
 │   │   │   ├── OffreStage, Candidature, DemandeStage, Stage
 │   │   │   ├── CvStandardise, Profil, Experience, Formation, Competence, Langue
-│   │   │   ├── RapportStage        # HEBDOMADAIRE|FINAL / BROUILLON|SOUMIS|VALIDE|REJETE ← NEW
-│   │   │   ├── Notification        # type, message, lu, createdAt ← NEW
+│   │   │   ├── RapportStage        # HEBDOMADAIRE|FINAL / BROUILLON|SOUMIS|VALIDE|REJETE ← v5
+│   │   │   ├── Notification        # type, message, lu, createdAt ← v5
 │   │   │   ├── Document, DocumentGenere, ModeleDocument, TypeDocument
+│   │   │   ├── LogActivite         # audit trail toutes actions utilisateurs ← v6
+│   │   │   ├── SessionConnexion    # sessions IP/device/durée ← v6
+│   │   │   ├── CahierDesCharges    # BROUILLON → VALIDE (prérequis sprint) ← v6
+│   │   │   ├── Sprint              # PLANIFIE → EN_COURS(auto) → CLOTURE ← v6
+│   │   │   └── Tache               # A_FAIRE → EN_COURS → TERMINEE → VALIDEE/REFUSEE ← v6
 │   │   ├── security/
 │   │   │   ├── JwtUtils, JwtAuthFilter
-│   │   │   └── JwtBlacklist        # Blacklist mémoire pour logout ← NEW
+│   │   │   └── JwtBlacklist        # Blacklist mémoire pour logout ← v5
 │   │   └── service/
 │   │       ├── AuthService, OtpService, EmailService
 │   │       ├── CvExtractionService, AsyncCvService (@Async), CvStandardiseService
 │   │       ├── OffreStageService, CandidatureService, StageService ← enrichi
-│   │       ├── RapportStageService  # CRUD rapports + validation encadrant ← NEW
-│   │       ├── NotificationService  # getMes, marquerLue, marquerToutesLues, getNonLues ← NEW
-│   │       ├── AdminService         # gestion users + demandes de stage ← NEW
+│   │       ├── MatchingService      # scoring 5 composantes + persistScores() ← v6
+│   │       ├── RapportStageService  # CRUD rapports + validation encadrant ← v5
+│   │       ├── NotificationService  # getMes, marquerLue, marquerToutesLues ← v5
+│   │       ├── AdminService         # gestion users + demandes de stage ← v5
 │   │       ├── DocumentService, ModeleDocumentService
-│   │       └── DocumentExpirationTask (@Scheduled, cron horaire)
+│   │       ├── DocumentExpirationTask (@Scheduled, cron horaire)
+│   │       ├── LogActiviteService   # TransactionTemplate fire-and-forget ← v6
+│   │       ├── SessionConnexionService # ouvrirSession/fermerSession ← v6
+│   │       ├── CahierDesChargesService # upload multipart + validation ← v6
+│   │       ├── SprintService        # CRUD + transition EN_COURS automatique ← v6
+│   │       └── TacheService         # machine à états + validation étudiant/encadrant ← v6
 │   └── src/main/resources/application.properties
 ├── smartintern-ai-service/          # Python FastAPI (port 8000)
 │   ├── main.py
@@ -115,6 +137,42 @@ PATCH /api/encadrant-academique/rapports/{id}/valider
   → Statut VALIDE
 PATCH /api/encadrant-academique/rapports/{id}/commenter  {commentaire: "..."}
   → Statut REJETE
+```
+
+### Flux CDC → Sprint → Tâche (v6 — Mission C)
+
+> **Prérequis** : le stage doit avoir un Cahier des Charges au statut `VALIDE` avant de pouvoir créer le premier Sprint.
+
+```
+POST /api/encadrant-entreprise/cahier-des-charges/stage/{id}   multipart(file,titre) → CDC BROUILLON
+POST /api/encadrant-entreprise/cahier-des-charges/{id}/valider  → CDC VALIDE (prérequis sprint déverrouillé)
+                  ↓
+POST /api/encadrant-entreprise/sprints/stage/{id}               → Sprint PLANIFIE
+POST /api/encadrant-entreprise/taches/sprint/{id}               → Tâche A_FAIRE
+  (1ère tâche démarrée → Sprint passe automatiquement EN_COURS)
+                  ↓
+POST /api/etudiant/taches/{id}/demarrer                         → EN_COURS
+POST /api/etudiant/taches/{id}/terminer                         → TERMINEE_PAR_ETUDIANT
+POST /api/encadrant-entreprise/taches/{id}/valider              → VALIDEE ✅
+  ou
+POST /api/encadrant-entreprise/taches/{id}/refuser              → REFUSEE
+POST /api/etudiant/taches/{id}/reprendre                        → EN_COURS (cycle recommence)
+                  ↓
+POST /api/encadrant-entreprise/sprints/{id}/cloturer            → CLOTURE
+```
+
+### Flux Audit Trail (v6 — Mission B)
+
+```
+[Toute action utilisateur] → LogActiviteService.loguer() [TransactionTemplate REQUIRES_NEW]
+                          ↓ (fire-and-forget, jamais de throw vers l'appelant)
+                          → LogActivite persisté en DB (action, entiteCible, entiteId, IP, device)
+                          → SessionConnexion ouverte au login, fermée au logout/expiration
+
+GET /api/admin/logs                              → audit trail paginé
+GET /api/admin/logs/user/{userId}               → logs par utilisateur
+GET /api/admin/logs/entite/{entiteCible}/{id}   → logs par entité
+GET /api/admin/sessions/actives                 → sessions en cours (temps-réel)
 ```
 
 ### Flux Génération de documents (avec QR authentification)
@@ -332,6 +390,59 @@ Dans vos fichiers `.docx`, utilisez des marqueurs `[nom_variable]`. Le microserv
 | GET | `/api/admin/types-documents` | Types de documents |
 | POST | `/api/admin/types-documents` | `{nom, code, description}` |
 
+### Cahier des charges ← **NEW v6**
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/encadrant-entreprise/cahier-des-charges/stage/{id}` | Upload CDC multipart `(file, titre)` |
+| POST | `/api/encadrant-entreprise/cahier-des-charges/{id}/valider` | Valider CDC → VALIDE |
+| GET | `/api/encadrant-entreprise/cahier-des-charges/stage/{id}` | Détail CDC (encadrant) |
+| GET | `/api/etudiant/cahier-des-charges/stage/{id}` | Détail CDC (étudiant, lecture seule) |
+
+### Sprints ← **NEW v6**
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/encadrant-entreprise/sprints/stage/{id}` | Créer sprint (nécessite CDC VALIDE) |
+| PUT | `/api/encadrant-entreprise/sprints/{id}` | Modifier sprint |
+| DELETE | `/api/encadrant-entreprise/sprints/{id}` | Soft-delete sprint |
+| POST | `/api/encadrant-entreprise/sprints/{id}/cloturer` | Clôturer `{observation}` → CLOTURE |
+| GET | `/api/encadrant-entreprise/sprints/stage/{id}` | Lister sprints d'un stage |
+| GET | `/api/etudiant/sprints/stage/{id}` | Lister sprints (étudiant, lecture seule) |
+
+### Tâches ← **NEW v6**
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/encadrant-entreprise/taches/sprint/{id}` | Créer tâche `{titre, description, dateDebutPrevue, dateFinPrevue}` |
+| PUT | `/api/encadrant-entreprise/taches/{id}` | Modifier tâche |
+| DELETE | `/api/encadrant-entreprise/taches/{id}` | Soft-delete tâche |
+| POST | `/api/encadrant-entreprise/taches/{id}/valider` | Valider → VALIDEE `{observation, note}` |
+| POST | `/api/encadrant-entreprise/taches/{id}/refuser` | Refuser → REFUSEE `{observation}` |
+| GET | `/api/encadrant-entreprise/taches/sprint/{id}` | Lister tâches d'un sprint (encadrant) |
+| POST | `/api/etudiant/taches/{id}/demarrer` | Démarrer → EN_COURS (auto: Sprint passe EN_COURS) |
+| POST | `/api/etudiant/taches/{id}/terminer` | Terminer → TERMINEE_PAR_ETUDIANT `{noteEtudiant}` |
+| POST | `/api/etudiant/taches/{id}/reprendre` | Reprendre tâche refusée → EN_COURS |
+| GET | `/api/etudiant/taches/sprint/{id}` | Lister tâches (étudiant, lecture seule) |
+
+### Logs d'activité & Sessions (Admin) ← **NEW v6**
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/admin/logs` | Audit trail global paginé `?page=0&size=20` |
+| GET | `/api/admin/logs/user/{userId}` | Logs d'un utilisateur spécifique |
+| GET | `/api/admin/logs/entite/{entiteCible}/{entiteId}` | Logs filtrés par entité |
+| GET | `/api/admin/sessions` | Historique sessions paginé |
+| GET | `/api/admin/sessions/actives` | Sessions actives en temps-réel |
+| GET | `/api/admin/sessions/user/{userId}` | Sessions d'un utilisateur |
+
+### Matching & Recommandations ← **NEW v6**
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/etudiant/recommandations/offres/{etudiantId}?limit=10` | Offres recommandées par score IA |
+| GET | `/api/entreprise/recommandations/candidats/{offreId}?limit=10` | Candidats classés par score matching |
+
 ### Microservice Python — Endpoints directs (port 8000)
 
 | Méthode | Endpoint | Description |
@@ -410,127 +521,136 @@ apiGetAllUsers()                  apiPatchUserStatut(id, statut) // ← NEW v5
 
 ## 7. Analyse du Backlog
 
-### Statut global par User Story — version6 (25 mai 2026)
+> **IDs conformes au backlog PDF (Sprint Planning SmartIntern AI — 138 pts, MoSCoW)**  
+> EN = Entreprise · EA = Encadrant Académique · EE = Encadrant Entreprise · ET = Étudiant · AD = Admin · U = Tous acteurs
 
-| ID | Titre | Sprint | Pts | Statut | Note |
-|----|-------|--------|-----|--------|------|
-| U-01 | Inscription multi-rôles | 1 | 8 | ✅ | |
-| U-02 | Connexion JWT | 1 | 5 | ✅ | |
-| U-03 | Vérification email OTP | 1 | 5 | ✅ | |
-| U-04 | Reset mot de passe | 1 | 3 | ✅ | |
-| U-05 | Profil utilisateur | 2 | 3 | ✅ | |
-| ET-01 | Upload CV | 2 | 3 | ✅ | PDF + JPG + PNG + WEBP |
-| ET-02 | Extraction IA asynchrone | 2 | 8 | ✅ | @Async, NVIDIA + OpenRouter fallback |
-| ET-03 | Affichage données extraites | 2 | 3 | ✅ | |
-| ET-04 | Scoring complétude CV | 2 | 3 | ✅ | scoreGlobal/100, 5 niveaux |
-| EA-01 | Création offre (Entreprise) | 2 | 3 | ✅ | |
-| EA-02 | Listing & recherche offres | 2 | 5 | ✅ | Pagination + filtres |
-| EA-03 | Validation offre (Admin) | 2 | 3 | ✅ | |
-| ET-05 | Postuler | 2 | 3 | ✅ | Anti-doublon inclus |
-| EA-05 | Décision candidature (Entreprise) | 2 | 3 | ✅ | |
-| EA-06 | Tableau candidatures | 3 | 3 | ✅ | |
-| AD-08 | Créer stage depuis candidature | 3 | 3 | ✅ | |
-| AD-09 | Assigner encadrants | 3 | 3 | ✅ | + dates + sujet + mission |
-| AD-01 | Créer type de document | 3 | 2 | ✅ | |
-| AD-02 | Upload modèle .docx | 3 | 5 | ✅ | Détection [champs] + zone QR rouge |
-| EN-01 | Score compatibilité CV/offre | 3 | 5 | ✅ | Via scoring microservice IA |
-| EE-01 | Suivi stage encadrant académique | 3 | 5 | ✅ | Vue stages + rapports + validation ← **NEW v5** |
-| EE-02 | Suivi stage encadrant entreprise | 3 | 5 | ✅ | Vue stages + convention + mission ← **NEW v5** |
-| AD-10 | Gestion expiration documents | 3 | 5 | 🔶 | @Scheduled OK, révocation manuelle absente |
-| EA-04 | Recommandation IA offres | 3 | 8 | ⬜ | Non réalisé |
-| EE-03 | Rapport de stage | 4 | 8 | ✅ | Hebdo + final, BROUILLON→SOUMIS→VALIDE/REJETE ← **NEW v5** |
-| EE-04 | Signature convention | 4 | 5 | ✅ | Entreprise + encadrant ← **NEW v5** |
-| U-07 | Notifications in-app | 4 | 8 | ✅ | CRUD complet, marquer lu/non-lu ← **NEW v5** |
-| U-08 | Centre de notifications | 4 | 5 | ✅ | /api/notifications/* complet ← **NEW v5** |
-| AD-03 | Génération document étudiant | 4 | 8 | 🔶 | Backend + microservice ✅, UI partielle |
-| AD-04 | QR code d'authentification | 4 | 8 | 🔶 | Logique complète, intégration UI partielle |
-| ET-06 | Télécharger ses documents | 4 | 3 | ⬜ | Endpoint présent, UI absente |
-| U-06 | Notifications email | 4 | 5 | ⬜ | Seul OTP implémenté |
-| AD-05 | Dashboard statistiques admin | 4 | 5 | ⬜ | `/api/admin/stats` non implémenté |
-| AD-06 | Export données CSV | 4 | 3 | ⬜ | Non réalisé |
-| AD-07 | Logs d'audit | 4 | 3 | ⬜ | Non réalisé |
-| EN-02 | Recommandations IA personnalisées | 4 | 8 | ⬜ | Non réalisé |
-| EN-03 | Analyse compétences marché | 4 | 5 | ⬜ | Non réalisé |
-| EN-04 | Génération lettre motivation IA | 4 | 5 | ⬜ | Non réalisé |
+### Statut global par User Story — version6 (28 mai 2026)
 
-**Légende :** ✅ Terminé · 🔶 Partiel · ⬜ Non réalisé · **NEW v5** = apporté par fusion version5
+| ID | Titre | Sprint | Statut | Note |
+|----|-------|--------|--------|------|
+| U-01 | Inscription multi-rôles (5 profils) | 1 | ✅ | |
+| U-02 | Connexion JWT stateless | 1 | ✅ | BCrypt + blacklist logout |
+| U-03 | Vérification email OTP | 1 | ✅ | 6 chiffres, 10 min |
+| U-04 | Reset mot de passe | 1 | ✅ | email + OTP |
+| U-05 | Profil utilisateur | 1 | ✅ | |
+| ET-01 | Upload CV (PDF/JPG/PNG/WEBP) | 1 | ✅ | |
+| ET-03 | Affichage données CV extraites | 1 | ✅ | |
+| ET-04 | Scoring complétude CV | 1 | ✅ | scoreGlobal/100, 5 niveaux |
+| ET-05 | Postuler à une offre de stage | 1 | ✅ | Anti-doublon inclus |
+| EN-01 | Publier une offre de stage | 1 | ✅ | |
+| EN-02 | Modifier / supprimer ses offres | 1 | ✅ | Repasse EN_ATTENTE si modifiée |
+| EN-05 | Décision candidature (accepter/refuser) | 1 | ✅ | |
+| AD-01 | Créer type de document | 1 | ✅ | |
+| AD-02 | Upload modèle de document .docx | 1 | ✅ | Détection `[champs]` + zone QR rouge |
+| ET-02 | Extraction IA asynchrone CV | 2 | ✅ | `@Async`, NVIDIA + OpenRouter fallback |
+| ET-07 | Créer & soumettre rapport de stage | 2 | ✅ | BROUILLON → SOUMIS ← **NEW v5** |
+| ET-08 | Consulter retours encadrant sur rapport | 2 | ✅ | VALIDE / REJETE visible ← **NEW v5** |
+| EN-03 | Tableau des candidatures reçues | 2 | ✅ | |
+| EN-06 | Profil complet candidat (côté Entreprise) | 2 | ✅ | ← **NEW v5** |
+| EE-03 | Définir la mission du stagiaire | 2 | ✅ | PATCH `/stages/{id}/mission` ← **NEW v5** |
+| EE-04 | Signer la convention de stage | 2 | ✅ | Entreprise + Encadrant ← **NEW v5** |
+| EA-01 | Voir stages encadrés (académique) | 2 | ✅ | ← **NEW v5** |
+| EA-02 | Valider rapport de stage | 2 | ✅ | SOUMIS → VALIDE ← **NEW v5** |
+| EA-03 | Rejeter rapport avec commentaire | 2 | ✅ | SOUMIS → REJETE ← **NEW v5** |
+| AD-05 | Dashboard statistiques admin | 2 | ⬜ | `/api/admin/stats` non implémenté |
+| EA-04 | Recommandation IA offres | 3 | ⬜ | Non réalisé |
+| AD-06 | Export données CSV | 3 | ⬜ | Non réalisé |
+| AD-07 | Logs d'audit & sessions connexion | 3 | ✅ | LogActivite + SessionConnexion + 6 endpoints ← **NEW v6** |
+| AD-08 | Créer stage depuis candidature acceptée | 3 | ✅ | |
+| AD-09 | Assigner encadrants + dates + mission | 3 | ✅ | |
+| AD-10 | Gestion expiration documents | 3 | 🔶 | `@Scheduled` ✅, révocation manuelle UI absente |
+| EE-01 | Suivi stage (encadrant académique) | 3 | ✅ | Stages + rapports ← **NEW v5** |
+| EE-02 | Suivi stage (encadrant entreprise) | 3 | ✅ | Vue stages + convention ← **NEW v5** |
+| EE-05 | CDC + Sprints + Tâches (gestion projet) | 4 | ✅ | Machine à états complète, 10 endpoints, 31 tests ← **NEW v6** |
+| AD-03 | Génération document officiel | 4 | 🔶 | Backend + microservice ✅, intégration UI partielle |
+| AD-04 | QR code d'authentification | 4 | 🔶 | Logique ✅ (HTTP 200/410/404), intégration UI partielle |
+| U-06 | Notifications email (événements) | 4 | ⬜ | Seul OTP implémenté |
+| U-07 | Notifications in-app | 4 | ✅ | CRUD + marquer lu/non-lu ← **NEW v5** |
+| U-08 | Centre de notifications | 4 | ✅ | `/api/notifications/*` ← **NEW v5** |
+| EN-04 | Matching & recommandations IA | 4 | 🔶 | Scoring 5 composantes ✅, endpoints recommandation ✅, UI partielle |
+| ET-06 | Télécharger ses documents | 4 | ⬜ | Endpoint ✅, UI absente |
+
+**Légende :** ✅ Terminé · 🔶 Partiel · ⬜ Non réalisé · **NEW v5** = fusion version5 · **NEW v6** = développement personnel version6
 
 ---
 
 ## 8. Avancement par Sprint
 
-### Sprint 1 — Authentification ✅ 100%
+### Sprint 1 — Auth + Base + Documents (36 pts) ✅ 100%
 
-| US | Pts | Statut | Détails |
-|----|-----|--------|---------|
-| U-01 Inscription | 8 | ✅ | 5 rôles |
-| U-02 Connexion JWT | 5 | ✅ | BCrypt + JWT stateless |
-| U-03 OTP email | 5 | ✅ | 6 chiffres, 10min expiration |
-| U-04 Reset MDP | 3 | ✅ | email + OTP |
-| **+ Logout JWT** | — | ✅ | `POST /logout` + JwtBlacklist ← NEW v5 |
+| US | Statut | Détails |
+|----|--------|---------|
+| U-01 Inscription | ✅ | 5 rôles (Étudiant, Entreprise, Admin, EncAcad, EncEntr) |
+| U-02 Connexion JWT | ✅ | BCrypt + JWT stateless + JwtBlacklist |
+| U-03 OTP email | ✅ | 6 chiffres, expiration 10 min |
+| U-04 Reset MDP | ✅ | Email + OTP |
+| U-05 Profil | ✅ | |
+| ET-01 Upload CV | ✅ | PDF + JPG + PNG + WEBP |
+| ET-03 Affichage CV | ✅ | |
+| ET-04 Scoring CV | ✅ | 5 niveaux (INCOMPLET → EXCELLENT) |
+| ET-05 Postuler | ✅ | Anti-doublon par offre |
+| EN-01 Publier offre | ✅ | |
+| EN-02 Gérer ses offres | ✅ | |
+| EN-05 Décision candidature | ✅ | |
+| AD-01 Type document | ✅ | |
+| AD-02 Modèle .docx | ✅ | `[champs]` + rectangle QR rouge |
+| **+ Logout JWT** | ✅ | `POST /logout` + blacklist en mémoire ← **NEW v5** |
 
-**Sprint 1 : 21/21 pts → 100%**
-
----
-
-### Sprint 2 — CV + Offres + Candidatures ✅ 100%
-
-| US | Pts | Statut |
-|----|-----|--------|
-| U-05 Profil | 3 | ✅ |
-| ET-01 Upload CV | 3 | ✅ |
-| ET-02 Extraction IA async | 8 | ✅ |
-| ET-03 Affichage CV | 3 | ✅ |
-| ET-04 Scoring CV | 3 | ✅ |
-| EA-01 Créer offre | 3 | ✅ |
-| EA-02 Listing & recherche | 5 | ✅ |
-| EA-03 Validation offre | 3 | ✅ |
-| ET-05 Postuler | 3 | ✅ |
-| EA-05 Décision candidature | 3 | ✅ |
-
-**Sprint 2 : 37/37 pts → 100%**
+**Sprint 1 : 36/36 pts → 100%**
 
 ---
 
-### Sprint 3 — Stages + Documents + Encadrants 🟡 ~78%
+### Sprint 2 — CV IA + Rapports + Encadrants (35 pts) 🟡 ~86%
 
-| US | Pts | Statut | Détails |
-|----|-----|--------|---------|
-| EA-06 Tableau candidatures | 3 | ✅ | |
-| AD-08 Créer stage | 3 | ✅ | Depuis candidature acceptée |
-| AD-09 Assigner encadrants | 3 | ✅ | + dates, sujet, mission |
-| AD-01 Créer type document | 2 | ✅ | |
-| AD-02 Upload modèle .docx | 5 | ✅ | [champs] + zone QR rouge |
-| EN-01 Score compatibilité CV | 5 | ✅ | |
-| **EE-01 Suivi encadrant acad.** | 5 | ✅ | Stages + rapports ← **NEW v5** |
-| **EE-02 Suivi encadrant entr.** | 5 | ✅ | Convention + mission ← **NEW v5** |
-| AD-10 Expiration documents | 5 | 🔶 | @Scheduled ✅, révocation manuelle ⬜ |
-| EA-04 Recommandation IA offres | 8 | ⬜ | Non réalisé |
+| US | Statut | Détails |
+|----|--------|---------|
+| ET-02 Extraction IA async | ✅ | `@Async`, NVIDIA NIM + OpenRouter fallback |
+| ET-07 Rapport hebdo/final | ✅ | BROUILLON → SOUMIS ← **NEW v5** |
+| ET-08 Retours encadrant | ✅ | VALIDE / REJETE visibles ← **NEW v5** |
+| EN-03 Tableau candidatures | ✅ | Filtres, tri date |
+| EN-06 Profil candidat complet | ✅ | Détail étudiant pour l'entreprise ← **NEW v5** |
+| EE-03 Définir mission | ✅ | PATCH `/stages/{id}/mission` ← **NEW v5** |
+| EE-04 Signer convention | ✅ | Entreprise + EncadrantEntreprise ← **NEW v5** |
+| EA-01 Suivi stages (acad.) | ✅ | ← **NEW v5** |
+| EA-02 Valider rapport | ✅ | SOUMIS → VALIDE ← **NEW v5** |
+| EA-03 Rejeter rapport | ✅ | SOUMIS → REJETE + commentaire ← **NEW v5** |
+| AD-05 Dashboard stats | ⬜ | Non réalisé |
 
-**Sprint 3 : ~38/49 pts → ~78%** *(+10 pts grâce à EE-01 et EE-02 de v5)*
+**Sprint 2 : ~30/35 pts → ~86%**
 
 ---
 
-### Sprint 4 — Documents avancés + Notifications + Analytics 🟡 ~43%
+### Sprint 3 — Stages + Matching + Audit (27 pts) 🟡 ~70%
 
-| US | Pts | Statut | Détails |
-|----|-----|--------|---------|
-| **EE-03 Rapport de stage** | 8 | ✅ | Hebdo + final, 4 statuts ← **NEW v5** |
-| **EE-04 Signature convention** | 5 | ✅ | Entreprise + encadrant ← **NEW v5** |
-| **U-07 Notifications in-app** | 8 | ✅ | CRUD + marquer lu ← **NEW v5** |
-| **U-08 Centre notifications** | 5 | ✅ | `/api/notifications/*` ← **NEW v5** |
-| AD-03 Génération document | 8 | 🔶 | Backend ✅, UI partielle |
-| AD-04 QR code auth | 8 | 🔶 | Logique ✅, intégration UI partielle |
-| ET-06 Télécharger documents | 3 | ⬜ | Endpoint présent, UI absente |
-| U-06 Notifications email | 5 | ⬜ | Seul OTP — pas les événements |
-| AD-05 Stats admin | 5 | ⬜ | Non réalisé |
-| AD-06 Export CSV | 3 | ⬜ | Non réalisé |
-| AD-07 Logs audit | 3 | ⬜ | Non réalisé |
-| EN-02 Recommandations IA | 8 | ⬜ | Non réalisé |
-| EN-03 Analyse compétences | 5 | ⬜ | Non réalisé |
-| EN-04 Lettre motivation IA | 5 | ⬜ | Non réalisé |
+| US | Statut | Détails |
+|----|--------|---------|
+| EA-04 Recommandation IA offres | ⬜ | Non réalisé |
+| AD-06 Export CSV | ⬜ | Non réalisé |
+| **AD-07 Logs d'audit** | ✅ | LogActiviteController (3 endpoints) + SessionConnexionController (3 endpoints) ← **NEW v6** |
+| AD-08 Créer stage depuis candidature | ✅ | `POST /api/admin/stages/depuis-candidature/{id}` |
+| AD-09 Assigner encadrants | ✅ | + dates, sujet, mission |
+| AD-10 Expiration documents | 🔶 | `@Scheduled` horaire ✅, révocation manuelle UI absente |
+| EE-01 Suivi (enc. académique) | ✅ | Stages + rapports + validation ← **NEW v5** |
+| EE-02 Suivi (enc. entreprise) | ✅ | Stages + convention + mission ← **NEW v5** |
 
-**Sprint 4 : ~34/79 pts → ~43%** *(contre ~10% avant fusion v5)*
+**Sprint 3 : ~19/27 pts → ~70%** *(+3 pts AD-07 grâce à v6)*
+
+---
+
+### Sprint 4 — CDC/Sprints/Tâches + Documents + Notifications (41 pts) 🟡 ~66%
+
+| US | Statut | Détails |
+|----|--------|---------|
+| **EE-05 CDC + Sprints + Tâches** | ✅ | Machine à états CDC/Sprint/Tâche, 10 endpoints, 31 tests unitaires ← **NEW v6** |
+| AD-03 Génération document | 🔶 | Backend + microservice ✅, UI partielle |
+| AD-04 QR code auth | 🔶 | HTTP 200/410/404 ✅, intégration UI partielle |
+| U-06 Notifications email | ⬜ | Seul OTP — pas les événements métier |
+| U-07 Notifications in-app | ✅ | CRUD + marquer lu/non-lu ← **NEW v5** |
+| U-08 Centre notifications | ✅ | `/api/notifications/*` ← **NEW v5** |
+| EN-04 Matching & reco IA | 🔶 | Scoring 5 composantes ✅, endpoints ✅, persistScores() ✅, UI partielle |
+| ET-06 Télécharger documents | ⬜ | Endpoint `telecharger/{uuid}` ✅, UI absente |
+
+**Sprint 4 : ~27/41 pts → ~66%** *(+8 pts EE-05 grâce à v6)*
 
 ---
 
@@ -538,84 +658,88 @@ apiGetAllUsers()                  apiPatchUserStatut(id, statut) // ← NEW v5
 
 | # | Fonctionnalité | Origine | Valeur est. |
 |---|---------------|---------|------------|
-| 1 | Microservice IA Python (FastAPI) — architecture complète | Perso | ~8 pts |
-| 2 | Multi-provider IA (NVIDIA NIM + OpenRouter fallback) | Perso | ~5 pts |
-| 3 | Signature HMAC-SHA256 des documents générés | Perso | ~5 pts |
-| 4 | Détection zone QR rouge (DrawingML + VML) dans .docx | Perso | ~5 pts |
-| 5 | Pré-génération UUID côté Spring (cohérence fichier↔MySQL) | Perso | ~3 pts |
-| 6 | `@Scheduled` expiration horaire automatique | Perso | ~3 pts |
-| 7 | `@Async` extraction CV non bloquante | Perso | ~3 pts |
-| 8 | Page d'auth QR publique (sans JWT) | Perso | ~3 pts |
-| 9 | HTTP 410 GONE si expiré / 404 si révoqué | Perso | ~1 pt |
-| 10 | `registry.json` persistance modèles microservice | Perso | ~2 pts |
-| 11 | Interface test microservice (4 onglets) | Perso | ~2 pts |
-| 12 | Interface test full-stack (auth+CV+docs) | Perso | ~3 pts |
-| 13 | `duree_validite_jours` configurable par modèle | Perso | ~2 pts |
-| 14 | Support .doc + .docx pour upload templates | Perso | ~1 pt |
-| 15 | Secrets externalisés `.env` / variables d'env | Perso | ~2 pts |
-| 16 | `README.md` — analyse complète backlog + variables | Perso | ~2 pts |
-| 17 | **`POST /api/auth/logout` + JwtBlacklist (mémoire)** | v5 | ~2 pts |
-| 18 | **AdminController complet** (rôles, statuts, demandes stage) | v5 | ~3 pts |
-| 19 | **EN-05 : Profil complet candidat** pour entreprise | v5 | ~3 pts |
-| 20 | **DemandeStage** — entité + service + CRUD admin | v5 | ~3 pts |
-| 21 | **API_DOC_SPRINT1_2.md** — documentation Sprint 1-2 | v5 | ~1 pt |
+| 1 | Microservice IA Python (FastAPI) — architecture complète | v6 perso | ~8 pts |
+| 2 | Multi-provider IA (NVIDIA NIM + OpenRouter fallback) | v6 perso | ~5 pts |
+| 3 | Signature HMAC-SHA256 des documents générés | v6 perso | ~5 pts |
+| 4 | Détection zone QR rouge (DrawingML + VML) dans .docx | v6 perso | ~5 pts |
+| 5 | Pré-génération UUID côté Spring (cohérence fichier↔MySQL) | v6 perso | ~3 pts |
+| 6 | `@Scheduled` expiration horaire automatique | v6 perso | ~3 pts |
+| 7 | `@Async` extraction CV non bloquante | v6 perso | ~3 pts |
+| 8 | Page d'auth QR publique (sans JWT, HTTP 410/404) | v6 perso | ~3 pts |
+| 9 | `registry.json` persistance modèles microservice | v6 perso | ~2 pts |
+| 10 | Interface test microservice HTML (4 onglets) | v6 perso | ~2 pts |
+| 11 | Interface test full-stack (auth+CV+docs) | v6 perso | ~3 pts |
+| 12 | `duree_validite_jours` configurable par modèle | v6 perso | ~2 pts |
+| 13 | Support .doc + .docx pour upload templates | v6 perso | ~1 pt |
+| 14 | Secrets externalisés `.env` / variables d'env Spring | v6 perso | ~2 pts |
+| 15 | `README.md` complet — analyse backlog + variables templates | v6 perso | ~2 pts |
+| 16 | **`POST /api/auth/logout` + JwtBlacklist (mémoire)** | v5 | ~2 pts |
+| 17 | **AdminController complet** (rôles, statuts, demandes stage) | v5 | ~3 pts |
+| 18 | **Profil complet candidat** pour entreprise (EN-06) | v5 | ~3 pts |
+| 19 | **DemandeStage** — entité + service + CRUD admin | v5 | ~3 pts |
+| 20 | **TransactionTemplate** pattern pour audit fire-and-forget | v6 | ~3 pts |
+| 21 | **31 tests unitaires** — SprintServiceTest (14) + TacheServiceTest (16) + BackendApplicationTests (1) | v6 | ~5 pts |
+| 22 | **Matching IA** — scoring 5 composantes + `persistScores()` + 2 controllers recommandation | v6 | ~5 pts |
 
-**Total estimé hors backlog : ~62 pts (21 fonctionnalités)**
+**Total estimé hors backlog : ~73 pts (22 fonctionnalités)**
 
 ---
 
 ## 10. Évolution Globale & Synthèse
 
-### Calcul d'avancement — version6 (après fusion v5)
+### Calcul d'avancement — version6 (28 mai 2026)
 
-| Catégorie | Avant fusion v5 | Après fusion v5 | Gain |
-|-----------|----------------|-----------------|------|
-| US terminées (100%) | 23 US / 82 pts | **29 US / 118 pts** | +6 US / +36 pts |
-| US partielles (50%) | 3 US / ~10 pts | 3 US / ~10 pts | = |
-| **Backlog réalisé** | **~92 / 138 pts (67%)** | **~128 / 138 pts (93%)** | **+26 pts** |
-| Hors backlog | 16 feat / ~49 pts | **21 feat / ~62 pts** | +5 feat |
+| Catégorie | Avant v6 (v5 seul) | v6 actuel | Gain v6 |
+|-----------|--------------------|-----------|---------|
+| US terminées ✅ | 26 US | **32 US** | +6 (AD-07, EE-05, ET-07, ET-08, EN-06, EE-04) |
+| US partielles 🔶 | 3 US | **4 US** | +1 (EN-04 matching) |
+| US non réalisées ⬜ | 12 US | **5 US** | −7 |
+| **Backlog accompli** | **~75%** | **~83%** (~115/138 pts) | **+8%** |
+| Hors backlog | 19 feat / ~62 pts | **22 feat / ~73 pts** | +3 feat |
 
-### Avancement par Sprint
+### Avancement par Sprint (PDF backlog — 138 pts total)
 
 ```
-Sprint 1  ████████████████████  100%  (21/21 pts)
-Sprint 2  ████████████████████  100%  (37/37 pts)
-Sprint 3  ████████████████░░░░   78%  (~38/49 pts)
-Sprint 4  █████████░░░░░░░░░░░   43%  (~34/79 pts)
+Sprint 1  ████████████████████  100%  (36/36 pts)   Auth + Base + Documents
+Sprint 2  █████████████████░░░   86%  (~30/35 pts)  CV IA + Rapports + Encadrants
+Sprint 3  ██████████████░░░░░░   70%  (~19/27 pts)  Stages + Matching + Audit
+Sprint 4  █████████████░░░░░░░   66%  (~27/41 pts)  CDC/Sprint/Tâche + Docs + Notifs
 
-Backlog global  ██████████████████░░   93%  (~128/138 pts)
+Backlog global  ████████████████░░░░   83%  (~112/138 pts)
 ```
 
-### Ce qui reste à faire (45 pts de backlog non couverts)
+### Ce qui reste à faire (~23 pts de backlog non couverts)
 
 | Priorité | User Story | Pts | Impact |
 |----------|-----------|-----|--------|
-| 🔴 HAUTE | **ET-06** — UI téléchargement documents étudiant | 3 | Utilisateurs bloqués |
-| 🔴 HAUTE | **AD-05** — Dashboard statistiques admin | 5 | Zéro visibilité métriques |
-| 🟡 MOY. | **U-06** — Notifications email (candidatures, stages) | 5 | EmailService partiel |
-| 🟡 MOY. | **AD-03/AD-04** — Finaliser intégration UI documents | — | Backend prêt, UI manquante |
-| 🟡 MOY. | **EA-04** — Recommandation IA offres | 8 | Valeur ajoutée IA |
-| 🟢 BASSE | **EN-02/EN-03/EN-04** — IA avancée | 18 | Nice-to-have |
-| 🟢 BASSE | **AD-06/AD-07** — Export CSV + Logs | 6 | Confort admin |
+| 🔴 HAUTE | **ET-06** — Connecter UI au téléchargement documents | ~3 | Utilisateurs bloqués sans UI |
+| 🔴 HAUTE | **AD-05** — Dashboard statistiques admin | ~5 | Zéro visibilité sur les métriques |
+| 🟡 MOY. | **U-06** — Notifications email (candidature, stage, rapport) | ~5 | EmailService partiel (seul OTP) |
+| 🟡 MOY. | **AD-03/AD-04** — Finaliser intégration UI génération + QR | — | Backend 100% prêt |
+| 🟡 MOY. | **EN-04** — Connecter recommandations IA à l'UI | ~5 | Endpoints prêts, affichage manquant |
+| 🟢 BASSE | **EA-04** — Recommandation IA offres (côté entreprise) | ~8 | Valeur IA, périmètre large |
+| 🟢 BASSE | **AD-06** — Export CSV | ~3 | Confort admin |
 
 ### Points forts du projet
 
 - ✅ **Socle d'authentification** irréprochable (JWT, OTP, Logout, Blacklist)
 - ✅ **Pipeline CV IA** complet et robuste (async, multi-formats, multi-providers)
-- ✅ **Cycle de vie stage** complet : offre → candidature → stage → rapports → convention
+- ✅ **Cycle de vie stage** complet : offre → candidature → stage → CDC → Sprint → Tâche → rapports → convention
+- ✅ **Audit trail** — toutes les actions persistées (LogActivite) + sessions connexion temps-réel
 - ✅ **Notifications in-app** fonctionnelles (création, lecture, compteur)
 - ✅ **Génération documents avec QR** — fonctionnalité phare opérationnelle
 - ✅ **Architecture microservice** — séparation claire Spring Boot ↔ Python
+- ✅ **31 tests unitaires** — Sprint + Tâche machine à états entièrement couverte
 
 ### Recommandations prioritaires
 
-1. **Connecter l'UI aux endpoints documents** (ET-06) — le backend est 100% prêt, c'est 1-2h de frontend
-2. **Étendre les notifications email** (U-06) au-delà du seul OTP (candidature acceptée/refusée, stage créé)
-3. **Implémenter `/api/admin/stats`** pour le dashboard admin (AD-05)
-4. **Tests unitaires** sur les services critiques (AuthService, DocumentService, RapportStageService)
-5. **Config production** — CORS restreint aux domaines autorisés, HTTPS, Nginx reverse-proxy
+1. **UI téléchargement documents** (ET-06) — backend 100% prêt, 1-2h de JavaScript
+2. **Dashboard stats admin** (AD-05) — implémenter `GET /api/admin/stats` (CompteRenderer + agrégats JPA)
+3. **Notifications email** (U-06) — étendre `EmailService` aux événements métier (candidature acceptée, stage créé, rapport validé)
+4. **Recommandations IA dans l'UI** (EN-04) — les endpoints `/recommandations/offres` et `/candidats` sont prêts
+5. **Config production** — CORS restreint, HTTPS, Nginx reverse-proxy, profil Spring `prod`
 
 ---
 
-*Documentation générée le 25 mai 2026 — `feature/version6` (fusion version5 + version6)*  
-*Analyse : 38 US backlog · 21 fonctionnalités hors backlog · **93% du backlog accompli***
+*Documentation mise à jour le 28 mai 2026 — `feature/version6` (fusion version5 + développement personnel v6)*  
+*Backlog PDF : 41 US · 138 pts · Must Have 110 pts · **83% accompli (32 US complètes, 4 partielles, 5 restantes)***

@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class OffreStageDto {
 
@@ -43,6 +44,7 @@ public class OffreStageDto {
         private Integer nombrePlaces;
 
         private Boolean remuneration;
+        private List<String> competencesRequises;
     }
 
     @Data
@@ -69,5 +71,6 @@ public class OffreStageDto {
         private Long entrepriseId;
         private String entrepriseNom;
         private LocalDateTime createdAt;
+        private List<String> competencesRequises;
     }
 }

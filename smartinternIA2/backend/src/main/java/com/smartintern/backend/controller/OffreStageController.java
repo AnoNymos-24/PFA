@@ -51,6 +51,12 @@ public class OffreStageController {
         return ResponseEntity.ok(Map.of("message", "Offre supprimée"));
     }
 
+    @PatchMapping("/api/entreprise/offres/{id}/fermer")
+    public ResponseEntity<OffreStageDto.OffreStageResponse> fermerOffre(
+            @PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(offreStageService.fermerOffre(id, authentication.getName()));
+    }
+
     // ── Étudiant ──────────────────────────────────────────────────────────────
 
     @GetMapping("/api/etudiant/offres")

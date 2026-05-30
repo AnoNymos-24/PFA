@@ -1,6 +1,7 @@
 package com.smartintern.backend.config;
 
 import com.smartintern.backend.security.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -13,11 +14,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend.url:http://localhost:5500,http://127.0.0.1:5500}")
+    private String frontendUrl;
 
     private final JwtAuthFilter jwtAuthFilter;
 
@@ -34,6 +39,9 @@ public class SecurityConfig {
 
                 // ── Public : auth ──────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
+
+                // ── WebSocket / SockJS (auth gérée par WebSocketAuthInterceptor) ──
+                .requestMatchers("/ws/**").permitAll()
 
                 // ── Authentification & vérification de documents (QR code scannable publiquement) ──
                 .requestMatchers("/api/documents/*/authentifier").permitAll()
@@ -76,9 +84,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
+        config.setAllowedOrigins(Arrays.asList(frontendUrl.split(",")));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

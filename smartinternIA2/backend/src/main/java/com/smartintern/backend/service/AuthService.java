@@ -5,6 +5,7 @@ import com.smartintern.backend.entity.User;
 import com.smartintern.backend.repository.UserRepository;
 import com.smartintern.backend.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,8 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
@@ -33,6 +36,14 @@ public class AuthService implements UserDetailsService {
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();
+    }
+
+    /**
+     * Retourne l'entité User complète par email — utilisée par AuthController
+     * pour passer le User aux services d'audit (SessionConnexionService, LogActiviteService).
+     */
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public AuthDto.AuthResponse register(AuthDto.RegisterRequest request) {
@@ -54,7 +65,13 @@ public class AuthService implements UserDetailsService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        emailService.sendOtpEmail(user.getEmail(), user.getFirstName(), otp);
+        try {
+            emailService.sendOtpEmail(user.getEmail(), user.getFirstName(), otp);
+        } catch (Exception e) {
+            // En développement : si SMTP non configuré, on logue l'OTP dans la console
+            log.warn("⚠️  Email non envoyé (SMTP non configuré). OTP pour [{}] : >>>  {}  <<<  — {}",
+                    user.getEmail(), otp, e.getMessage());
+        }
 
         return AuthDto.AuthResponse.builder()
                 .id(user.getId())

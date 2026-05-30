@@ -4,6 +4,7 @@ import com.smartintern.backend.entity.User;
 import com.smartintern.backend.repository.UserRepository;
 import com.smartintern.backend.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,6 +17,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OtpService {
 
     private final UserRepository userRepository;
@@ -65,7 +67,11 @@ public class OtpService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        emailService.sendOtpEmail(email, user.getFirstName(), newCode);
+        try {
+            emailService.sendOtpEmail(email, user.getFirstName(), newCode);
+        } catch (Exception e) {
+            log.warn("⚠️  Email non envoyé (SMTP). OTP pour [{}] : >>>  {}  <<<", email, newCode);
+        }
     }
 
     public void forgotPassword(String email) {
@@ -77,7 +83,11 @@ public class OtpService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        emailService.sendPasswordResetEmail(email, user.getFirstName(), code);
+        try {
+            emailService.sendPasswordResetEmail(email, user.getFirstName(), code);
+        } catch (Exception e) {
+            log.warn("⚠️  Email non envoyé (SMTP). Code reset pour [{}] : >>>  {}  <<<", email, code);
+        }
     }
 
     public void resetPassword(String email, String code, String newPassword) {

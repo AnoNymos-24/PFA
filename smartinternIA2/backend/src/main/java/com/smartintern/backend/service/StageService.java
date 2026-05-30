@@ -72,6 +72,11 @@ public class StageService {
         return toResponse(stage);
     }
 
+    // ── Admin : tous les stages ───────────────────────────────────────────────
+    public List<StageDto.StageResponse> getAllStages() {
+        return stageRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     // ── Étudiant : mon stage actuel ───────────────────────────────────────────
     public List<StageDto.StageResponse> getMesStages(String email) {
         User user = userRepository.findByEmail(email)

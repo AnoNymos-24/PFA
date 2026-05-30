@@ -1,0 +1,2983 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+   <script>
+        (function(){
+            const t = localStorage.getItem('si_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartIntern AI — Mon Espace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="../css/Messaging .css"/>
+  <link rel="icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #2563eb;
+      --blue-dark:  #1d4ed8;
+      --blue-glow:  rgba(37,99,235,0.15);
+      --blue-soft:  #eff6ff;
+      --blue-mid:   #dbeafe;
+      --dark:       #04070f;
+      --dark2:      #0c1220;
+      --dark3:      #111827;
+      --surface:    #141c2e;
+      --surface2:   #1a2540;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+      --text:       #f1f5f9;
+      --text2:      #94a3b8;
+      --text3:      #475569;
+      --green:      #10b981;
+      --green-soft: rgba(16,185,129,0.12);
+      --amber:      #f59e0b;
+      --amber-soft: rgba(245,158,11,0.12);
+      --red:        #ef4444;
+      --red-soft:   rgba(239,68,68,0.12);
+      --purple:     #8b5cf6;
+      --purple-soft:rgba(139,92,246,0.12);
+      --sidebar-w:  240px;
+      --sidebar-col:72px;
+      --topbar-h:   64px;
+    }
+     /* ── Mode clair ── ajoutez ceci juste après */
+    [data-theme="light"] {
+    --dark:    #f8fafc;
+    --dark2:   #ffffff;
+    --surface: #f1f5f9;
+    --surface2:#e2e8f0;
+    --border:  rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.15);
+    --text:    #0f172a;
+    --text2:   #475569;
+    --text3:   #94a3b8;
+}
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Sora', system-ui, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--dark2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+      transition: width 0.25s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed { width: var(--sidebar-col); }
+
+    .sidebar-logo {
+      height: var(--topbar-h);
+      display: flex;
+      align-items: center;
+      padding: 0 1.1rem;
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-mark svg { width: 17px; height: 17px; }
+
+    .logo-text {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.15s;
+    }
+
+    .logo-text span { color: #60a5fa; }
+    .sidebar.collapsed .logo-text { opacity: 0; pointer-events: none; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .nav-section-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 0.6rem 0.6rem 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.15s;
+    }
+
+    .sidebar.collapsed .nav-section-label { opacity: 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.6rem 0.75rem;
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+
+    .nav-item.active {
+      background: var(--blue-glow);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 3px;
+      background: var(--blue);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item svg {
+      width: 18px; height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    .nav-label {
+      opacity: 1;
+      transition: opacity 0.15s;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed .nav-label { opacity: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 99px;
+      min-width: 18px;
+      text-align: center;
+      transition: opacity 0.15s;
+    }
+
+    .sidebar.collapsed .nav-badge { opacity: 0; }
+
+    .sidebar.collapsed .nav-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%; transform: translateY(-50%);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 7px;
+      white-space: nowrap;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 0.85rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .toggle-btn {
+      width: 28px; height: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      color: var(--text2);
+    }
+
+    .toggle-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .toggle-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.5; stroke-linecap: round;
+      transition: transform 0.25s;
+    }
+
+    .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
+
+    .sidebar-profile {
+      padding: 0.75rem 0.6rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: grid; place-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .profile-info { overflow: hidden; transition: opacity 0.15s; }
+    .sidebar.collapsed .profile-info { opacity: 0; }
+
+    .profile-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-role {
+      font-size: 0.68rem;
+      color: var(--text3);
+      white-space: nowrap;
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    .main.collapsed { margin-left: var(--sidebar-col); }
+
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--dark2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .topbar-icon-btn {
+      width: 36px; height: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      color: var(--text2);
+      position: relative;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .topbar-icon-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .topbar-icon-btn svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 1.5px solid var(--dark2);
+    }
+
+    .topbar-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: grid; place-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      border: 2px solid var(--border2);
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 0.875rem;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.25rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+    .btn-primary svg {
+      width: 15px; height: 15px;
+      stroke: #fff; fill: none;
+      stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.25rem;
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover { background: var(--surface); color: var(--text); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .stat-card.blue::before   { background: var(--blue); }
+    .stat-card.green::before  { background: var(--green); }
+    .stat-card.amber::before  { background: var(--amber); }
+    .stat-card.purple::before { background: var(--purple); }
+
+    .stat-icon {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      display: grid; place-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card.blue   .stat-icon { background: var(--blue-glow); }
+    .stat-card.green  .stat-icon { background: var(--green-soft); }
+    .stat-card.amber  .stat-icon { background: var(--amber-soft); }
+    .stat-card.purple .stat-icon { background: var(--purple-soft); }
+
+    .stat-icon svg {
+      width: 18px; height: 18px;
+      fill: none; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .stat-card.blue   .stat-icon svg { stroke: #60a5fa; }
+    .stat-card.green  .stat-icon svg { stroke: var(--green); }
+    .stat-card.amber  .stat-icon svg { stroke: var(--amber); }
+    .stat-card.purple .stat-icon svg { stroke: var(--purple); }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    .stat-trend {
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .stat-trend.up   { color: var(--green); }
+    .stat-trend.same { color: var(--text3); }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .card-action {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #60a5fa;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .card-action:hover { text-decoration: underline; }
+
+    .card-body { padding: 1.25rem 1.5rem; }
+
+    .offre-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .offre-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .offre-item:last-child { border-bottom: none; }
+    .offre-item:hover { background: rgba(255,255,255,0.02); }
+
+    .offre-logo {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text2);
+      letter-spacing: -0.5px;
+    }
+
+    .offre-info { flex: 1; min-width: 0; }
+
+    .offre-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .offre-meta {
+      font-size: 0.75rem;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .offre-meta span { display: flex; align-items: center; gap: 3px; }
+
+    .offre-meta svg {
+      width: 11px; height: 11px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge.new      { background: var(--blue-glow);   color: #60a5fa; }
+    .badge.open     { background: var(--green-soft);  color: var(--green); }
+    .badge.pending  { background: var(--amber-soft);  color: var(--amber); }
+    .badge.rejected { background: var(--red-soft);    color: var(--red); }
+    .badge.accepted { background: var(--green-soft);  color: var(--green); }
+
+    .cand-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .cand-item {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .cand-item:last-child { border-bottom: none; }
+
+    .cand-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .cand-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .cand-company {
+      font-size: 0.75rem;
+      color: var(--text3);
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 6px;
+    }
+
+    .progress-step {
+      flex: 1;
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 99px;
+      position: relative;
+      margin-right: 3px;
+    }
+
+    .progress-step:last-child { margin-right: 0; }
+
+    .progress-step.done { background: var(--blue); }
+    .progress-step.active { background: var(--amber); }
+
+    .progress-label {
+      font-size: 0.68rem;
+      color: var(--text3);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .rapport-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rapport-item:last-child { border-bottom: none; }
+
+    .rapport-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+
+    .rapport-icon svg {
+      width: 16px; height: 16px;
+      stroke: var(--text2); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .rapport-info { flex: 1; }
+
+    .rapport-title {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .rapport-date {
+      font-size: 0.72rem;
+      color: var(--text3);
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      padding: 0 1.5rem 1.25rem;
+      position: relative;
+    }
+
+    .timeline-item:first-child { padding-top: 0.25rem; }
+
+    .timeline-dot-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .timeline-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+
+    .timeline-dot svg {
+      width: 12px; height: 12px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 2.5; stroke-linecap: round;
+    }
+
+    .timeline-dot.done {
+      background: var(--green-soft);
+      border-color: var(--green);
+    }
+
+    .timeline-dot.done svg { stroke: var(--green); }
+
+    .timeline-dot.active {
+      background: var(--blue-glow);
+      border-color: var(--blue);
+    }
+
+    .timeline-dot.active svg { stroke: #60a5fa; }
+
+    .timeline-line {
+      flex: 1;
+      width: 1px;
+      background: var(--border);
+      margin-top: 4px;
+    }
+
+    .timeline-content { flex: 1; padding-top: 2px; }
+
+    .timeline-title {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .timeline-desc {
+      font-size: 0.75rem;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+
+    .timeline-date {
+      font-size: 0.68rem;
+      color: var(--text3);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cv-upload {
+      border: 1.5px dashed var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .cv-upload:hover {
+      border-color: var(--blue);
+      background: var(--blue-glow);
+    }
+
+    .cv-upload svg {
+      width: 28px; height: 28px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+      margin-bottom: 0.75rem;
+    }
+
+    .cv-upload p {
+      font-size: 0.825rem;
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+
+    .cv-upload span {
+      font-size: 0.72rem;
+      color: var(--text3);
+    }
+
+    .notif-list { display: flex; flex-direction: column; }
+
+    .notif-item {
+      display: flex;
+      gap: 0.875rem;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+      transition: background 0.15s;
+    }
+
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: rgba(255,255,255,0.02); }
+    .notif-item.unread { background: rgba(37,99,235,0.04); }
+
+    .notif-dot-indicator {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .notif-item:not(.unread) .notif-dot-indicator { background: transparent; }
+
+    .notif-text {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .notif-text strong { color: var(--text); font-weight: 600; }
+
+    .notif-time {
+      font-size: 0.68rem;
+      color: var(--text3);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.6rem 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar svg {
+      width: 16px; height: 16px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 2; stroke-linecap: round;
+      flex-shrink: 0;
+    }
+
+    .search-bar input {
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 0.875rem;
+      color: var(--text);
+      font-family: inherit;
+      flex: 1;
+    }
+
+    .search-bar input::placeholder { color: var(--text3); }
+
+    .filter-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .chip {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      cursor: pointer;
+      background: none;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .chip:hover { border-color: var(--blue); color: #60a5fa; }
+    .chip.active { background: var(--blue-glow); border-color: var(--blue); color: #60a5fa; }
+
+    .empty {
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+
+    .empty svg {
+      width: 40px; height: 40px;
+      stroke: var(--text3); fill: none;
+      stroke-width: 1.5; stroke-linecap: round;
+      margin-bottom: 1rem;
+    }
+
+    .empty p { font-size: 0.875rem; color: var(--text3); }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: none;
+      place-items: center;
+    }
+    .modal-overlay.open { display: grid; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 450px;
+      margin: 1rem;
+    }
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      font-size: 1.2rem;
+    }
+    .modal-error {
+      display: none;
+      color: var(--red);
+      font-size: 0.825rem;
+      margin-bottom: 1rem;
+    }
+    .btn-detail {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-detail:hover {
+  background: var(--primary);
+  color: white;
+}
+/* MODALE DÉTAILS */
+.modal-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-detail-content {
+  background: white;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.modal-detail-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.modal-detail-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.modal-detail-close:hover {
+  color: #1f2937;
+}
+
+.modal-detail-body {
+  padding: 1.5rem;
+}
+
+.modal-detail-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0 0 1rem 1rem;
+}
+
+/* Style pour l'en-tête des détails */
+.detail-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.detail-title-section h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  color: #1f2937;
+}
+
+.detail-title-section p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Grille d'informations */
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-info-card {
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.detail-info-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.detail-info-value {
+  display: block;
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Sections */
+.detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.detail-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.detail-section p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.detail-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.competence-tag {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 0.375rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Boutons */
+.btn-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+/* Styles similaires à l'encadrant */
+        .mission-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .mission-body {
+            padding: 1rem;
+        }
+        .compte-rendu-item {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .statut-A_FAIRE { background: var(--amber-soft); color: var(--amber); }
+        .statut-EN_COURS { background: var(--blue-glow); color: #60a5fa; }
+        .statut-TERMINEE { background: var(--green-soft); color: var(--green); }
+        .statut-VALIDE { background: var(--green-soft); color: var(--green); }
+        .statut-REJETE { background: var(--red-soft); color: var(--red); }
+        .statut-EN_ATTENTE { background: var(--amber-soft); color: var(--amber); }
+        /* Ajoutez ces styles dans votre section <style> */
+.statut-A_FAIRE { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.statut-EN_COURS { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+.statut-TERMINEE { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.statut-VALIDE { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.statut-REJETE { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.statut-EN_ATTENTE { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+.mission-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.mission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.mission-body {
+    padding: 1rem;
+}
+.compte-rendu-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .content { animation: fadeUp 0.3s ease; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid  { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-col); }
+      .sidebar .logo-text,
+      .sidebar .nav-label,
+      .sidebar .nav-badge,
+      .sidebar .nav-section-label,
+      .sidebar .profile-info { opacity: 0; pointer-events: none; }
+      .main { margin-left: var(--sidebar-col); }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="../index.html">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-text">SmartIntern <span>AI</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item active" data-view="accueil" data-tooltip="Accueil" onclick="showView('accueil', this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="nav-label">Tableau de bord</span>
+      </a>
+      <a class="nav-item" data-view="offres" data-tooltip="Offres" onclick="showView('offres', this)">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="nav-label">Rechercher des offres</span>
+      </a>
+      <a class="nav-item" data-view="candidatures" data-tooltip="Candidatures" onclick="showView('candidatures', this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="nav-label">Mes candidatures</span>
+        <span class="nav-badge" id="candidatures-badge">0</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Mon stage</div>
+<a class="nav-item" data-view="suivi" data-tooltip="Suivi" onclick="showView('suivi', this)">
+  <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <span class="nav-label">Suivi du stage</span>
+</a>
+
+<a class="nav-item" data-view="missions" data-tooltip="Missions" onclick="showView('missions', this)">
+  <svg viewBox="0 0 24 24" width="20" height="20">
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+  <span class="nav-label">Mes missions</span>
+</a>
+
+<a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports', this)">
+  <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  <span class="nav-label">Mes rapports</span>
+</a>
+
+<a class="nav-item" data-view="documents" data-tooltip="Documents" onclick="showView('documents', this)">
+  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <span class="nav-label">Mes documents</span>
+</a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Compte</div>
+      <a class="nav-item" data-view="profil" data-tooltip="Profil" onclick="showView('profil', this)">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-label">Mon profil & CV</span>
+      </a>
+      <a class="nav-item" data-view="notifications" data-tooltip="Notifications" onclick="showView('notifications', this)">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="nav-label">Notifications</span>
+        <span class="nav-badge" id="notifications-badge" style="background:var(--red)">0</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar" id="sidebar-avatar">...</div>
+      <div class="profile-info">
+        <div class="profile-name" id="sidebar-name">Chargement...</div>
+        <div class="profile-role" id="sidebar-role">Étudiant</div>
+      </div>
+    </div>
+
+    <div class="sidebar-toggle">
+      <button class="toggle-btn" onclick="toggleSidebar()" title="Réduire la sidebar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main" id="main">
+    <header class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Tableau de bord</div>
+    </div>
+    <div class="topbar-right">
+        <button class="topbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Changer le thème"></button>
+        <div class="topbar-icon-btn" title="Notifications" onclick="showView('notifications', null)">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-dot" id="topbar-notif-dot" style="display:none;"></span>
+        </div>
+        <div class="topbar-avatar" id="topbar-avatar">...</div>
+        <div class="topbar-icon-btn" title="Déconnexion" onclick="logout()">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+    </div>
+</header>
+
+    <div class="content">
+
+      <!-- ACCUEIL -->
+      <div class="view active" id="view-accueil">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" id="welcome-title">Bonjour 👋</h1>
+            <p class="page-subtitle">Voici un résumé de votre activité sur SmartIntern AI</p>
+          </div>
+          <a class="btn-primary" onclick="showView('offres', document.querySelector('[data-view=offres]'))">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Explorer les offres
+          </a>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="stat-value" id="stat-candidatures">0</div>
+            <div class="stat-label">Candidatures envoyées</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="stat-value" id="stat-entretiens">0</div>
+            <div class="stat-label">Entretien planifié</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <div class="stat-value" id="stat-rapports-attente">0</div>
+            <div class="stat-label">Rapports à déposer</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+            <div class="stat-value" id="stat-offres-dispo">0</div>
+            <div class="stat-label">Offres disponibles</div>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Offres recommandées</div>
+                <div class="card-subtitle">Basées sur votre profil et spécialité</div>
+              </div>
+              <button class="card-action" onclick="showView('offres', document.querySelector('[data-view=offres]'))">Voir tout</button>
+            </div>
+            <div class="offre-list" id="offres-recommandees">
+              <div class="empty"><p>Chargement des offres...</p></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Candidatures récentes</div>
+                <button class="card-action" onclick="showView('candidatures', document.querySelector('[data-view=candidatures]'))">Tout voir</button>
+              </div>
+              <div class="cand-list" id="candidatures-recentes">
+                <div class="empty"><p>Aucune candidature pour le moment</p></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Notifications</div>
+                <button class="card-action" onclick="showView('notifications', document.querySelector('[data-view=notifications]'))">Tout voir</button>
+              </div>
+              <div class="notif-list" id="notifications-recentes">
+                <div class="empty"><p>Aucune notification</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFRES -->
+      <div class="view" id="view-offres">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Rechercher des offres</h1>
+            <p class="page-subtitle" id="offres-count">0 offres disponibles</p>
+          </div>
+        </div>
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Titre, entreprise, compétence…" id="search-offres" onkeyup="filterOffres()"/>
+        </div>
+        <div class="filter-chips" id="filter-chips-offres">
+          <button class="chip active" onclick="setOffreFilter('',this)">Tous</button>
+          <button class="chip" onclick="setOffreFilter('Stage PFE',this)">PFE</button>
+          <button class="chip" onclick="setOffreFilter('Stage d\'été',this)">Été</button>
+          <button class="chip" onclick="setOffreFilter('Stage de perfectionnement',this)">Perfectionnement</button>
+        </div>
+        <div class="card">
+          <div class="offre-list" id="offres-list">
+            <div class="empty"><p>Chargement des offres...</p></div>
+          </div>
+        </div>
+      </div>
+      <!-- MODALE DÉTAILS OFFRE -->
+<div id="offre-detail-modal" class="modal-detail" style="display: none;">
+  <div class="modal-detail-content">
+    <div class="modal-detail-header">
+      <h2>📋 Détails du stage</h2>
+      <button class="modal-detail-close" onclick="closeOffreDetailModal()">&times;</button>
+    </div>
+    
+    <div class="modal-detail-body">
+      <!-- En-tête avec titre et entreprise -->
+      <div class="detail-header-info">
+        <div class="detail-logo" id="detail-offre-logo">EN</div>
+        <div class="detail-title-section">
+          <h3 id="detail-offre-titre">Titre du stage</h3>
+          <p id="detail-offre-entreprise">Entreprise</p>
+        </div>
+      </div>
+      
+      <!-- Informations clés -->
+      <div class="detail-info-grid">
+        <div class="detail-info-card">
+          <span class="detail-info-label">📍 Lieu</span>
+          <span class="detail-info-value" id="detail-offre-lieu">-</span>
+        </div>
+        <div class="detail-info-card">
+          <span class="detail-info-label">⏱️ Durée</span>
+          <span class="detail-info-value" id="detail-offre-duree">-</span>
+        </div>
+        <div class="detail-info-card">
+          <span class="detail-info-label">🏷️ Type</span>
+          <span class="detail-info-value" id="detail-offre-type">-</span>
+        </div>
+      </div>
+      
+      <!-- Description -->
+      <div class="detail-section">
+        <h4>📄 Description du stage</h4>
+        <p id="detail-offre-description"></p>
+      </div>
+      
+      <!-- Compétences -->
+      <div class="detail-section">
+        <h4>🎯 Compétences requises</h4>
+        <div id="detail-offre-competences" class="detail-competences"></div>
+      </div>
+    </div>
+    
+    <div class="modal-detail-footer">
+      <button class="btn-secondary" onclick="closeOffreDetailModal()">Fermer</button>
+      <button class="btn-primary" onclick="postulerDepuisModal()">Postuler à cette offre</button>
+    </div>
+    <input type="hidden" id="postuler-offre-id">
+  </div>
+</div>
+      <!-- CANDIDATURES -->
+      <div class="view" id="view-candidatures">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mes candidatures</h1>
+            <p class="page-subtitle" id="candidatures-subtitle">0 candidature</p>
+          </div>
+           <div class="filter-chips">
+          <button class="chip active" onclick="setCandFilter('',this)">Toutes</button>
+          <button class="chip" onclick="setCandFilter('EN_ATTENTE',this)">En attente</button>
+          <button class="chip" onclick="setCandFilter('EN_EXAMEN',this)">En examen</button>
+          <button class="chip" onclick="setCandFilter('ENTRETIEN',this)">Entretien</button>
+          <button class="chip" onclick="setCandFilter('ACCEPTEE',this)">Acceptées</button>
+          <button class="chip" onclick="setCandFilter('REFUSEE',this)">Refusées</button>
+        </div>
+        </div>
+        <div class="card">
+          <div class="cand-list" id="candidatures-list">
+            <div class="empty"><p>Chargement de vos candidatures...</p></div>
+          </div>
+        </div>
+      </div>
+
+     <!-- SUIVI -->
+<div class="view" id="view-suivi">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Suivi du stage</h1>
+      <p class="page-subtitle" id="stage-title">Aucun stage en cours</p>
+    </div>
+    <a class="btn-primary" onclick="showView('rapports', document.querySelector('[data-view=rapports]'))">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Déposer un rapport
+    </a>
+  </div>
+  <div id="suivi-content">
+    <div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>
+  </div>
+</div>
+
+<!-- MISSIONS -->
+<div class="view" id="view-missions">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes missions</h1>
+      <p class="page-subtitle">Suivez vos missions et soumettez vos comptes-rendus</p>
+    </div>
+  </div>
+  <div id="missions-content">
+    <div class="empty"><p>Chargement de vos missions...</p></div>
+  </div>
+</div>
+
+
+
+<!-- DOCUMENTS -->
+<div class="view" id="view-documents">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes documents</h1>
+      <p class="page-subtitle">Téléchargez vos documents de stage pré-remplis</p>
+    </div>
+  </div>
+  <div id="documents-content">
+    <div class="empty"><p>Chargement...</p></div>
+  </div>
+</div>
+
+      <!-- RAPPORTS -->
+      <div class="view" id="view-rapports">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mes rapports</h1>
+            <p class="page-subtitle" id="rapports-subtitle">0 rapport déposé</p>
+          </div>
+           <button class="btn-primary" id="btn-nouveau-rapport" onclick="openRapportModal()" style="display:none;">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouveau rapport
+          </button>
+        </div>
+        <div id="rapports-content">
+          <div class="empty"><p>Chargement de vos rapports...</p></div>
+        </div>
+      </div>
+
+      <!-- PROFIL -->
+      <div class="view" id="view-profil">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mon profil & CV</h1>
+            <p class="page-subtitle">Gérez vos informations personnelles et votre CV</p>
+          </div>
+          <button class="btn-primary" onclick="saveProfil()">Enregistrer les modifications</button>
+        </div>
+        <div class="main-grid">
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Informations personnelles</div></div>
+              <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;">
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Nom</label>
+                  <input type="text" id="profil-nom" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Prénom</label>
+                  <input type="text" id="profil-prenom" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">E-mail</label>
+                  <input type="email" id="profil-email" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);" readonly/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Université</label>
+                  <input type="text" id="profil-universite" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Niveau</label>
+                  <input type="text" id="profil-niveau" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Spécialité</label>
+                  <input type="text" id="profil-specialite" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">Numéro carte étudiant</label>
+                  <input type="text" id="profil-carte" style="width:100%;padding:0.6rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Mon CV</div></div>
+              <div class="card-body">
+                <div id="cv-existant" style="display:none;align-items:center;gap:0.875rem;padding:0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;margin-bottom:1rem;">
+                  <div style="width:38px;height:38px;background:var(--red-soft);border-radius:8px;display:grid;place-items:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style="flex:1;"><div id="cv-nom" style="font-size:0.825rem;font-weight:600;color:var(--text);">—</div><div id="cv-date" style="font-size:0.72rem;color:var(--text3);">—</div></div>
+                  <button onclick="telechargerCv()" style="background:none;border:none;cursor:pointer;color:var(--text2);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+                  <button onclick="supprimerCv()" style="background:none;border:none;cursor:pointer;color:var(--red);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                </div>
+                <div class="cv-upload" id="cv-upload-zone" onclick="document.getElementById('cv-input').click()">
+                  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <p id="cv-upload-text">Glissez votre CV ici ou cliquez pour sélectionner</p>
+                  <span>PDF uniquement · max 5 Mo</span>
+                  <input type="file" id="cv-input" accept=".pdf" style="display:none" onchange="uploadCv(this.files[0])"/>
+                </div>
+                <div id="cv-progress" style="display:none;margin-top:0.75rem;"><div style="height:4px;background:var(--border);border-radius:99px;overflow:hidden;"><div id="cv-progress-bar" style="height:100%;width:0%;background:var(--blue);border-radius:99px;transition:width 0.3s;"></div></div><div id="cv-progress-text" style="font-size:0.75rem;color:var(--text2);margin-top:4px;">Upload en cours…</div></div>
+                <div id="cv-message" style="display:none;margin-top:0.75rem;font-size:0.825rem;"></div>
+              </div>
+            </div>
+
+            <!-- Sécurité - Changer mot de passe -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Sécurité</div></div>
+              <div class="card-body">
+                <button class="btn-secondary" style="width:100%;" onclick="openPasswordModal()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Changer mon mot de passe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="view" id="view-notifications">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle" id="notifications-subtitle">0 non lue</p>
+          </div>
+          <button class="btn-secondary" onclick="marquerToutLu()">Tout marquer comme lu</button>
+        </div>
+        <div class="card">
+          <div class="notif-list" id="notifications-list">
+            <div class="empty"><p>Chargement des notifications...</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGER MOT DE PASSE -->
+<div class="modal-overlay" id="password-modal" onclick="closePasswordModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">
+      Changer mon mot de passe
+      <button class="modal-close" onclick="closePasswordModal()">✕</button>
+    </div>
+    <div id="password-error" class="modal-error"></div>
+    <div class="field">
+      <label>Mot de passe actuel</label>
+      <input type="password" id="old-password" placeholder="Entrez votre mot de passe actuel" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div class="field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="new-password" placeholder="Minimum 8 caractères" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div class="field">
+      <label>Confirmer le nouveau mot de passe</label>
+      <input type="password" id="confirm-password" placeholder="Retapez votre nouveau mot de passe" style="width:100%;padding:0.65rem 0.875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);"/>
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem;">
+      <button class="btn-secondary" onclick="closePasswordModal()">Annuler</button>
+      <button class="btn-primary" onclick="changerMotDePasse()">Modifier</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL POSTULER -->
+<div class="modal-overlay" id="modal-postuler" onclick="closeModalOutside(event,'modal-postuler')">
+  <div class="modal">
+    <div class="modal-title">Postuler à l'offre<button class="modal-close" onclick="closeModal('modal-postuler')">✕</button></div>
+    <div id="postuler-offre-info" style="background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+      <div id="postuler-titre" style="font-weight:700;margin-bottom:4px;">—</div>
+      <div id="postuler-entreprise" style="font-size:.8rem;color:var(--text3);">—</div>
+    </div>
+    
+    <div style="margin-bottom: 1rem;">
+  <label style="font-size:.85rem;display:block;margin-bottom:5px;">
+    CV (PDF ou DOC)
+  </label>
+  <input type="file" id="cv-file" accept=".pdf,.doc,.docx" />
+</div>
+    <div id="postuler-success" class="modal-success"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="closeModal('modal-postuler')">Annuler</button>
+      <button class="btn-primary" id="btn-postuler-confirm" onclick="confirmerPostuler()">
+        <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>Envoyer ma candidature
+      </button>
+    </div>
+    <div id="postuler-error" class="modal-error"></div>
+  </div>
+</div>
+<!-- Modal Soumettre compte-rendu -->
+<div class="modal-overlay" id="modal-compte-rendu" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal" style="max-width: 600px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:1.5rem;">
+            <span style="font-size:1.1rem;font-weight:800;">📝 Soumettre un compte-rendu</span>
+            <button onclick="closeModal('modal-compte-rendu')" style="background:none;border:none;cursor:pointer;">✕</button>
+        </div>
+        <div class="field">
+            <label>Mission</label>
+            <div id="cr-mission-titre" style="background:var(--surface2);padding:0.5rem;border-radius:8px;"></div>
+        </div>
+        <div class="field">
+            <label>Votre compte-rendu *</label>
+            <textarea id="cr-contenu" rows="8" placeholder="Décrivez votre avancement, les difficultés rencontrées, ce que vous avez appris..."></textarea>
+        </div>
+        <div class="field">
+            <label>Commentaire additionnel (optionnel)</label>
+            <textarea id="cr-commentaire" rows="3" placeholder="Ajoutez un message pour votre encadrant..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button class="btn-ghost" onclick="closeModal('modal-compte-rendu')">Annuler</button>
+            <button class="btn-primary" onclick="soumettreCompteRendu()">Soumettre</button>
+        </div>
+    </div>
+</div>
+<!-- MODAL DÉPOSER RAPPORT -->
+<div class="modal-overlay" id="modal-rapport" onclick="closeModalOutside(event,'modal-rapport')">
+  <div class="modal" style="max-width:600px; width:90%; overflow-y:auto; max-height:90vh; padding:1.5rem; border-radius:12px;">
+    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h2 style="margin:0;">Déposer un rapport</h2>
+      <button onclick="closeModal('modal-rapport')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+
+    <form id="rapport-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <div style="flex:1 1 200px;">
+          <label>Type de rapport</label>
+          <select id="rapport-type" style="width:100%; padding:0.4rem; border-radius:6px;">
+            <option value="HEBDOMADAIRE">Rapport hebdomadaire</option>
+            <option value="FINAL">Rapport final</option>
+          </select>
+        </div>
+        <div style="flex:1 1 100px;">
+          <label>Numéro de semaine</label>
+          <input type="number" id="rapport-semaine" min="1" max="26" placeholder="ex: 3" style="width:100%; padding:0.4rem; border-radius:6px;"/>
+        </div>
+      </div>
+
+      <div>
+        <label>Titre du rapport *</label>
+        <input type="text" id="rapport-titre" placeholder="ex: Semaine 3 — Développement du module auth" style="width:100%; padding:0.5rem; border-radius:6px;"/>
+      </div>
+
+      <div>
+        <label>Contenu / Résumé *</label>
+        <textarea id="rapport-contenu" placeholder="Décrivez les tâches réalisées, les difficultés rencontrées et les points à aborder…"
+                  style="width:100%; padding:0.5rem; border-radius:6px; min-height:150px; resize:vertical;"></textarea>
+      </div>
+
+      <div>
+        <label>Fichiers / Images (optionnel)</label>
+        <input type="file" id="rapport-fichiers" multiple style="width:100%;"/>
+        <small style="color:var(--text3);">Vous pouvez joindre plusieurs fichiers ou images.</small>
+      </div>
+
+      <div id="rapport-error" class="modal-error" style="display:none;"></div>
+      <div id="rapport-success" class="modal-success" style="display:none;"></div>
+
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-rapport')">Annuler</button>
+        <button type="button" class="btn-primary" id="btn-rapport-confirm" onclick="confirmerRapport()" style="display:flex; align-items:center; gap:0.5rem;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Déposer le rapport
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/auth.js"></script>
+<script src="../js/api.js"></script>
+<!-- SockJS + STOMP (nécessaires pour le WebSocket) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<!-- Messagerie SmartIntern -->
+<script src="../js/Messaging.js"></script>
+<script src="../js/theme.js"></script>
+<script>
+requireAuth();
+
+
+if (getRole() !== 'ROLE_ETUDIANT') {
+  redirectByRole(getRole());
+}
+
+// ==================== VARIABLES ====================
+let toutesOffres = [];
+let toutesCandidatures = [];
+let toutesNotifications = [];
+let offreFilter = '';
+let currentFilter = '';
+let currentOffreId = null;
+let currentStageId = null;
+
+// ==================== INITIALISATION ====================
+const prenom = getPrenom() || 'Utilisateur';
+const nom = getNom() || '';
+const initials = (prenom[0] + (nom[0] || '')).toUpperCase();
+
+document.getElementById('welcome-title').textContent = `Bonjour, ${prenom} 👋`;
+document.getElementById('sidebar-name').textContent = `${prenom} ${nom}`.trim();
+document.getElementById('sidebar-avatar').textContent = initials;
+document.getElementById('topbar-avatar').textContent = initials;
+
+// Récupérer et afficher les informations complètes du profil
+async function chargerProfil() {
+  try {
+    const userData = await apiGetMe();
+    if (!userData) return;
+
+    const ini = ((userData.prenom?.[0] || '') + (userData.nom?.[0] || '')).toUpperCase();
+    document.getElementById('welcome-title').textContent  = `Bonjour, ${userData.prenom} 👋`;
+    document.getElementById('sidebar-name').textContent   = `${userData.prenom} ${userData.nom}`;
+    document.getElementById('sidebar-avatar').textContent = ini;
+    document.getElementById('topbar-avatar').textContent  = ini;
+
+    const map = {
+      'profil-nom'        : 'nom',
+      'profil-prenom'     : 'prenom',
+      'profil-email'      : 'email',
+      'profil-universite' : 'universite',
+      'profil-niveau'     : 'niveau',
+      'profil-specialite' : 'specialite',
+      'profil-carte'      : 'numeroCarte'
+    };
+
+    Object.entries(map).forEach(([elId, key]) => {
+      const el = document.getElementById(elId);
+      if (el) el.value = userData[key] || '';
+    });
+
+  } catch (err) {
+    console.error('Erreur profil:', err);
+  }
+
+};
+
+    
+  
+
+
+// ==================== NAVIGATION ====================
+const viewTitles = {
+  accueil: 'Tableau de bord',
+  offres: 'Rechercher des offres',
+  candidatures: 'Mes candidatures',
+  suivi: 'Suivi du stage',
+  missions: 'Mes missions',
+  rapports: 'Mes rapports',
+   documents: 'Mes documents',  
+  profil: 'Mon profil & CV',
+  notifications: 'Notifications'
+  
+};
+
+window.showView = function(name, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  const target = navEl || document.querySelector(`[data-view="${name}"]`);
+  if (target) target.classList.add('active');
+  document.getElementById('topbar-title').textContent = viewTitles[name] || '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ← AJOUT : recharger la vue documents à chaque visite
+  if (name === 'documents') chargerDocuments();
+  if (name === 'missions') chargerMissions(); 
+};
+
+window.toggleSidebar = function() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('main').classList.toggle('collapsed');
+};
+
+// ==================== OFFRES ====================
+async function chargerOffres() {
+  try {
+    toutesOffres = await apiGetOffres();
+
+    afficherOffres(toutesOffres);
+    afficherOffresRecommandees(toutesOffres);
+
+    // ✅ compteur dashboard
+    document.getElementById('stat-offres-dispo').textContent = toutesOffres.length;
+
+  } catch(e) {
+    console.error(e);
+  }
+}
+function getEntreprise(o) {
+  return o.entrepriseNom || 'Entreprise non précisée';
+}
+function afficherOffresRecommandees(offres) {
+  const container = document.getElementById('offres-recommandees');
+
+  if (!container) return;
+
+  container.innerHTML = offres.slice(0, 3).map(o => `
+    <div class="offre-item">
+      <div class="offre-title">${o.titre || 'Sans titre'}</div>
+     <div class="offre-meta">${getEntreprise(o)}</div>
+    </div>
+  `).join('');
+}
+function afficherOffres(offres) {
+  const container = document.getElementById('offres-list');
+  
+  if (offres.length === 0) { 
+    container.innerHTML = '<div class="empty"><p>Aucune offre trouvée</p></div>'; 
+    return; 
+  }
+  
+  container.innerHTML = offres.map(o => `
+    <div class="offre-item">
+      <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
+      <div class="offre-info">
+        <div class="offre-title">${o.titre || 'Sans titre'}</div>
+        <div class="offre-meta">
+          <span>${o.entreprise || 'Entreprise'}</span>
+          <span>${o.localisation || 'Tunisie'}</span>
+          <span>${o.duree || 'N/A'}</span>
+        </div>
+      </div>
+      <span class="badge ${o.nouveau ? 'new' : 'open'}">${o.nouveau ? 'Nouveau' : 'Ouvert'}</span>
+      <button class="btn-detail" onclick="openOffreDetailModal(${o.id})">Détails</button>
+      <button class="btn-primary" onclick="openPostulerModal(${o.id})">Postuler</button>
+    </div>
+  `).join('');
+}
+async function apiGetOffres() {
+  const res = await fetch(`${BASE_URL}/offres`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+async function apiGetOffreDetail(id) {
+  const res = await fetch(`${BASE_URL}/offres/${id}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+function authHeaders() {
+  const token = getToken();
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+}
+function getToken() {
+  return localStorage.getItem("smartintern_token");
+}
+
+function setOffreFilter(type, el) {
+    offreFilter = type;
+    document.querySelectorAll('#filter-chips-offres .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Filtrer et passer à afficherOffres
+    const offresFiltrees = type 
+        ? toutesOffres.filter(o => o.type === type)
+        : toutesOffres;
+    afficherOffres(offresFiltrees);
+}
+
+window.filterOffres = afficherOffres;
+function voirDetailOffre(id) {
+  const o = toutesOffres.find(x=>x.id===id);
+  if (!o) return;
+  alert(`${o.titre}\n\n${o.entreprise} · ${o.lieu||''} · ${o.duree||''}\n\n${o.description||'Aucune description.'}`);
+}
+// ==================== MODALE DÉTAIL OFFRE ====================
+async function openOffreDetailModal(offreId) {
+  try {
+    // Chercher l'offre dans les données déjà chargées
+    const offre = toutesOffres.find(o => o.id === offreId);
+    
+    if (!offre) {
+      alert("Offre non trouvée");
+      return;
+    }
+    
+    // Remplir la modale avec les données de l'offre
+    document.getElementById('detail-offre-titre').textContent = offre.titre || 'Sans titre';
+    document.getElementById('detail-offre-entreprise').textContent = offre.entreprise || offre.entrepriseNom || 'Entreprise non précisée';
+    document.getElementById('detail-offre-lieu').textContent = offre.localisation || offre.lieu || 'Tunisie';
+    document.getElementById('detail-offre-duree').textContent = offre.duree || 'Non spécifiée';
+    document.getElementById('detail-offre-type').textContent = offre.type || offre.typeStage || 'Stage';
+    document.getElementById('detail-offre-description').textContent = offre.description || 'Aucune description disponible pour cette offre.';
+    
+    // ✅ GESTION CORRIGÉE DES COMPÉTENCES
+    const competencesContainer = document.getElementById('detail-offre-competences');
+    
+    // Vérifier si competences existe et est un tableau
+    let competencesList = [];
+    
+    if (offre.competences) {
+      // Si c'est un tableau
+      if (Array.isArray(offre.competences)) {
+        competencesList = offre.competences;
+      }
+      // Si c'est une string (ex: "Java, Python, SQL")
+      else if (typeof offre.competences === 'string') {
+        competencesList = offre.competences.split(',').map(c => c.trim());
+      }
+      // Si c'est autre chose
+      else {
+        competencesList = [];
+      }
+    }
+    
+    // Vérifier aussi competencesRequises
+    if (offre.competencesRequises) {
+      if (Array.isArray(offre.competencesRequises)) {
+        competencesList = [...competencesList, ...offre.competencesRequises];
+      } else if (typeof offre.competencesRequises === 'string') {
+        competencesList = [...competencesList, ...offre.competencesRequises.split(',').map(c => c.trim())];
+      }
+    }
+    
+    // Supprimer les doublons
+    competencesList = [...new Set(competencesList)];
+    
+    // Afficher les compétences
+    if (competencesList && competencesList.length > 0) {
+      competencesContainer.innerHTML = competencesList.map(comp => 
+        `<span class="competence-tag">${comp}</span>`
+      ).join('');
+    } else {
+      competencesContainer.innerHTML = '<span class="text-muted">Aucune compétence spécifiée</span>';
+    }
+    
+    // Stocker l'ID pour le bouton postuler dans la modale
+    document.getElementById('postuler-offre-id').value = offreId;
+    
+    // Afficher la modale
+    document.getElementById('offre-detail-modal').style.display = 'flex';
+    
+  } catch(e) {
+    console.error('Erreur:', e);
+    alert('Impossible de charger les détails de cette offre');
+  }
+}
+// Fonction pour fermer la modale des détails
+function closeOffreDetailModal() {
+  const modal = document.getElementById('offre-detail-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// Fonction pour postuler depuis la modale des détails
+function postulerDepuisModal() {
+  const offreIdInput = document.getElementById('postuler-offre-id');
+  if (!offreIdInput) {
+    console.error("Champ postuler-offre-id non trouvé");
+    alert("Erreur: Impossible d'identifier l'offre");
+    return;
+  }
+  
+  const offreId = offreIdInput.value;
+  if (!offreId) {
+    console.error("Offre ID non trouvé");
+    alert("Erreur: Offre non identifiée");
+    return;
+  }
+  
+  // Fermer la modale des détails
+  closeOffreDetailModal();
+  
+  // Ouvrir la modale de candidature
+  if (typeof openPostulerModal === 'function') {
+    openPostulerModal(parseInt(offreId));
+  } else {
+    console.error("openPostulerModal n'est pas définie");
+    alert("Fonction de candidature non disponible. Veuillez rafraîchir la page.");
+  }
+}
+
+// Alternative si vous voulez fermer en cliquant à l'extérieur de la modale
+function setupModalClickOutside() {
+  const modal = document.getElementById('offre-detail-modal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeOffreDetailModal();
+      }
+    });
+  }
+}
+
+// Appeler cette fonction après le chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+  setupModalClickOutside();
+});
+// ===== POSTULER =====
+function openPostulerModal(id, titre, entreprise) {
+  currentOffreId = id;
+  document.getElementById('postuler-titre').textContent = titre;
+  document.getElementById('postuler-entreprise').textContent = entreprise;
+  
+  document.getElementById('postuler-error').style.display='none';
+  document.getElementById('postuler-success').style.display='none';
+  document.getElementById('modal-postuler').classList.add('open');
+}
+
+async function confirmerPostuler() {
+  const btn = document.getElementById('btn-postuler-confirm');
+  const err = document.getElementById('postuler-error');
+  const suc = document.getElementById('postuler-success');
+  
+  err.style.display='none';
+  suc.style.display='none';
+
+  btn.disabled = true;
+  btn.textContent = 'Envoi...';
+
+  try {
+    await apiPostuler(currentOffreId);
+
+    suc.textContent = '✅ Candidature envoyée avec succès !';
+    suc.style.display = 'block';
+
+    setTimeout(() => {
+      closeModal('modal-postuler');
+      chargerCandidatures();
+    }, 1500);
+
+  } catch(e) {
+    err.textContent = 'Erreur : ' + (e.message || 'Une erreur est survenue.');
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Envoyer ma candidature';
+  }
+}
+
+// ==================== CANDIDATURES ====================
+function getStatutLabel(statut) {
+  switch (statut) {
+    case 'EN_ATTENTE': return 'En attente';
+    case 'EN_EXAMEN': return 'En examen';
+    case 'ENTRETIEN': return 'Entretien';
+    case 'ACCEPTEE': return 'Acceptée';
+    case 'REFUSEE': return 'Refusée';
+    default: return statut;
+  }
+}
+
+function getBadgeClass(statut) {
+  switch (statut) {
+    case 'ACCEPTEE': return 'accepted';
+    case 'REFUSEE': return 'rejected';
+    case 'EN_ATTENTE': return 'pending';
+    case 'EN_EXAMEN': return 'review';
+    case 'ENTRETIEN': return 'interview';
+    default: return '';
+  }
+}
+async function chargerCandidatures() {
+  try {
+    toutesCandidatures = await apiGetCandidatures();
+
+    const count = toutesCandidatures.length || 0;
+
+    document.getElementById('candidatures-subtitle').textContent =
+      `${count} candidature${count > 1 ? 's' : ''}`;
+
+    document.getElementById('stat-candidatures').textContent = count;
+    document.getElementById('candidatures-badge').textContent = count;
+
+    // 🔥 AJOUT MANQUANT
+    const entretiens = toutesCandidatures.filter(
+      c => c.statut === 'ENTRETIEN'
+    ).length;
+
+    document.getElementById('stat-entretiens').textContent = entretiens;
+
+    // récents
+    const recentes = toutesCandidatures.slice(0, 2);
+    const recDiv = document.getElementById('candidatures-recentes');
+
+    if (recentes.length === 0) {
+      recDiv.innerHTML = '<div class="empty"><p>Aucune candidature pour le moment</p></div>';
+    } else {
+      recDiv.innerHTML = recentes.map(c => `
+        <div class="cand-item">
+          <div class="cand-top">
+            <div>
+              <div class="cand-title">${c.offreTitre || 'Stage'}</div>
+              <div class="cand-company">
+                ${c.entreprise || ''} · Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+              </div>
+            </div>
+
+            <span class="badge ${getBadgeClass(c.statut)}">
+              ${getStatutLabel(c.statut)}
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // liste complète
+    const container = document.getElementById('candidatures-list');
+
+    if (toutesCandidatures.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucune candidature trouvée</p></div>';
+    } else {
+      container.innerHTML = toutesCandidatures.map(c => `
+        <div class="cand-item">
+          <div class="cand-top">
+            <div>
+              <div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div>
+              <div class="cand-company">
+                Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+              </div>
+            </div>
+
+            <span class="badge ${getBadgeClass(c.statut)}">
+              ${getStatutLabel(c.statut)}
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+  } catch (err) {
+    console.error('Erreur candidatures:', err);
+  }
+}
+window.setCandFilter = function(filter, btn) {
+  currentFilter = filter;
+
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+
+  renderCandidatures();
+};
+window.renderCandidatures = function() {
+  const container = document.getElementById('candidatures-list');
+
+  let data = toutesCandidatures;
+
+  if (currentFilter && currentFilter !== '') {
+    data = data.filter(c => c.statut === currentFilter);
+  }
+
+  if (!data.length) {
+    container.innerHTML = '<div class="empty"><p>Aucune candidature trouvée</p></div>';
+    return;
+  }
+
+  container.innerHTML = data.map(c => `
+    <div class="cand-item">
+      <div class="cand-top">
+        <div>
+          <div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div>
+          <div class="cand-company">
+            Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+          </div>
+        </div>
+
+        <span class="badge ${getBadgeClass(c.statut)}">
+          ${getStatutLabel(c.statut)}
+        </span>
+      </div>
+    </div>
+  `).join('');
+};
+// ==================== STAGE ====================
+// Ajoutez cette fonction avant chargerStage()
+async function verifierToken() {
+    const token = getToken();
+    if (!token) {
+        console.error("Token manquant");
+        return false;
+    }
+    
+    // Vérifier si le token est expiré
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const exp = payload.exp * 1000;
+        if (Date.now() >= exp) {
+            console.error("Token expiré");
+            logout(); // Rediriger vers login
+            return false;
+        }
+        return true;
+    } catch(e) {
+        console.error("Token invalide");
+        return false;
+    }
+}
+// Modifiez la fonction chargerStage
+async function chargerStage() {
+    // Vérifier le token d'abord
+    const tokenOk = await verifierToken();
+    if (!tokenOk) return;
+    
+    const container = document.getElementById('suivi-content');
+    try {
+        const stageData = await apiGetStage();
+        console.log('Stage reçu:', stageData);
+        
+        if (!stageData || !stageData.id) {
+            document.getElementById('stage-title').textContent = "Aucun stage en cours";
+            container.innerHTML = `<div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>`;
+            return;
+        }
+
+    const semaine  = stageData.semaineActuelle || 0;
+    const duree    = stageData.dureeSemaines  || 1;
+    const progress = Math.round((semaine / duree) * 100);
+
+    document.getElementById('stage-title').textContent =
+      `${stageData.offreTitre || 'Stage'} — ${stageData.entrepriseNom || ''}`;
+
+    const encadrantsHTML = [
+      stageData.encadrantEntrepriseNom ? `
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--surface2);border-radius:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--blue-glow);display:grid;place-items:center;font-weight:700;color:#60a5fa;">
+            ${(stageData.encadrantEntreprisePrenom?.[0] || '') + (stageData.encadrantEntrepriseNom?.[0] || '')}
+          </div>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;">${stageData.encadrantEntreprisePrenom || ''} ${stageData.encadrantEntrepriseNom}</div>
+            <div style="font-size:.72rem;color:var(--text3);">Encadrant Entreprise · ${stageData.entrepriseNom || ''}</div>
+          </div>
+        </div>` : '',
+      stageData.encadrantAcademiqueNom ? `
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--surface2);border-radius:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--purple-soft);display:grid;place-items:center;font-weight:700;color:var(--purple);">
+            ${(stageData.encadrantAcademiquePrenom?.[0] || '') + (stageData.encadrantAcademiqueNom?.[0] || '')}
+          </div>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;">${stageData.encadrantAcademiquePrenom || ''} ${stageData.encadrantAcademiqueNom}</div>
+            <div style="font-size:.72rem;color:var(--text3);">Encadrant Académique · Université</div>
+          </div>
+        </div>` : ''
+    ].filter(Boolean).join('')
+      || '<p style="color:var(--text3);font-size:.85rem;">Aucun encadrant assigné</p>';
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${stageData.offreTitre || 'Stage'}</div>
+            <div class="card-subtitle">${stageData.entrepriseNom || ''}</div>
+          </div>
+          <span class="badge accepted">En cours</span>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem;">
+              <span style="color:var(--text2);">Semaine ${semaine} sur ${duree}</span>
+              <span style="color:var(--green);font-weight:700;">${progress}%</span>
+            </div>
+            <div style="height:8px;background:var(--surface2);border-radius:99px;">
+              <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div>
+            </div>
+          </div>
+          ${stageData.missionDescription ? `
+          <div style="padding:.875rem;background:var(--surface2);border-radius:10px;margin-bottom:1rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;">Mission</div>
+            <div style="font-size:.85rem;color:var(--text2);">${stageData.missionDescription}</div>
+          </div>` : ''}
+        </div>
+        <div class="card-header">
+          <div class="card-title">Mes encadrants</div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+          ${encadrantsHTML}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-nouveau-rapport').style.display = 'inline-flex';
+    currentStageId = stageData.id;
+
+  } catch (err) {
+        console.error('Erreur stage détaillée:', err);
+        
+        // Si erreur 401, rediriger vers login
+        if (err.message.includes('401') || err.message.includes('invalide')) {
+            alert('Session expirée, veuillez vous reconnecter');
+            logout();
+            return;
+        }
+        
+        container.innerHTML = `<div class="empty"><p>Erreur : ${err.message}</p></div>`;
+    }
+}
+// ==================== RAPPORTS ====================
+// Dans chargerRapports()
+async function chargerRapports() {
+  try {
+    const rapports = await apiGetRapports();
+    // Corrigez ici : utiliser 'EN_ATTENTE' au lieu de 'PENDING'
+    const enAttente = rapports.filter(r => r.statut === 'EN_ATTENTE').length;
+    document.getElementById('stat-rapports-attente').textContent = enAttente;
+    document.getElementById('rapports-subtitle').textContent = `${rapports.length} rapport${rapports.length > 1 ? 's' : ''} déposé${rapports.length > 1 ? 's' : ''}`;
+    
+    const container = document.getElementById('rapports-content');
+    if (rapports.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucun rapport déposé</p></div>';
+    } else {
+      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Historique des rapports</div></div>${rapports.map(r => {
+        // Gérer les différents statuts
+        let badgeClass = '';
+        let badgeText = '';
+        switch(r.statut) {
+          case 'VALIDE':
+            badgeClass = 'accepted';
+            badgeText = 'Validé ✓';
+            break;
+          case 'EN_ATTENTE':
+            badgeClass = 'pending';
+            badgeText = 'En attente';
+            break;
+          case 'REJETE':
+            badgeClass = 'rejected';
+            badgeText = 'Rejeté ✗';
+            break;
+          default:
+            badgeClass = 'pending';
+            badgeText = 'En attente';
+        }
+        
+        return `<div class="rapport-item">
+          <div class="rapport-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="rapport-info">
+            <div class="rapport-title">${r.titre}</div>
+            <div class="rapport-date">Déposé le ${new Date(r.dateDepot).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>`;
+      }).join('')}</div>`;
+    }
+  } catch (err) { 
+    console.error('Erreur rapports:', err); 
+  }
+}
+
+// ==================== NOTIFICATIONS ====================
+async function chargerNotifications() {
+  try {
+    toutesNotifications = await apiGetNotifications();
+    const nonLues = toutesNotifications.filter(n => !n.lu).length;
+    document.getElementById('notifications-subtitle').textContent = `${nonLues} non lue${nonLues > 1 ? 's' : ''}`;
+    document.getElementById('notifications-badge').textContent = nonLues;
+    document.getElementById('topbar-notif-dot').style.display = nonLues > 0 ? 'block' : 'none';
+    const recentes = toutesNotifications.slice(0, 3);
+    const recDiv = document.getElementById('notifications-recentes');
+    if (recentes.length === 0) {
+      recDiv.innerHTML = '<div class="empty"><p>Aucune notification</p></div>';
+    } else {
+      recDiv.innerHTML = recentes.map(n => `<div class="notif-item ${!n.lu ? 'unread' : ''}"><div class="notif-dot-indicator"></div><div class="notif-text">${n.message}</div><div class="notif-time">${timeAgo(new Date(n.date))}</div></div>`).join('');
+    }
+    const container = document.getElementById('notifications-list');
+    if (toutesNotifications.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucune notification</p></div>';
+    } else {
+      container.innerHTML = toutesNotifications.map(n => `<div class="notif-item ${!n.lu ? 'unread' : ''}"><div class="notif-dot-indicator"></div><div class="notif-text">${n.message}</div><div class="notif-time">${timeAgo(new Date(n.date))}</div></div>`).join('');
+    }
+  } catch (err) { console.error('Erreur notifications:', err); }
+}
+
+function timeAgo(date) { const s = Math.floor((new Date() - date) / 1000); if (s < 60) return 'à l\'instant'; const m = Math.floor(s/60); if (m<60) return `${m}m`; const h = Math.floor(m/60); if (h<24) return `${h}h`; const d = Math.floor(h/24); if (d<7) return `${d}j`; return date.toLocaleDateString('fr-FR'); }
+
+async function marquerToutLu() { try { await apiMarkNotificationsRead(); chargerNotifications(); } catch(err) { alert(err.message); } }
+
+// ==================== PROFIL ====================
+async function saveProfil() {
+  try {
+    const data = {
+      universite: document.getElementById('profil-universite').value,
+      niveau: document.getElementById('profil-niveau').value,
+      specialite: document.getElementById('profil-specialite').value,
+      numeroCarte: document.getElementById('profil-carte').value
+    };
+    await apiUpdateProfile(data);
+    alert('Profil mis à jour avec succès !');
+    chargerProfil();
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+// ==================== CHANGER MOT DE PASSE ====================
+function openPasswordModal() {
+  document.getElementById('password-modal').classList.add('open');
+  document.getElementById('old-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+  document.getElementById('password-error').style.display = 'none';
+}
+
+function closePasswordModal() {
+  document.getElementById('password-modal').classList.remove('open');
+}
+
+function closePasswordModalOutside(e) {
+  if (e.target === document.getElementById('password-modal')) closePasswordModal();
+}
+
+async function changerMotDePasse() {
+  const oldPassword = document.getElementById('old-password').value;
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  const errorEl = document.getElementById('password-error');
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    errorEl.textContent = 'Veuillez remplir tous les champs';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    errorEl.textContent = 'Les nouveaux mots de passe ne correspondent pas';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    errorEl.textContent = 'Le mot de passe doit contenir au moins 8 caractères';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    await apiChangePassword(oldPassword, newPassword);
+    alert('Mot de passe modifié avec succès !');
+    closePasswordModal();
+  } catch (err) {
+    errorEl.textContent = err.message || 'Erreur lors du changement de mot de passe';
+    errorEl.style.display = 'block';
+  }
+}
+
+// ==================== CV ====================
+async function chargerInfoCv() {
+  try {
+    const info = await apiGetCvInfo();
+    if (info && info.hasCv) {
+      document.getElementById('cv-existant').style.display = 'flex';
+      document.getElementById('cv-nom').textContent = info.fileName;
+      document.getElementById('cv-date').textContent = 'Déposé le ' + new Date(info.uploadedAt).toLocaleDateString('fr-FR');
+      document.getElementById('cv-upload-text').textContent = 'Mettre à jour mon CV';
+    }
+  } catch (err) { console.error('Erreur info CV:', err); }
+}
+
+async function uploadCv(file) {
+  if (!file) return;
+  const progress = document.getElementById('cv-progress');
+  const progressBar = document.getElementById('cv-progress-bar');
+  const message = document.getElementById('cv-message');
+  progress.style.display = 'block';
+  message.style.display = 'none';
+  progressBar.style.width = '30%';
+  try {
+    progressBar.style.width = '70%';
+    const res = await apiUploadCv(file);
+    progressBar.style.width = '100%';
+    message.style.cssText = 'display:block;color:var(--green);font-size:0.825rem;margin-top:0.75rem;';
+    message.textContent = '✅ ' + res.message;
+    setTimeout(() => { progress.style.display = 'none'; chargerInfoCv(); }, 1000);
+  } catch (err) {
+    progressBar.style.background = 'var(--red)';
+    message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
+    message.textContent = '❌ ' + err.message;
+    setTimeout(() => { progress.style.display = 'none'; progressBar.style.background = 'var(--blue)'; }, 2000);
+  }
+}
+
+async function telechargerCv() {
+  try {
+    const blob = await apiDownloadCv();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = document.getElementById('cv-nom').textContent;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+async function supprimerCv() {
+  if (!confirm('Supprimer votre CV ?')) return;
+  try {
+    await apiDeleteCv();
+    document.getElementById('cv-existant').style.display = 'none';
+    document.getElementById('cv-upload-text').textContent = 'Glissez votre CV ici ou cliquez pour sélectionner';
+    document.getElementById('cv-message').style.display = 'none';
+  } catch (err) { alert('Erreur: ' + err.message); }
+}
+
+
+const uploadZone = document.getElementById('cv-upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--blue)'; uploadZone.style.background = 'var(--blue-glow)'; });
+  uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; uploadZone.style.background = ''; });
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.style.borderColor = ''; uploadZone.style.background = ''; const file = e.dataTransfer.files[0]; if (file) uploadCv(file); });
+}
+
+// ==================== DOCUMENTS====================
+async function chargerDocuments() {
+  const container = document.getElementById('documents-content');
+  try {
+    const stage = await apiGetStage();
+    if (!stage || !stage.id) {
+      container.innerHTML = '<div class="empty"><p>Vous devez avoir un stage actif pour accéder aux documents</p></div>';
+      return;
+    }
+
+   const docs = [
+  { type: 'DEMANDE_STAGE',           label: 'Demande de stage',          icon: '📄', roles: ['ROLE_ETUDIANT','ROLE_ADMIN'] },
+  { type: 'CONVENTION_STAGE',        label: 'Convention de stage',        icon: '📋', roles: ['ROLE_ETUDIANT','ROLE_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'CAHIER_CHARGE',           label: 'Cahier de charge',           icon: '📝', roles: ['ROLE_ETUDIANT','ROLE_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'FICHE_EVALUATION',        label: "Fiche d'évaluation",         icon: '⭐', roles: ['ROLE_ENCADRANT_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'AUTORISATION_SOUTENANCE', label: 'Autorisation de soutenance', icon: '✅', roles: ['ROLE_ENCADRANT_ACADEMIQUE','ROLE_ADMIN'] },
+  { type: 'ATTESTATION_STAGE', label: 'Attestation de stage', icon: '🏆', 
+  roles: ['ROLE_ETUDIANT', 'ROLE_ENTREPRISE', 'ROLE_ADMIN'] },
+];
+
+    const role = getRole(); // depuis auth.js
+    const accessibles = docs.filter(d => d.roles.includes(role));
+
+    if (accessibles.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucun document disponible pour votre rôle</p></div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Documents disponibles</div>
+          <div class="card-subtitle">Stage : ${stage.offreTitre || ''} — ${stage.entrepriseNom || ''}</div>
+        </div>
+        ${accessibles.map(d => `
+          <div class="offre-item">
+            <div class="offre-logo" style="font-size:1.2rem;">${d.icon}</div>
+            <div class="offre-info">
+              <div class="offre-title">${d.label}</div>
+              <div class="offre-meta"><span>Pré-rempli avec vos données</span></div>
+            </div>
+            <button class="btn-primary" style="padding:.4rem .875rem;font-size:.78rem;"
+              onclick="telechargerDocument('${d.type}', ${stage.id}, '${d.label}', this)">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Télécharger
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="empty"><p>Erreur : ${err.message}</p></div>`;
+  }
+}
+
+async function telechargerDocument(type, stageId, label, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération...';
+  try {
+    const blob = await apiGenererDocument(type, stageId);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = label.replace(/\s+/g, '_') + '.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Erreur : ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⬇ Télécharger';
+  }
+}
+// Variables pour les missions
+let mesMissions = [];
+let currentMission = null;
+
+// Fonctions pour les missions
+async function chargerMissions() {
+    const container = document.getElementById('missions-content');
+    container.innerHTML = '<div class="empty"><p>⏳ Chargement...</p></div>';
+    
+    try {
+        mesMissions = await apiGetMesMissions();
+        
+        console.log("📦 Missions reçues:", JSON.stringify(mesMissions));
+        console.log("📦 Nombre:", mesMissions?.length);
+        
+        if (!mesMissions || mesMissions.length === 0) {
+            container.innerHTML = '<div class="empty"><p>📭 Aucune mission pour le moment.</p></div>';
+            return;
+        }
+        
+        afficherMissions(mesMissions); // ✅ passe les données en paramètre
+        
+    } catch(err) {
+        console.error('❌ Erreur:', err);
+        container.innerHTML = `<div class="empty"><p>❌ Erreur: ${err.message}</p></div>`;
+    }
+}
+
+function afficherMissions(missions) {  // ← reçoit missions en paramètre
+    const container = document.getElementById('missions-content');
+    
+    if (!missions || missions.length === 0) {
+        container.innerHTML = '<div class="empty"><p>📭 Aucune mission.</p></div>';
+        return;
+    }
+    
+    container.innerHTML = mesMissions.map(mission => {
+        const compteRendus = mission.compteRendus || [];
+        const dernierCr = compteRendus[compteRendus.length - 1];
+        const peutSoumettre = mission.statut !== 'TERMINEE' && 
+            (!dernierCr || dernierCr.statut !== 'EN_ATTENTE');
+        const peutDemarrer = mission.statut === 'A_FAIRE';
+        
+        return `
+            <div class="mission-card">
+                <div class="mission-header">
+                    <div>
+                        <div style="font-weight:700;">🎯 ${escapeHtml(mission.titre)}</div>
+                        <div style="font-size:0.75rem;color:var(--text3);">
+                            Créée le ${formatDate(mission.dateCreation)}
+                        </div>
+                    </div>
+                    <span class="badge statut-${mission.statut}">
+                        ${getStatutText(mission.statut)}
+                    </span>
+                </div>
+                <div class="mission-body">
+                    <p><strong>📝 Description:</strong> ${escapeHtml(mission.description)}</p>
+                    <p><strong>🎯 Objectifs:</strong> ${escapeHtml(mission.objectifs || 'Non définis')}</p>
+                    ${mission.dateEcheance ? `<p><strong>⏰ Échéance:</strong> ${formatDate(mission.dateEcheance)}</p>` : ''}
+                </div>
+                <div style="border-top:1px solid var(--border);padding:1rem;">
+                    <h4 style="margin-bottom:0.75rem;">📋 Comptes-rendus (${compteRendus.length})</h4>
+                    ${compteRendus.map(cr => `
+                        <div class="compte-rendu-item">
+                            <div style="display:flex;justify-content:space-between;">
+                                <strong>Soumis le ${formatDate(cr.dateSoumission)}</strong>
+                                <span class="badge statut-${cr.statut}">${getCRStatutText(cr.statut)}</span>
+                            </div>
+                            <p style="margin-top:0.5rem;">${escapeHtml(cr.contenu)}</p>
+                            ${cr.commentaireEncadrant ? `<p style="margin-top:0.5rem;color:var(--amber);"><em>💬 Réponse:</em> ${escapeHtml(cr.commentaireEncadrant)}</p>` : ''}
+                        </div>
+                    `).join('') || '<p style="color:var(--text3);">Aucun compte-rendu</p>'}
+                    
+                    ${peutDemarrer ? `
+                        <button class="btn-primary" style="margin-top:1rem;width:100%;" onclick="demarrerMission(${mission.id})">
+                            🚀 Démarrer la mission
+                        </button>
+                    ` : ''}
+                    
+                    ${peutSoumettre && mission.statut !== 'A_FAIRE' && mission.statut !== 'TERMINEE' ? `
+                        <button class="btn-primary" style="margin-top:1rem;width:100%;" onclick="ouvrirModalCompteRendu(${mission.id}, '${escapeHtml(mission.titre)}')">
+                            📤 Soumettre un compte-rendu
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function demarrerMission(missionId) {
+    if (!confirm('Démarrer cette mission ?')) return;
+    
+    try {
+        await apiDemarrerMission(missionId);
+        alert('✅ Mission démarrée !');
+        await chargerMissions();
+    } catch(err) {
+        alert('Erreur: ' + err.message);
+    }
+}
+
+function ouvrirModalCompteRendu(missionId, missionTitre) {
+    currentMission = { id: missionId, titre: missionTitre };
+    document.getElementById('cr-mission-titre').textContent = missionTitre;
+    document.getElementById('cr-contenu').value = '';
+    document.getElementById('cr-commentaire').value = '';
+    document.getElementById('modal-compte-rendu').classList.add('open');
+}
+
+async function soumettreCompteRendu() {
+    const contenu = document.getElementById('cr-contenu').value.trim();
+    const commentaire = document.getElementById('cr-commentaire').value.trim();
+    
+    if (!contenu) {
+        alert('Veuillez remplir le contenu du compte-rendu');
+        return;
+    }
+    
+    try {
+        await apiSoumettreCompteRendu(currentMission.id, contenu, commentaire);
+        closeModal('modal-compte-rendu');
+        alert('✅ Compte-rendu soumis !');
+        await chargerMissions();
+    } catch(err) {
+        alert('Erreur: ' + err.message);
+    }
+}
+
+// Fonctions utilitaires
+function getStatutText(statut) {
+    const map = {
+        'A_FAIRE': 'À faire',
+        'EN_COURS': 'En cours',
+        'TERMINEE': 'Terminée'
+    };
+    return map[statut] || statut;
+}
+
+function getCRStatutText(statut) {
+    const map = {
+        'EN_ATTENTE': 'En attente',
+        'VALIDE': 'Validé ✓',
+        'REJETE': 'Rejeté ✗'
+    };
+    return map[statut] || statut;
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+// ==================== LANCEMENT ====================
+chargerProfil();
+chargerOffres();
+chargerCandidatures();
+chargerStage();
+chargerRapports();
+chargerNotifications();
+chargerInfoCv();
+chargerDocuments(); 
+</script>
+</body>
+</html>

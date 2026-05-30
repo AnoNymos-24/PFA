@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Diagramme : OffreStage
@@ -87,6 +89,12 @@ public class OffreStage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "createur_id")
     private User createur;
+
+    @ElementCollection
+    @CollectionTable(name = "offre_competences", joinColumns = @JoinColumn(name = "offre_id"))
+    @Column(name = "competence")
+    @Builder.Default
+    private List<String> competencesRequises = new ArrayList<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

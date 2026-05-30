@@ -26,6 +26,7 @@ from app.modules.cv_extraction.router      import router as cv_router
 from app.modules.document_templates.router import router as templates_router
 from app.modules.document_generation.router import router as generation_router
 from app.modules.matching.router           import router as matching_router
+from app.modules.risque.router             import router as risque_router
 
 # ── Logging ────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -66,6 +67,7 @@ app.include_router(cv_router)
 app.include_router(templates_router)
 app.include_router(generation_router)
 app.include_router(matching_router)
+app.include_router(risque_router)
 
 
 # ── Health check global ────────────────────────────────────────────────────
@@ -100,6 +102,7 @@ async def health_check():
             "document_templates":   "actif",
             "document_generation":  "actif",
             "matching_ia":          "actif",
+            "risque_ia":            "actif",   # AD-04
         },
         "formats_cv_supportes": ["pdf", "pdf_ocr", "jpg", "png", "webp", "docx"],
         "timestamp": datetime.now().isoformat(),

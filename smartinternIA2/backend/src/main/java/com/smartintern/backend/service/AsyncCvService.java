@@ -1,10 +1,7 @@
 package com.smartintern.backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartintern.backend.entity.CvStandardise;
-import com.smartintern.backend.entity.Etudiant;
 import com.smartintern.backend.repository.CvStandardiseRepository;
-import com.smartintern.backend.repository.EtudiantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -31,8 +28,6 @@ public class AsyncCvService {
     private final CvExtractionService cvExtractionService;
     private final CvStandardiseService cvStandardiseService;
     private final CvStandardiseRepository cvStandardiseRepository;
-    private final EtudiantRepository etudiantRepository;
-    private final ObjectMapper objectMapper;
 
     /**
      * Lance l'extraction CV en arrière-plan.
@@ -70,17 +65,6 @@ public class AsyncCvService {
 
                 // Persister dans les tables structurées
                 cvStandardiseService.persisterCvExtrait(emailEtudiant, cvResponse, savedFilename);
-
-                // Mettre à jour le JSON brut sur l'entité Etudiant
-                etudiantRepository.findByEmail(emailEtudiant).ifPresent(etudiant -> {
-                    try {
-                        etudiant.setCvDataJson(
-                                objectMapper.writeValueAsString(cvResponse.getCvStandardise()));
-                        etudiantRepository.save(etudiant);
-                    } catch (Exception e) {
-                        log.warn("[ASYNC] Impossible de sérialiser cvDataJson: {}", e.getMessage());
-                    }
-                });
 
                 log.info("[ASYNC] Extraction CV terminée pour {} — score={}", emailEtudiant,
                         cvResponse.getCvStandardise().getProfil() != null ? "ok" : "partiel");

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartIntern AI — Connexion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -695,14 +696,11 @@
           if (remember) localStorage.setItem('remembered_email', email);
           else          localStorage.removeItem('remembered_email');
 
-          showMsg('success', `Bienvenue ${data.prenom} ! Redirection…`);
+          const prenom = data.firstName || data.prenom || '';
+          showMsg('success', `Bienvenue ${prenom} ! Redirection…`);
 
           setTimeout(() => {
-            if (data.firstLogin) {
-              window.location.href = 'first-login.html';
-            } else {
-              redirectByRole(data.role);
-            }
+            redirectByRole(data.role);
           }, 1000);
 
         } catch (err) {

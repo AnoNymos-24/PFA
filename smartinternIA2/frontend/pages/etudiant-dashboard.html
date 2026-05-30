@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+   <script>
+        (function(){
+            const t = localStorage.getItem('si_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartIntern AI — Mon Espace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="../css/Messaging .css"/>
+  <link rel="icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,6 +45,18 @@
       --sidebar-col:72px;
       --topbar-h:   64px;
     }
+     /* ── Mode clair ── ajoutez ceci juste après */
+    [data-theme="light"] {
+    --dark:    #f8fafc;
+    --dark2:   #ffffff;
+    --surface: #f1f5f9;
+    --surface2:#e2e8f0;
+    --border:  rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.15);
+    --text:    #0f172a;
+    --text2:   #475569;
+    --text3:   #94a3b8;
+}
 
     html, body {
       min-height: 100vh;
@@ -998,6 +1018,281 @@
       font-size: 0.825rem;
       margin-bottom: 1rem;
     }
+    .btn-detail {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-detail:hover {
+  background: var(--primary);
+  color: white;
+}
+/* MODALE DÉTAILS */
+.modal-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-detail-content {
+  background: white;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.modal-detail-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.modal-detail-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.modal-detail-close:hover {
+  color: #1f2937;
+}
+
+.modal-detail-body {
+  padding: 1.5rem;
+}
+
+.modal-detail-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0 0 1rem 1rem;
+}
+
+/* Style pour l'en-tête des détails */
+.detail-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.detail-title-section h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  color: #1f2937;
+}
+
+.detail-title-section p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Grille d'informations */
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-info-card {
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.detail-info-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.detail-info-value {
+  display: block;
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Sections */
+.detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.detail-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.detail-section p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.detail-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.competence-tag {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 0.375rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Boutons */
+.btn-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+/* Styles similaires à l'encadrant */
+        .mission-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .mission-body {
+            padding: 1rem;
+        }
+        .compte-rendu-item {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .statut-A_FAIRE { background: var(--amber-soft); color: var(--amber); }
+        .statut-EN_COURS { background: var(--blue-glow); color: #60a5fa; }
+        .statut-TERMINEE { background: var(--green-soft); color: var(--green); }
+        .statut-VALIDE { background: var(--green-soft); color: var(--green); }
+        .statut-REJETE { background: var(--red-soft); color: var(--red); }
+        .statut-EN_ATTENTE { background: var(--amber-soft); color: var(--amber); }
+        /* Ajoutez ces styles dans votre section <style> */
+.statut-A_FAIRE { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.statut-EN_COURS { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+.statut-TERMINEE { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.statut-VALIDE { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.statut-REJETE { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.statut-EN_ATTENTE { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+.mission-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.mission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.mission-body {
+    padding: 1rem;
+}
+.compte-rendu-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -1054,14 +1349,28 @@
         <span class="nav-badge" id="candidatures-badge">0</span>
       </a>
       <div class="nav-section-label" style="margin-top:0.75rem">Mon stage</div>
-      <a class="nav-item" data-view="suivi" data-tooltip="Suivi" onclick="showView('suivi', this)">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span class="nav-label">Suivi du stage</span>
-      </a>
-      <a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports', this)">
-        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <span class="nav-label">Mes rapports</span>
-      </a>
+<a class="nav-item" data-view="suivi" data-tooltip="Suivi" onclick="showView('suivi', this)">
+  <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <span class="nav-label">Suivi du stage</span>
+</a>
+
+<a class="nav-item" data-view="missions" data-tooltip="Missions" onclick="showView('missions', this)">
+  <svg viewBox="0 0 24 24" width="20" height="20">
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+  <span class="nav-label">Mes missions</span>
+</a>
+
+<a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports', this)">
+  <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  <span class="nav-label">Mes rapports</span>
+</a>
+
+<a class="nav-item" data-view="documents" data-tooltip="Documents" onclick="showView('documents', this)">
+  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <span class="nav-label">Mes documents</span>
+</a>
       <div class="nav-section-label" style="margin-top:0.75rem">Compte</div>
       <a class="nav-item" data-view="profil" data-tooltip="Profil" onclick="showView('profil', this)">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1091,20 +1400,21 @@
 
   <div class="main" id="main">
     <header class="topbar">
-      <div class="topbar-left">
+    <div class="topbar-left">
         <div class="topbar-title" id="topbar-title">Tableau de bord</div>
-      </div>
-      <div class="topbar-right">
+    </div>
+    <div class="topbar-right">
+        <button class="topbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Changer le thème"></button>
         <div class="topbar-icon-btn" title="Notifications" onclick="showView('notifications', null)">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-dot" id="topbar-notif-dot" style="display:none;"></span>
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-dot" id="topbar-notif-dot" style="display:none;"></span>
         </div>
         <div class="topbar-avatar" id="topbar-avatar">...</div>
         <div class="topbar-icon-btn" title="Déconnexion" onclick="logout()">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </div>
-      </div>
-    </header>
+    </div>
+</header>
 
     <div class="content">
 
@@ -1194,13 +1504,72 @@
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input type="text" placeholder="Titre, entreprise, compétence…" id="search-offres" onkeyup="filterOffres()"/>
         </div>
+        <div class="filter-chips" id="filter-chips-offres">
+          <button class="chip active" onclick="setOffreFilter('',this)">Tous</button>
+          <button class="chip" onclick="setOffreFilter('Stage PFE',this)">PFE</button>
+          <button class="chip" onclick="setOffreFilter('Stage d\'été',this)">Été</button>
+          <button class="chip" onclick="setOffreFilter('Stage de perfectionnement',this)">Perfectionnement</button>
+        </div>
         <div class="card">
           <div class="offre-list" id="offres-list">
             <div class="empty"><p>Chargement des offres...</p></div>
           </div>
         </div>
       </div>
-
+      <!-- MODALE DÉTAILS OFFRE -->
+<div id="offre-detail-modal" class="modal-detail" style="display: none;">
+  <div class="modal-detail-content">
+    <div class="modal-detail-header">
+      <h2>📋 Détails du stage</h2>
+      <button class="modal-detail-close" onclick="closeOffreDetailModal()">&times;</button>
+    </div>
+    
+    <div class="modal-detail-body">
+      <!-- En-tête avec titre et entreprise -->
+      <div class="detail-header-info">
+        <div class="detail-logo" id="detail-offre-logo">EN</div>
+        <div class="detail-title-section">
+          <h3 id="detail-offre-titre">Titre du stage</h3>
+          <p id="detail-offre-entreprise">Entreprise</p>
+        </div>
+      </div>
+      
+      <!-- Informations clés -->
+      <div class="detail-info-grid">
+        <div class="detail-info-card">
+          <span class="detail-info-label">📍 Lieu</span>
+          <span class="detail-info-value" id="detail-offre-lieu">-</span>
+        </div>
+        <div class="detail-info-card">
+          <span class="detail-info-label">⏱️ Durée</span>
+          <span class="detail-info-value" id="detail-offre-duree">-</span>
+        </div>
+        <div class="detail-info-card">
+          <span class="detail-info-label">🏷️ Type</span>
+          <span class="detail-info-value" id="detail-offre-type">-</span>
+        </div>
+      </div>
+      
+      <!-- Description -->
+      <div class="detail-section">
+        <h4>📄 Description du stage</h4>
+        <p id="detail-offre-description"></p>
+      </div>
+      
+      <!-- Compétences -->
+      <div class="detail-section">
+        <h4>🎯 Compétences requises</h4>
+        <div id="detail-offre-competences" class="detail-competences"></div>
+      </div>
+    </div>
+    
+    <div class="modal-detail-footer">
+      <button class="btn-secondary" onclick="closeOffreDetailModal()">Fermer</button>
+      <button class="btn-primary" onclick="postulerDepuisModal()">Postuler à cette offre</button>
+    </div>
+    <input type="hidden" id="postuler-offre-id">
+  </div>
+</div>
       <!-- CANDIDATURES -->
       <div class="view" id="view-candidatures">
         <div class="page-header">
@@ -1208,6 +1577,14 @@
             <h1 class="page-title">Mes candidatures</h1>
             <p class="page-subtitle" id="candidatures-subtitle">0 candidature</p>
           </div>
+           <div class="filter-chips">
+          <button class="chip active" onclick="setCandFilter('',this)">Toutes</button>
+          <button class="chip" onclick="setCandFilter('EN_ATTENTE',this)">En attente</button>
+          <button class="chip" onclick="setCandFilter('EN_EXAMEN',this)">En examen</button>
+          <button class="chip" onclick="setCandFilter('ENTRETIEN',this)">Entretien</button>
+          <button class="chip" onclick="setCandFilter('ACCEPTEE',this)">Acceptées</button>
+          <button class="chip" onclick="setCandFilter('REFUSEE',this)">Refusées</button>
+        </div>
         </div>
         <div class="card">
           <div class="cand-list" id="candidatures-list">
@@ -1216,22 +1593,50 @@
         </div>
       </div>
 
-      <!-- SUIVI -->
-      <div class="view" id="view-suivi">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Suivi du stage</h1>
-            <p class="page-subtitle" id="stage-title">Aucun stage en cours</p>
-          </div>
-          <a class="btn-primary" onclick="showView('rapports', document.querySelector('[data-view=rapports]'))">
-            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Déposer un rapport
-          </a>
-        </div>
-        <div id="suivi-content">
-          <div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>
-        </div>
-      </div>
+     <!-- SUIVI -->
+<div class="view" id="view-suivi">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Suivi du stage</h1>
+      <p class="page-subtitle" id="stage-title">Aucun stage en cours</p>
+    </div>
+    <a class="btn-primary" onclick="showView('rapports', document.querySelector('[data-view=rapports]'))">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Déposer un rapport
+    </a>
+  </div>
+  <div id="suivi-content">
+    <div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>
+  </div>
+</div>
+
+<!-- MISSIONS -->
+<div class="view" id="view-missions">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes missions</h1>
+      <p class="page-subtitle">Suivez vos missions et soumettez vos comptes-rendus</p>
+    </div>
+  </div>
+  <div id="missions-content">
+    <div class="empty"><p>Chargement de vos missions...</p></div>
+  </div>
+</div>
+
+
+
+<!-- DOCUMENTS -->
+<div class="view" id="view-documents">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes documents</h1>
+      <p class="page-subtitle">Téléchargez vos documents de stage pré-remplis</p>
+    </div>
+  </div>
+  <div id="documents-content">
+    <div class="empty"><p>Chargement...</p></div>
+  </div>
+</div>
 
       <!-- RAPPORTS -->
       <div class="view" id="view-rapports">
@@ -1240,6 +1645,9 @@
             <h1 class="page-title">Mes rapports</h1>
             <p class="page-subtitle" id="rapports-subtitle">0 rapport déposé</p>
           </div>
+           <button class="btn-primary" id="btn-nouveau-rapport" onclick="openRapportModal()" style="display:none;">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouveau rapport
+          </button>
         </div>
         <div id="rapports-content">
           <div class="empty"><p>Chargement de vos rapports...</p></div>
@@ -1307,8 +1715,8 @@
                 <div class="cv-upload" id="cv-upload-zone" onclick="document.getElementById('cv-input').click()">
                   <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   <p id="cv-upload-text">Glissez votre CV ici ou cliquez pour sélectionner</p>
-                  <span>PDF, JPG, PNG · max 5 Mo</span>
-                  <input type="file" id="cv-input" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadCv(this.files[0])"/>
+                  <span>PDF uniquement · max 5 Mo</span>
+                  <input type="file" id="cv-input" accept=".pdf" style="display:none" onchange="uploadCv(this.files[0])"/>
                 </div>
                 <div id="cv-progress" style="display:none;margin-top:0.75rem;"><div style="height:4px;background:var(--border);border-radius:99px;overflow:hidden;"><div id="cv-progress-bar" style="height:100%;width:0%;background:var(--blue);border-radius:99px;transition:width 0.3s;"></div></div><div id="cv-progress-text" style="font-size:0.75rem;color:var(--text2);margin-top:4px;">Upload en cours…</div></div>
                 <div id="cv-message" style="display:none;margin-top:0.75rem;font-size:0.825rem;"></div>
@@ -1375,11 +1783,125 @@
     </div>
   </div>
 </div>
+<!-- MODAL POSTULER -->
+<div class="modal-overlay" id="modal-postuler" onclick="closeModalOutside(event,'modal-postuler')">
+  <div class="modal">
+    <div class="modal-title">Postuler à l'offre<button class="modal-close" onclick="closeModal('modal-postuler')">✕</button></div>
+    <div id="postuler-offre-info" style="background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+      <div id="postuler-titre" style="font-weight:700;margin-bottom:4px;">—</div>
+      <div id="postuler-entreprise" style="font-size:.8rem;color:var(--text3);">—</div>
+    </div>
+    
+    <div style="margin-bottom: 1rem;">
+  <label style="font-size:.85rem;display:block;margin-bottom:5px;">
+    CV (PDF ou DOC)
+  </label>
+  <input type="file" id="cv-file" accept=".pdf,.doc,.docx" />
+</div>
+    <div id="postuler-success" class="modal-success"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="closeModal('modal-postuler')">Annuler</button>
+      <button class="btn-primary" id="btn-postuler-confirm" onclick="confirmerPostuler()">
+        <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>Envoyer ma candidature
+      </button>
+    </div>
+    <div id="postuler-error" class="modal-error"></div>
+  </div>
+</div>
+<!-- Modal Soumettre compte-rendu -->
+<div class="modal-overlay" id="modal-compte-rendu" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal" style="max-width: 600px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:1.5rem;">
+            <span style="font-size:1.1rem;font-weight:800;">📝 Soumettre un compte-rendu</span>
+            <button onclick="closeModal('modal-compte-rendu')" style="background:none;border:none;cursor:pointer;">✕</button>
+        </div>
+        <div class="field">
+            <label>Mission</label>
+            <div id="cr-mission-titre" style="background:var(--surface2);padding:0.5rem;border-radius:8px;"></div>
+        </div>
+        <div class="field">
+            <label>Votre compte-rendu *</label>
+            <textarea id="cr-contenu" rows="8" placeholder="Décrivez votre avancement, les difficultés rencontrées, ce que vous avez appris..."></textarea>
+        </div>
+        <div class="field">
+            <label>Commentaire additionnel (optionnel)</label>
+            <textarea id="cr-commentaire" rows="3" placeholder="Ajoutez un message pour votre encadrant..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button class="btn-ghost" onclick="closeModal('modal-compte-rendu')">Annuler</button>
+            <button class="btn-primary" onclick="soumettreCompteRendu()">Soumettre</button>
+        </div>
+    </div>
+</div>
+<!-- MODAL DÉPOSER RAPPORT -->
+<div class="modal-overlay" id="modal-rapport" onclick="closeModalOutside(event,'modal-rapport')">
+  <div class="modal" style="max-width:600px; width:90%; overflow-y:auto; max-height:90vh; padding:1.5rem; border-radius:12px;">
+    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h2 style="margin:0;">Déposer un rapport</h2>
+      <button onclick="closeModal('modal-rapport')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+
+    <form id="rapport-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <div style="flex:1 1 200px;">
+          <label>Type de rapport</label>
+          <select id="rapport-type" style="width:100%; padding:0.4rem; border-radius:6px;">
+            <option value="HEBDOMADAIRE">Rapport hebdomadaire</option>
+            <option value="FINAL">Rapport final</option>
+          </select>
+        </div>
+        <div style="flex:1 1 100px;">
+          <label>Numéro de semaine</label>
+          <input type="number" id="rapport-semaine" min="1" max="26" placeholder="ex: 3" style="width:100%; padding:0.4rem; border-radius:6px;"/>
+        </div>
+      </div>
+
+      <div>
+        <label>Titre du rapport *</label>
+        <input type="text" id="rapport-titre" placeholder="ex: Semaine 3 — Développement du module auth" style="width:100%; padding:0.5rem; border-radius:6px;"/>
+      </div>
+
+      <div>
+        <label>Contenu / Résumé *</label>
+        <textarea id="rapport-contenu" placeholder="Décrivez les tâches réalisées, les difficultés rencontrées et les points à aborder…"
+                  style="width:100%; padding:0.5rem; border-radius:6px; min-height:150px; resize:vertical;"></textarea>
+      </div>
+
+      <div>
+        <label>Fichiers / Images (optionnel)</label>
+        <input type="file" id="rapport-fichiers" multiple style="width:100%;"/>
+        <small style="color:var(--text3);">Vous pouvez joindre plusieurs fichiers ou images.</small>
+      </div>
+
+      <div id="rapport-error" class="modal-error" style="display:none;"></div>
+      <div id="rapport-success" class="modal-success" style="display:none;"></div>
+
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-rapport')">Annuler</button>
+        <button type="button" class="btn-primary" id="btn-rapport-confirm" onclick="confirmerRapport()" style="display:flex; align-items:center; gap:0.5rem;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Déposer le rapport
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script src="../js/auth.js"></script>
 <script src="../js/api.js"></script>
+<!-- SockJS + STOMP (nécessaires pour le WebSocket) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<!-- Messagerie SmartIntern -->
+<script src="../js/Messaging.js"></script>
+<script src="../js/theme.js"></script>
 <script>
 requireAuth();
+
 
 if (getRole() !== 'ROLE_ETUDIANT') {
   redirectByRole(getRole());
@@ -1389,6 +1911,10 @@ if (getRole() !== 'ROLE_ETUDIANT') {
 let toutesOffres = [];
 let toutesCandidatures = [];
 let toutesNotifications = [];
+let offreFilter = '';
+let currentFilter = '';
+let currentOffreId = null;
+let currentStageId = null;
 
 // ==================== INITIALISATION ====================
 const prenom = getPrenom() || 'Utilisateur';
@@ -1403,32 +1929,39 @@ document.getElementById('topbar-avatar').textContent = initials;
 // Récupérer et afficher les informations complètes du profil
 async function chargerProfil() {
   try {
-    const user = await apiGetMe();
+    const userData = await apiGetMe();
+    if (!userData) return;
 
-    // Sidebar & topbar
-    const initials = (user.prenom[0] + user.nom[0]).toUpperCase();
-    document.getElementById('welcome-title').textContent  = `Bonjour, ${user.prenom} 👋`;
-    document.getElementById('sidebar-name').textContent   = `${user.prenom} ${user.nom}`;
-    document.getElementById('sidebar-avatar').textContent = initials;
-    document.getElementById('topbar-avatar').textContent  = initials;
+    const ini = ((userData.prenom?.[0] || '') + (userData.nom?.[0] || '')).toUpperCase();
+    document.getElementById('welcome-title').textContent  = `Bonjour, ${userData.prenom} 👋`;
+    document.getElementById('sidebar-name').textContent   = `${userData.prenom} ${userData.nom}`;
+    document.getElementById('sidebar-avatar').textContent = ini;
+    document.getElementById('topbar-avatar').textContent  = ini;
 
-    // Profil
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-    setVal('p-nom',        user.nom);
-    setVal('p-prenom',     user.prenom);
-    setVal('p-email',      user.email);
-    setVal('p-universite', user.universite);
-    setVal('p-niveau',     user.niveau);
-    setVal('p-specialite', user.specialite);
-    setVal('p-carte',      user.carteEtudiant);
+    const map = {
+      'profil-nom'        : 'nom',
+      'profil-prenom'     : 'prenom',
+      'profil-email'      : 'email',
+      'profil-universite' : 'universite',
+      'profil-niveau'     : 'niveau',
+      'profil-specialite' : 'specialite',
+      'profil-carte'      : 'numeroCarte'
+    };
 
-    // Sauvegarder en localStorage aussi
-    localStorage.setItem('smartintern_email', user.email);
+    Object.entries(map).forEach(([elId, key]) => {
+      const el = document.getElementById(elId);
+      if (el) el.value = userData[key] || '';
+    });
 
   } catch (err) {
     console.error('Erreur profil:', err);
   }
-}
+
+};
+
+    
+  
+
 
 // ==================== NAVIGATION ====================
 const viewTitles = {
@@ -1436,9 +1969,12 @@ const viewTitles = {
   offres: 'Rechercher des offres',
   candidatures: 'Mes candidatures',
   suivi: 'Suivi du stage',
+  missions: 'Mes missions',
   rapports: 'Mes rapports',
+   documents: 'Mes documents',  
   profil: 'Mon profil & CV',
   notifications: 'Notifications'
+  
 };
 
 window.showView = function(name, navEl) {
@@ -1449,6 +1985,10 @@ window.showView = function(name, navEl) {
   if (target) target.classList.add('active');
   document.getElementById('topbar-title').textContent = viewTitles[name] || '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ← AJOUT : recharger la vue documents à chaque visite
+  if (name === 'documents') chargerDocuments();
+  if (name === 'missions') chargerMissions(); 
 };
 
 window.toggleSidebar = function() {
@@ -1460,133 +2000,631 @@ window.toggleSidebar = function() {
 async function chargerOffres() {
   try {
     toutesOffres = await apiGetOffres();
-    document.getElementById('offres-count').textContent = `${toutesOffres.length} offres disponibles`;
-    document.getElementById('stat-offres-dispo').textContent = toutesOffres.length;
     afficherOffres(toutesOffres);
+    document.getElementById('stat-offres-dispo').textContent = toutesOffres.length;
 
-    const recommandees = toutesOffres.slice(0, 3);
-    const recDiv = document.getElementById('offres-recommandees');
-    if (recommandees.length === 0) {
-      recDiv.innerHTML = '<div class="empty"><p>Aucune offre disponible</p></div>';
-    } else {
-      recDiv.innerHTML = recommandees.map(o => `
-        <div class="offre-item">
-          <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
-          <div class="offre-info">
-            <div class="offre-title">${o.titre || 'Sans titre'}</div>
-            <div class="offre-meta"><span>${o.entreprise || 'Entreprise'}</span><span>${o.localisation || 'Tunisie'}</span><span>${o.duree || 'N/A'}</span></div>
-          </div>
-          <span class="badge new">Nouveau</span>
-          <button class="btn-primary" style="padding:0.4rem 0.875rem;font-size:0.78rem;" onclick="postulerOffre(${o.id})">Postuler</button>
-        </div>
-      `).join('');
-    }
-  } catch (err) { console.error('Erreur offres:', err); }
+    // ── Recommandation IA ──────────────────────────────────────────
+    // Tente d'abord l'endpoint IA ; repli sur les 3 premières offres
+    await chargerOffresRecommandees();
+
+  } catch(e) {
+    console.error('Erreur chargement offres:', e);
+  }
 }
 
+async function chargerOffresRecommandees() {
+  const container = document.getElementById('offres-recommandees');
+  if (!container) return;
+
+  container.innerHTML = '<div class="empty"><p>Chargement des recommandations IA…</p></div>';
+
+  try {
+    const etudiantId = getUserId();
+    if (!etudiantId) throw new Error('ID étudiant manquant');
+
+    const result = await apiRecommandationOffres(etudiantId, 5);
+    const offresIA = result?.offres || [];
+
+    if (offresIA.length === 0) throw new Error('Aucune recommandation IA');
+
+    container.innerHTML = offresIA.map(o => {
+      const score = o.scoreMatching?.score ?? null;
+      const scoreBadge = score !== null
+        ? `<span style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;
+             background:${score >= 70 ? 'var(--green-soft)' : score >= 40 ? 'var(--amber-soft)' : 'var(--red-soft)'};
+             color:${score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--amber)' : 'var(--red)'};">
+             🤖 ${Math.round(score)}%</span>`
+        : '';
+      return `
+        <div class="offre-item">
+          <div class="offre-logo">${(o.entrepriseNom || '??').substring(0,2).toUpperCase()}</div>
+          <div class="offre-info">
+            <div class="offre-title">${o.titre || 'Sans titre'}</div>
+            <div class="offre-meta">
+              <span>${o.entrepriseNom || 'Entreprise'}</span>
+              <span>${o.lieu || ''}</span>
+              <span>${o.typeStage || ''}</span>
+            </div>
+          </div>
+          ${scoreBadge}
+          <button class="btn-primary" style="font-size:.75rem;padding:.4rem .875rem;"
+            onclick="openPostulerModal(${o.offreId}, '${(o.titre||'').replace(/'/g,"\\'")}', '${(o.entrepriseNom||'').replace(/'/g,"\\'")}')">
+            Postuler
+          </button>
+        </div>`;
+    }).join('');
+
+  } catch(e) {
+    // Repli : afficher les 3 premières offres actives
+    console.info('Recommandation IA indisponible, repli sur liste offres :', e.message);
+    const fallback = toutesOffres.slice(0, 3);
+    if (fallback.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucune offre disponible</p></div>';
+      return;
+    }
+    container.innerHTML = fallback.map(o => `
+      <div class="offre-item">
+        <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
+        <div class="offre-info">
+          <div class="offre-title">${o.titre || 'Sans titre'}</div>
+          <div class="offre-meta">
+            <span>${o.entreprise || 'Entreprise'}</span>
+            <span>${o.localisation || ''}</span>
+          </div>
+        </div>
+        <button class="btn-primary" style="font-size:.75rem;padding:.4rem .875rem;"
+          onclick="openPostulerModal(${o.id}, '${(o.titre||'').replace(/'/g,"\\'")}', '${(o.entreprise||'').replace(/'/g,"\\'")}')">
+          Postuler
+        </button>
+      </div>`).join('');
+  }
+}
+
+function getEntreprise(o) {
+  return o.entrepriseNom || o.entreprise || 'Entreprise non précisée';
+}
 function afficherOffres(offres) {
   const container = document.getElementById('offres-list');
-  if (offres.length === 0) { container.innerHTML = '<div class="empty"><p>Aucune offre trouvée</p></div>'; return; }
+  
+  if (offres.length === 0) { 
+    container.innerHTML = '<div class="empty"><p>Aucune offre trouvée</p></div>'; 
+    return; 
+  }
+  
   container.innerHTML = offres.map(o => `
     <div class="offre-item">
       <div class="offre-logo">${(o.entreprise || '??').substring(0,2).toUpperCase()}</div>
       <div class="offre-info">
         <div class="offre-title">${o.titre || 'Sans titre'}</div>
-        <div class="offre-meta"><span>${o.entreprise || 'Entreprise'}</span><span>${o.localisation || 'Tunisie'}</span><span>${o.duree || 'N/A'}</span></div>
+        <div class="offre-meta">
+          <span>${o.entreprise || 'Entreprise'}</span>
+          <span>${o.localisation || 'Tunisie'}</span>
+          <span>${o.duree || 'N/A'}</span>
+        </div>
       </div>
       <span class="badge ${o.nouveau ? 'new' : 'open'}">${o.nouveau ? 'Nouveau' : 'Ouvert'}</span>
-      <button class="btn-primary" style="padding:0.4rem 0.875rem;font-size:0.78rem;" onclick="postulerOffre(${o.id})">Postuler</button>
+      <button class="btn-detail" onclick="openOffreDetailModal(${o.id})">Détails</button>
+      <button class="btn-primary" onclick="openPostulerModal(${o.id})">Postuler</button>
     </div>
   `).join('');
 }
+async function apiGetOffres() {
+  const res = await fetch(`${BASE_URL}/offres`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+async function apiGetOffreDetail(id) {
+  const res = await fetch(`${BASE_URL}/offres/${id}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+function authHeaders() {
+  const token = getToken();
 
-function filterOffres() {
-  const searchTerm = document.getElementById('search-offres')?.value.toLowerCase() || '';
-  let filtered = toutesOffres;
-  if (searchTerm) filtered = toutesOffres.filter(o => (o.titre?.toLowerCase().includes(searchTerm) || o.entreprise?.toLowerCase().includes(searchTerm)));
-  afficherOffres(filtered);
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+}
+function getToken() {
+  return localStorage.getItem("smartintern_token");
 }
 
-async function postulerOffre(offreId) {
+function setOffreFilter(type, el) {
+    offreFilter = type;
+    document.querySelectorAll('#filter-chips-offres .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Filtrer et passer à afficherOffres
+    const offresFiltrees = type 
+        ? toutesOffres.filter(o => o.type === type)
+        : toutesOffres;
+    afficherOffres(offresFiltrees);
+}
+
+window.filterOffres = afficherOffres;
+function voirDetailOffre(id) {
+  const o = toutesOffres.find(x=>x.id===id);
+  if (!o) return;
+  alert(`${o.titre}\n\n${o.entreprise} · ${o.lieu||''} · ${o.duree||''}\n\n${o.description||'Aucune description.'}`);
+}
+// ==================== MODALE DÉTAIL OFFRE ====================
+async function openOffreDetailModal(offreId) {
   try {
-    await apiPostuler(offreId);
-    alert('Candidature envoyée avec succès !');
-    chargerCandidatures();
-  } catch (err) { alert('Erreur: ' + err.message); }
+    // Chercher l'offre dans les données déjà chargées
+    const offre = toutesOffres.find(o => o.id === offreId);
+    
+    if (!offre) {
+      alert("Offre non trouvée");
+      return;
+    }
+    
+    // Remplir la modale avec les données de l'offre
+    document.getElementById('detail-offre-titre').textContent = offre.titre || 'Sans titre';
+    document.getElementById('detail-offre-entreprise').textContent = offre.entreprise || offre.entrepriseNom || 'Entreprise non précisée';
+    document.getElementById('detail-offre-lieu').textContent = offre.localisation || offre.lieu || 'Tunisie';
+    document.getElementById('detail-offre-duree').textContent = offre.duree || 'Non spécifiée';
+    document.getElementById('detail-offre-type').textContent = offre.type || offre.typeStage || 'Stage';
+    document.getElementById('detail-offre-description').textContent = offre.description || 'Aucune description disponible pour cette offre.';
+    
+    // ✅ GESTION CORRIGÉE DES COMPÉTENCES
+    const competencesContainer = document.getElementById('detail-offre-competences');
+    
+    // Vérifier si competences existe et est un tableau
+    let competencesList = [];
+    
+    if (offre.competences) {
+      // Si c'est un tableau
+      if (Array.isArray(offre.competences)) {
+        competencesList = offre.competences;
+      }
+      // Si c'est une string (ex: "Java, Python, SQL")
+      else if (typeof offre.competences === 'string') {
+        competencesList = offre.competences.split(',').map(c => c.trim());
+      }
+      // Si c'est autre chose
+      else {
+        competencesList = [];
+      }
+    }
+    
+    // Vérifier aussi competencesRequises
+    if (offre.competencesRequises) {
+      if (Array.isArray(offre.competencesRequises)) {
+        competencesList = [...competencesList, ...offre.competencesRequises];
+      } else if (typeof offre.competencesRequises === 'string') {
+        competencesList = [...competencesList, ...offre.competencesRequises.split(',').map(c => c.trim())];
+      }
+    }
+    
+    // Supprimer les doublons
+    competencesList = [...new Set(competencesList)];
+    
+    // Afficher les compétences
+    if (competencesList && competencesList.length > 0) {
+      competencesContainer.innerHTML = competencesList.map(comp => 
+        `<span class="competence-tag">${comp}</span>`
+      ).join('');
+    } else {
+      competencesContainer.innerHTML = '<span class="text-muted">Aucune compétence spécifiée</span>';
+    }
+    
+    // Stocker l'ID pour le bouton postuler dans la modale
+    document.getElementById('postuler-offre-id').value = offreId;
+    
+    // Afficher la modale
+    document.getElementById('offre-detail-modal').style.display = 'flex';
+    
+  } catch(e) {
+    console.error('Erreur:', e);
+    alert('Impossible de charger les détails de cette offre');
+  }
+}
+// Fonction pour fermer la modale des détails
+function closeOffreDetailModal() {
+  const modal = document.getElementById('offre-detail-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// Fonction pour postuler depuis la modale des détails
+function postulerDepuisModal() {
+  const offreIdInput = document.getElementById('postuler-offre-id');
+  if (!offreIdInput) {
+    console.error("Champ postuler-offre-id non trouvé");
+    alert("Erreur: Impossible d'identifier l'offre");
+    return;
+  }
+  
+  const offreId = offreIdInput.value;
+  if (!offreId) {
+    console.error("Offre ID non trouvé");
+    alert("Erreur: Offre non identifiée");
+    return;
+  }
+  
+  // Fermer la modale des détails
+  closeOffreDetailModal();
+  
+  // Ouvrir la modale de candidature
+  if (typeof openPostulerModal === 'function') {
+    openPostulerModal(parseInt(offreId));
+  } else {
+    console.error("openPostulerModal n'est pas définie");
+    alert("Fonction de candidature non disponible. Veuillez rafraîchir la page.");
+  }
+}
+
+// Alternative si vous voulez fermer en cliquant à l'extérieur de la modale
+function setupModalClickOutside() {
+  const modal = document.getElementById('offre-detail-modal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeOffreDetailModal();
+      }
+    });
+  }
+}
+
+// Appeler cette fonction après le chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+  setupModalClickOutside();
+});
+// ===== POSTULER =====
+function openPostulerModal(id, titre, entreprise) {
+  currentOffreId = id;
+  document.getElementById('postuler-titre').textContent = titre;
+  document.getElementById('postuler-entreprise').textContent = entreprise;
+  
+  document.getElementById('postuler-error').style.display='none';
+  document.getElementById('postuler-success').style.display='none';
+  document.getElementById('modal-postuler').classList.add('open');
+}
+
+async function confirmerPostuler() {
+  const btn = document.getElementById('btn-postuler-confirm');
+  const err = document.getElementById('postuler-error');
+  const suc = document.getElementById('postuler-success');
+  
+  err.style.display='none';
+  suc.style.display='none';
+
+  btn.disabled = true;
+  btn.textContent = 'Envoi...';
+
+  try {
+    await apiPostuler(currentOffreId);
+
+    suc.textContent = '✅ Candidature envoyée avec succès !';
+    suc.style.display = 'block';
+
+    setTimeout(() => {
+      closeModal('modal-postuler');
+      chargerCandidatures();
+    }, 1500);
+
+  } catch(e) {
+    err.textContent = 'Erreur : ' + (e.message || 'Une erreur est survenue.');
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Envoyer ma candidature';
+  }
 }
 
 // ==================== CANDIDATURES ====================
+function getStatutLabel(statut) {
+  switch (statut) {
+    case 'EN_ATTENTE': return 'En attente';
+    case 'EN_EXAMEN': return 'En examen';
+    case 'ENTRETIEN': return 'Entretien';
+    case 'ACCEPTEE': return 'Acceptée';
+    case 'REFUSEE': return 'Refusée';
+    default: return statut;
+  }
+}
+
+function getBadgeClass(statut) {
+  switch (statut) {
+    case 'ACCEPTEE': return 'accepted';
+    case 'REFUSEE': return 'rejected';
+    case 'EN_ATTENTE': return 'pending';
+    case 'EN_EXAMEN': return 'review';
+    case 'ENTRETIEN': return 'interview';
+    default: return '';
+  }
+}
 async function chargerCandidatures() {
   try {
     toutesCandidatures = await apiGetCandidatures();
+
     const count = toutesCandidatures.length || 0;
-    document.getElementById('candidatures-subtitle').textContent = `${count} candidature${count > 1 ? 's' : ''}`;
+
+    document.getElementById('candidatures-subtitle').textContent =
+      `${count} candidature${count > 1 ? 's' : ''}`;
+
     document.getElementById('stat-candidatures').textContent = count;
     document.getElementById('candidatures-badge').textContent = count;
 
+    // 🔥 AJOUT MANQUANT
+    const entretiens = toutesCandidatures.filter(
+      c => c.statut === 'ENTRETIEN'
+    ).length;
+
+    document.getElementById('stat-entretiens').textContent = entretiens;
+
+    // récents
     const recentes = toutesCandidatures.slice(0, 2);
     const recDiv = document.getElementById('candidatures-recentes');
+
     if (recentes.length === 0) {
       recDiv.innerHTML = '<div class="empty"><p>Aucune candidature pour le moment</p></div>';
     } else {
       recDiv.innerHTML = recentes.map(c => `
         <div class="cand-item">
           <div class="cand-top">
-            <div><div class="cand-title">${c.offreTitre || 'Stage'}</div><div class="cand-company">${c.entreprise || ''} · Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}</div></div>
-            <span class="badge ${c.statut === 'ACCEPTEE' ? 'accepted' : (c.statut === 'PENDING' ? 'pending' : '')}">${c.statut === 'ACCEPTEE' ? 'Acceptée' : (c.statut === 'PENDING' ? 'En attente' : 'En examen')}</span>
+            <div>
+              <div class="cand-title">${c.offreTitre || 'Stage'}</div>
+              <div class="cand-company">
+                ${c.entreprise || ''} · Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+              </div>
+            </div>
+
+            <span class="badge ${getBadgeClass(c.statut)}">
+              ${getStatutLabel(c.statut)}
+            </span>
           </div>
         </div>
       `).join('');
     }
 
+    // liste complète
     const container = document.getElementById('candidatures-list');
+
     if (toutesCandidatures.length === 0) {
       container.innerHTML = '<div class="empty"><p>Aucune candidature trouvée</p></div>';
     } else {
       container.innerHTML = toutesCandidatures.map(c => `
         <div class="cand-item">
           <div class="cand-top">
-            <div><div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div><div class="cand-company">Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}</div></div>
-            <span class="badge ${c.statut === 'ACCEPTEE' ? 'accepted' : (c.statut === 'PENDING' ? 'pending' : '')}">${c.statut === 'ACCEPTEE' ? 'Acceptée' : (c.statut === 'PENDING' ? 'En attente' : 'En examen')}</span>
+            <div>
+              <div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div>
+              <div class="cand-company">
+                Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+              </div>
+            </div>
+
+            <span class="badge ${getBadgeClass(c.statut)}">
+              ${getStatutLabel(c.statut)}
+            </span>
           </div>
         </div>
       `).join('');
     }
-  } catch (err) { console.error('Erreur candidatures:', err); }
-}
 
+  } catch (err) {
+    console.error('Erreur candidatures:', err);
+  }
+}
+window.setCandFilter = function(filter, btn) {
+  currentFilter = filter;
+
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+
+  renderCandidatures();
+};
+window.renderCandidatures = function() {
+  const container = document.getElementById('candidatures-list');
+
+  let data = toutesCandidatures;
+
+  if (currentFilter && currentFilter !== '') {
+    data = data.filter(c => c.statut === currentFilter);
+  }
+
+  if (!data.length) {
+    container.innerHTML = '<div class="empty"><p>Aucune candidature trouvée</p></div>';
+    return;
+  }
+
+  container.innerHTML = data.map(c => `
+    <div class="cand-item">
+      <div class="cand-top">
+        <div>
+          <div class="cand-title">${c.offreTitre || 'Stage'} — ${c.entreprise || ''}</div>
+          <div class="cand-company">
+            Postulé le ${new Date(c.datePostulation).toLocaleDateString('fr-FR')}
+          </div>
+        </div>
+
+        <span class="badge ${getBadgeClass(c.statut)}">
+          ${getStatutLabel(c.statut)}
+        </span>
+      </div>
+    </div>
+  `).join('');
+};
 // ==================== STAGE ====================
-async function chargerStage() {
-  try {
-    const stages = await apiGetStage();
-    // Le backend retourne une liste — on prend le premier stage actif
-    const stage = Array.isArray(stages) ? stages[0] : stages;
-    if (stage && stage.id) {
-      document.getElementById('stage-title').textContent = `${stage.titre || 'Stage'} — ${stage.entreprise || ''}`;
-      const progress = Math.round((stage.semaineActuelle / stage.dureeSemaines) * 100);
-      document.getElementById('suivi-content').innerHTML = `
-        <div class="card"><div class="card-header"><div class="card-title">Progression du stage</div><div class="card-subtitle">Semaine ${stage.semaineActuelle} / ${stage.dureeSemaines}</div></div>
-        <div class="card-body"><div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Avancement global</span><span style="color:var(--green)">${progress}%</span></div><div style="height:8px;background:var(--surface2);border-radius:99px;"><div style="height:100%;width:${progress}%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div></div></div></div>
-        <div class="card-header"><div class="card-title">Mes encadrants</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">${stage.encadrants?.map(e => `<div style="display:flex;align-items:center;gap:0.875rem;"><div class="profile-avatar" style="width:40px;height:40px;font-size:0.85rem;">${(e.prenom?.[0] || '') + (e.nom?.[0] || '')}</div><div><div style="font-weight:600;">${e.prenom} ${e.nom}</div><div style="font-size:0.72rem;color:var(--text3);">${e.role} · ${e.organisation}</div></div></div>`).join('')}</div></div>
-      `;
+// Ajoutez cette fonction avant chargerStage()
+async function verifierToken() {
+    const token = getToken();
+    if (!token) {
+        console.error("Token manquant");
+        return false;
     }
-  } catch (err) { console.error('Erreur stage:', err); }
+    
+    // Vérifier si le token est expiré
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const exp = payload.exp * 1000;
+        if (Date.now() >= exp) {
+            console.error("Token expiré");
+            logout(); // Rediriger vers login
+            return false;
+        }
+        return true;
+    } catch(e) {
+        console.error("Token invalide");
+        return false;
+    }
 }
+// Modifiez la fonction chargerStage
+async function chargerStage() {
+    // Vérifier le token d'abord
+    const tokenOk = await verifierToken();
+    if (!tokenOk) return;
+    
+    const container = document.getElementById('suivi-content');
+    try {
+        const stageData = await apiGetStage();
+        console.log('Stage reçu:', stageData);
+        
+        if (!stageData || !stageData.id) {
+            document.getElementById('stage-title').textContent = "Aucun stage en cours";
+            container.innerHTML = `<div class="empty"><p>Vous n'avez pas encore de stage accepté</p></div>`;
+            return;
+        }
 
+    const semaine  = stageData.semaineActuelle || 0;
+    const duree    = stageData.dureeSemaines  || 1;
+    const progress = Math.round((semaine / duree) * 100);
+
+    document.getElementById('stage-title').textContent =
+      `${stageData.offreTitre || 'Stage'} — ${stageData.entrepriseNom || ''}`;
+
+    const encadrantsHTML = [
+      stageData.encadrantEntrepriseNom ? `
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--surface2);border-radius:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--blue-glow);display:grid;place-items:center;font-weight:700;color:#60a5fa;">
+            ${(stageData.encadrantEntreprisePrenom?.[0] || '') + (stageData.encadrantEntrepriseNom?.[0] || '')}
+          </div>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;">${stageData.encadrantEntreprisePrenom || ''} ${stageData.encadrantEntrepriseNom}</div>
+            <div style="font-size:.72rem;color:var(--text3);">Encadrant Entreprise · ${stageData.entrepriseNom || ''}</div>
+          </div>
+        </div>` : '',
+      stageData.encadrantAcademiqueNom ? `
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--surface2);border-radius:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--purple-soft);display:grid;place-items:center;font-weight:700;color:var(--purple);">
+            ${(stageData.encadrantAcademiquePrenom?.[0] || '') + (stageData.encadrantAcademiqueNom?.[0] || '')}
+          </div>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;">${stageData.encadrantAcademiquePrenom || ''} ${stageData.encadrantAcademiqueNom}</div>
+            <div style="font-size:.72rem;color:var(--text3);">Encadrant Académique · Université</div>
+          </div>
+        </div>` : ''
+    ].filter(Boolean).join('')
+      || '<p style="color:var(--text3);font-size:.85rem;">Aucun encadrant assigné</p>';
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${stageData.offreTitre || 'Stage'}</div>
+            <div class="card-subtitle">${stageData.entrepriseNom || ''}</div>
+          </div>
+          <span class="badge accepted">En cours</span>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem;">
+              <span style="color:var(--text2);">Semaine ${semaine} sur ${duree}</span>
+              <span style="color:var(--green);font-weight:700;">${progress}%</span>
+            </div>
+            <div style="height:8px;background:var(--surface2);border-radius:99px;">
+              <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div>
+            </div>
+          </div>
+          ${stageData.missionDescription ? `
+          <div style="padding:.875rem;background:var(--surface2);border-radius:10px;margin-bottom:1rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;">Mission</div>
+            <div style="font-size:.85rem;color:var(--text2);">${stageData.missionDescription}</div>
+          </div>` : ''}
+        </div>
+        <div class="card-header">
+          <div class="card-title">Mes encadrants</div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+          ${encadrantsHTML}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-nouveau-rapport').style.display = 'inline-flex';
+    currentStageId = stageData.id;
+
+  } catch (err) {
+        console.error('Erreur stage détaillée:', err);
+        
+        // Si erreur 401, rediriger vers login
+        if (err.message.includes('401') || err.message.includes('invalide')) {
+            alert('Session expirée, veuillez vous reconnecter');
+            logout();
+            return;
+        }
+        
+        container.innerHTML = `<div class="empty"><p>Erreur : ${err.message}</p></div>`;
+    }
+}
 // ==================== RAPPORTS ====================
+// Dans chargerRapports()
 async function chargerRapports() {
   try {
     const rapports = await apiGetRapports();
-    const enAttente = rapports.filter(r => r.statut === 'PENDING').length;
+    // Corrigez ici : utiliser 'EN_ATTENTE' au lieu de 'PENDING'
+    const enAttente = rapports.filter(r => r.statut === 'EN_ATTENTE').length;
     document.getElementById('stat-rapports-attente').textContent = enAttente;
     document.getElementById('rapports-subtitle').textContent = `${rapports.length} rapport${rapports.length > 1 ? 's' : ''} déposé${rapports.length > 1 ? 's' : ''}`;
+    
     const container = document.getElementById('rapports-content');
     if (rapports.length === 0) {
       container.innerHTML = '<div class="empty"><p>Aucun rapport déposé</p></div>';
     } else {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Historique des rapports</div></div>${rapports.map(r => `<div class="rapport-item"><div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="rapport-info"><div class="rapport-title">${r.titre}</div><div class="rapport-date">Déposé le ${new Date(r.dateDepot).toLocaleDateString('fr-FR')}</div></div><span class="badge ${r.statut === 'VALIDE' ? 'accepted' : 'pending'}">${r.statut === 'VALIDE' ? 'Validé ✓' : 'En attente'}</span></div>`).join('')}</div>`;
+      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Historique des rapports</div></div>${rapports.map(r => {
+        // Gérer les différents statuts
+        let badgeClass = '';
+        let badgeText = '';
+        switch(r.statut) {
+          case 'VALIDE':
+            badgeClass = 'accepted';
+            badgeText = 'Validé ✓';
+            break;
+          case 'EN_ATTENTE':
+            badgeClass = 'pending';
+            badgeText = 'En attente';
+            break;
+          case 'REJETE':
+            badgeClass = 'rejected';
+            badgeText = 'Rejeté ✗';
+            break;
+          default:
+            badgeClass = 'pending';
+            badgeText = 'En attente';
+        }
+        
+        return `<div class="rapport-item">
+          <div class="rapport-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="rapport-info">
+            <div class="rapport-title">${r.titre}</div>
+            <div class="rapport-date">Déposé le ${new Date(r.dateDepot).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>`;
+      }).join('')}</div>`;
     }
-  } catch (err) { console.error('Erreur rapports:', err); }
+  } catch (err) { 
+    console.error('Erreur rapports:', err); 
+  }
 }
 
 // ==================== NOTIFICATIONS ====================
@@ -1689,51 +2727,11 @@ async function chargerInfoCv() {
     const info = await apiGetCvInfo();
     if (info && info.hasCv) {
       document.getElementById('cv-existant').style.display = 'flex';
-      document.getElementById('cv-nom').textContent = info.filename || 'cv.pdf';
-      // Le backend ne renvoie pas uploadedAt — on masque la date
-      const dateEl = document.getElementById('cv-date');
-      if (dateEl) dateEl.textContent = info.statutExtraction === 'EXTRAIT' ? 'CV analysé par l\'IA' : 'CV déposé';
+      document.getElementById('cv-nom').textContent = info.fileName;
+      document.getElementById('cv-date').textContent = 'Déposé le ' + new Date(info.uploadedAt).toLocaleDateString('fr-FR');
       document.getElementById('cv-upload-text').textContent = 'Mettre à jour mon CV';
-
-      // Afficher le score de complétude si disponible
-      if (info.scoreCompletude !== undefined) {
-        const scoreEl = document.getElementById('cv-score');
-        if (scoreEl) scoreEl.textContent = `Score IA : ${info.scoreCompletude}/100`;
-      }
     }
   } catch (err) { console.error('Erreur info CV:', err); }
-}
-
-let _cvPollInterval = null;
-
-function demarrerPollStatutCv() {
-  if (_cvPollInterval) return;
-  _cvPollInterval = setInterval(async () => {
-    try {
-      const statut = await apiGetCvStatut();
-      const message = document.getElementById('cv-message');
-      if (statut.statut === 'EXTRAIT') {
-        clearInterval(_cvPollInterval);
-        _cvPollInterval = null;
-        document.getElementById('cv-progress').style.display = 'none';
-        if (message) {
-          message.style.cssText = 'display:block;color:var(--green);font-size:0.825rem;margin-top:0.75rem;';
-          message.textContent = '✅ CV analysé par l\'IA avec succès !';
-        }
-        chargerInfoCv();
-      } else if (statut.statut === 'ERREUR') {
-        clearInterval(_cvPollInterval);
-        _cvPollInterval = null;
-        document.getElementById('cv-progress').style.display = 'none';
-        if (message) {
-          message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
-          message.textContent = '⚠️ Extraction IA échouée — votre CV est enregistré mais non analysé.';
-        }
-        chargerInfoCv();
-      }
-      // EN_COURS → on continue à poller
-    } catch (e) { /* silencieux */ }
-  }, 3000);
 }
 
 async function uploadCv(file) {
@@ -1741,47 +2739,21 @@ async function uploadCv(file) {
   const progress = document.getElementById('cv-progress');
   const progressBar = document.getElementById('cv-progress-bar');
   const message = document.getElementById('cv-message');
-  if (progress) progress.style.display = 'block';
-  if (message) message.style.display = 'none';
-  if (progressBar) progressBar.style.width = '40%';
+  progress.style.display = 'block';
+  message.style.display = 'none';
+  progressBar.style.width = '30%';
   try {
-    if (progressBar) progressBar.style.width = '70%';
+    progressBar.style.width = '70%';
     const res = await apiUploadCv(file);
-    // Le serveur répond 202 — extraction async lancée
-    if (progressBar) progressBar.style.width = '90%';
-    if (message) {
-      message.style.cssText = 'display:block;color:var(--blue);font-size:0.825rem;margin-top:0.75rem;';
-      message.textContent = '⏳ ' + (res.message || 'CV reçu — analyse IA en cours…');
-    }
-    chargerInfoCv();
-    demarrerPollStatutCv();
+    progressBar.style.width = '100%';
+    message.style.cssText = 'display:block;color:var(--green);font-size:0.825rem;margin-top:0.75rem;';
+    message.textContent = '✅ ' + res.message;
+    setTimeout(() => { progress.style.display = 'none'; chargerInfoCv(); }, 1000);
   } catch (err) {
-    if (progressBar) progressBar.style.background = 'var(--red)';
-    if (message) {
-      message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
-      message.textContent = '❌ ' + err.message;
-    }
-    setTimeout(() => {
-      if (progress) progress.style.display = 'none';
-      if (progressBar) progressBar.style.background = 'var(--blue)';
-    }, 2000);
-  }
-}
-
-async function reanalyserCv() {
-  const message = document.getElementById('cv-message');
-  try {
-    if (message) {
-      message.style.cssText = 'display:block;color:var(--blue);font-size:0.825rem;margin-top:0.75rem;';
-      message.textContent = '⏳ Ré-analyse IA lancée…';
-    }
-    await apiReanalyseCv();
-    demarrerPollStatutCv();
-  } catch (err) {
-    if (message) {
-      message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
-      message.textContent = '❌ ' + err.message;
-    }
+    progressBar.style.background = 'var(--red)';
+    message.style.cssText = 'display:block;color:var(--red);font-size:0.825rem;margin-top:0.75rem;';
+    message.textContent = '❌ ' + err.message;
+    setTimeout(() => { progress.style.display = 'none'; progressBar.style.background = 'var(--blue)'; }, 2000);
   }
 }
 
@@ -1791,15 +2763,22 @@ async function telechargerCv() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = document.getElementById('cv-nom').textContent || 'cv.pdf';
+    a.download = document.getElementById('cv-nom').textContent;
     a.click();
     URL.revokeObjectURL(url);
   } catch (err) { alert('Erreur: ' + err.message); }
 }
 
 async function supprimerCv() {
-  alert('La suppression de CV sera disponible prochainement.');
+  if (!confirm('Supprimer votre CV ?')) return;
+  try {
+    await apiDeleteCv();
+    document.getElementById('cv-existant').style.display = 'none';
+    document.getElementById('cv-upload-text').textContent = 'Glissez votre CV ici ou cliquez pour sélectionner';
+    document.getElementById('cv-message').style.display = 'none';
+  } catch (err) { alert('Erreur: ' + err.message); }
 }
+
 
 const uploadZone = document.getElementById('cv-upload-zone');
 if (uploadZone) {
@@ -1808,6 +2787,245 @@ if (uploadZone) {
   uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.style.borderColor = ''; uploadZone.style.background = ''; const file = e.dataTransfer.files[0]; if (file) uploadCv(file); });
 }
 
+// ==================== DOCUMENTS====================
+async function chargerDocuments() {
+  const container = document.getElementById('documents-content');
+  try {
+    const stage = await apiGetStage();
+    if (!stage || !stage.id) {
+      container.innerHTML = '<div class="empty"><p>Vous devez avoir un stage actif pour accéder aux documents</p></div>';
+      return;
+    }
+
+   const docs = [
+  { type: 'DEMANDE_STAGE',           label: 'Demande de stage',          icon: '📄', roles: ['ROLE_ETUDIANT','ROLE_ADMIN'] },
+  { type: 'CONVENTION_STAGE',        label: 'Convention de stage',        icon: '📋', roles: ['ROLE_ETUDIANT','ROLE_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'CAHIER_CHARGE',           label: 'Cahier de charge',           icon: '📝', roles: ['ROLE_ETUDIANT','ROLE_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'FICHE_EVALUATION',        label: "Fiche d'évaluation",         icon: '⭐', roles: ['ROLE_ENCADRANT_ENTREPRISE','ROLE_ADMIN'] },
+  { type: 'AUTORISATION_SOUTENANCE', label: 'Autorisation de soutenance', icon: '✅', roles: ['ROLE_ENCADRANT_ACADEMIQUE','ROLE_ADMIN'] },
+  { type: 'ATTESTATION_STAGE', label: 'Attestation de stage', icon: '🏆', 
+  roles: ['ROLE_ETUDIANT', 'ROLE_ENTREPRISE', 'ROLE_ADMIN'] },
+];
+
+    const role = getRole(); // depuis auth.js
+    const accessibles = docs.filter(d => d.roles.includes(role));
+
+    if (accessibles.length === 0) {
+      container.innerHTML = '<div class="empty"><p>Aucun document disponible pour votre rôle</p></div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Documents disponibles</div>
+          <div class="card-subtitle">Stage : ${stage.offreTitre || ''} — ${stage.entrepriseNom || ''}</div>
+        </div>
+        ${accessibles.map(d => `
+          <div class="offre-item">
+            <div class="offre-logo" style="font-size:1.2rem;">${d.icon}</div>
+            <div class="offre-info">
+              <div class="offre-title">${d.label}</div>
+              <div class="offre-meta"><span>Pré-rempli avec vos données</span></div>
+            </div>
+            <button class="btn-primary" style="padding:.4rem .875rem;font-size:.78rem;"
+              onclick="telechargerDocument('${d.type}', ${stage.id}, '${d.label}', this)">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Télécharger
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="empty"><p>Erreur : ${err.message}</p></div>`;
+  }
+}
+
+async function telechargerDocument(type, stageId, label, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération...';
+  try {
+    const blob = await apiGenererDocument(type, stageId);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = label.replace(/\s+/g, '_') + '.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Erreur : ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⬇ Télécharger';
+  }
+}
+// Variables pour les missions
+let mesMissions = [];
+let currentMission = null;
+
+// Fonctions pour les missions
+async function chargerMissions() {
+    const container = document.getElementById('missions-content');
+    container.innerHTML = '<div class="empty"><p>⏳ Chargement...</p></div>';
+    
+    try {
+        mesMissions = await apiGetMesMissions();
+        
+        console.log("📦 Missions reçues:", JSON.stringify(mesMissions));
+        console.log("📦 Nombre:", mesMissions?.length);
+        
+        if (!mesMissions || mesMissions.length === 0) {
+            container.innerHTML = '<div class="empty"><p>📭 Aucune mission pour le moment.</p></div>';
+            return;
+        }
+        
+        afficherMissions(mesMissions); // ✅ passe les données en paramètre
+        
+    } catch(err) {
+        console.error('❌ Erreur:', err);
+        container.innerHTML = `<div class="empty"><p>❌ Erreur: ${err.message}</p></div>`;
+    }
+}
+
+function afficherMissions(missions) {  // ← reçoit missions en paramètre
+    const container = document.getElementById('missions-content');
+    
+    if (!missions || missions.length === 0) {
+        container.innerHTML = '<div class="empty"><p>📭 Aucune mission.</p></div>';
+        return;
+    }
+    
+    container.innerHTML = mesMissions.map(mission => {
+        const compteRendus = mission.compteRendus || [];
+        const dernierCr = compteRendus[compteRendus.length - 1];
+        const peutSoumettre = mission.statut !== 'TERMINEE' && 
+            (!dernierCr || dernierCr.statut !== 'EN_ATTENTE');
+        const peutDemarrer = mission.statut === 'A_FAIRE';
+        
+        return `
+            <div class="mission-card">
+                <div class="mission-header">
+                    <div>
+                        <div style="font-weight:700;">🎯 ${escapeHtml(mission.titre)}</div>
+                        <div style="font-size:0.75rem;color:var(--text3);">
+                            Créée le ${formatDate(mission.dateCreation)}
+                        </div>
+                    </div>
+                    <span class="badge statut-${mission.statut}">
+                        ${getStatutText(mission.statut)}
+                    </span>
+                </div>
+                <div class="mission-body">
+                    <p><strong>📝 Description:</strong> ${escapeHtml(mission.description)}</p>
+                    <p><strong>🎯 Objectifs:</strong> ${escapeHtml(mission.objectifs || 'Non définis')}</p>
+                    ${mission.dateEcheance ? `<p><strong>⏰ Échéance:</strong> ${formatDate(mission.dateEcheance)}</p>` : ''}
+                </div>
+                <div style="border-top:1px solid var(--border);padding:1rem;">
+                    <h4 style="margin-bottom:0.75rem;">📋 Comptes-rendus (${compteRendus.length})</h4>
+                    ${compteRendus.map(cr => `
+                        <div class="compte-rendu-item">
+                            <div style="display:flex;justify-content:space-between;">
+                                <strong>Soumis le ${formatDate(cr.dateSoumission)}</strong>
+                                <span class="badge statut-${cr.statut}">${getCRStatutText(cr.statut)}</span>
+                            </div>
+                            <p style="margin-top:0.5rem;">${escapeHtml(cr.contenu)}</p>
+                            ${cr.commentaireEncadrant ? `<p style="margin-top:0.5rem;color:var(--amber);"><em>💬 Réponse:</em> ${escapeHtml(cr.commentaireEncadrant)}</p>` : ''}
+                        </div>
+                    `).join('') || '<p style="color:var(--text3);">Aucun compte-rendu</p>'}
+                    
+                    ${peutDemarrer ? `
+                        <button class="btn-primary" style="margin-top:1rem;width:100%;" onclick="demarrerMission(${mission.id})">
+                            🚀 Démarrer la mission
+                        </button>
+                    ` : ''}
+                    
+                    ${peutSoumettre && mission.statut !== 'A_FAIRE' && mission.statut !== 'TERMINEE' ? `
+                        <button class="btn-primary" style="margin-top:1rem;width:100%;" onclick="ouvrirModalCompteRendu(${mission.id}, '${escapeHtml(mission.titre)}')">
+                            📤 Soumettre un compte-rendu
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function demarrerMission(missionId) {
+    if (!confirm('Démarrer cette mission ?')) return;
+    
+    try {
+        await apiDemarrerMission(missionId);
+        alert('✅ Mission démarrée !');
+        await chargerMissions();
+    } catch(err) {
+        alert('Erreur: ' + err.message);
+    }
+}
+
+function ouvrirModalCompteRendu(missionId, missionTitre) {
+    currentMission = { id: missionId, titre: missionTitre };
+    document.getElementById('cr-mission-titre').textContent = missionTitre;
+    document.getElementById('cr-contenu').value = '';
+    document.getElementById('cr-commentaire').value = '';
+    document.getElementById('modal-compte-rendu').classList.add('open');
+}
+
+async function soumettreCompteRendu() {
+    const contenu = document.getElementById('cr-contenu').value.trim();
+    const commentaire = document.getElementById('cr-commentaire').value.trim();
+    
+    if (!contenu) {
+        alert('Veuillez remplir le contenu du compte-rendu');
+        return;
+    }
+    
+    try {
+        await apiSoumettreCompteRendu(currentMission.id, contenu, commentaire);
+        closeModal('modal-compte-rendu');
+        alert('✅ Compte-rendu soumis !');
+        await chargerMissions();
+    } catch(err) {
+        alert('Erreur: ' + err.message);
+    }
+}
+
+// Fonctions utilitaires
+function getStatutText(statut) {
+    const map = {
+        'A_FAIRE': 'À faire',
+        'EN_COURS': 'En cours',
+        'TERMINEE': 'Terminée'
+    };
+    return map[statut] || statut;
+}
+
+function getCRStatutText(statut) {
+    const map = {
+        'EN_ATTENTE': 'En attente',
+        'VALIDE': 'Validé ✓',
+        'REJETE': 'Rejeté ✗'
+    };
+    return map[statut] || statut;
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
 // ==================== LANCEMENT ====================
 chargerProfil();
 chargerOffres();
@@ -1816,6 +3034,7 @@ chargerStage();
 chargerRapports();
 chargerNotifications();
 chargerInfoCv();
+chargerDocuments(); 
 </script>
 </body>
 </html>

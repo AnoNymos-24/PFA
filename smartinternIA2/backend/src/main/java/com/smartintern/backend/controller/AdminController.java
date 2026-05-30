@@ -51,6 +51,12 @@ public class AdminController {
         return ResponseEntity.ok(adminService.changerStatut(id, request.getStatut()));
     }
 
+    // ── AD : Statistiques globales ────────────────────────────────────────────
+    @GetMapping("/api/admin/stats")
+    public ResponseEntity<?> getStats() {
+        return ResponseEntity.ok(adminService.getStats());
+    }
+
     // ── AD-05 : Générer une demande de stage pour un étudiant ────────────────
     @PostMapping("/api/admin/demandes-stage")
     public ResponseEntity<DemandeStageDto.DemandeStageResponse> creerDemandeStage(

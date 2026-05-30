@@ -52,6 +52,12 @@ public class StageController {
         return ResponseEntity.ok(stageService.getStagesEncadrantEntreprise(authentication.getName()));
     }
 
+    // ── Admin : tous les stages ───────────────────────────────────────────────
+    @GetMapping("/api/admin/stages")
+    public ResponseEntity<List<StageDto.StageResponse>> getAllStages() {
+        return ResponseEntity.ok(stageService.getAllStages());
+    }
+
     // ── EN-06 : Entreprise signe la convention ────────────────────────────────
     @PatchMapping("/api/entreprise/stages/{id}/signer-convention")
     public ResponseEntity<StageDto.StageResponse> signerConventionEntreprise(

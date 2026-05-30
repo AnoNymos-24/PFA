@@ -37,6 +37,15 @@ public class CvExtractionService {
         private String texteBrut;
         private int nbPages;
         private String message;
+        private ScoreResultat score;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ScoreResultat {
+        private double scoreSur100;
+        private String niveau;
+        private List<String> recommandations;
     }
 
     @Data

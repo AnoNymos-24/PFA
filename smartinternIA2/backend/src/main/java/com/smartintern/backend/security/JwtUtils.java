@@ -2,6 +2,7 @@ package com.smartintern.backend.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,14 @@ public class JwtUtils {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    @PostConstruct
+    void validateJwtSecret() {
+        if (jwtSecret != null && jwtSecret.contains("ChangeInProd")) {
+            throw new IllegalStateException(
+                "JWT_SECRET non sécurisé : définissez la variable d'environnement JWT_SECRET en production !");
+        }
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
