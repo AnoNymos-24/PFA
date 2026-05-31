@@ -452,14 +452,22 @@ public class RisqueStageService {
 
     private ResultatRisqueDto.Resume toResume(ResultatRisque entite) {
         ResultatRisqueDto.Resume r = new ResultatRisqueDto.Resume();
-        r.setStageId(entite.getStage().getId());
-        Etudiant e = entite.getStage().getEtudiant();
+        Stage stage = entite.getStage();
+        Etudiant e  = stage.getEtudiant();
+
+        r.setStageId(stage.getId());
+        r.setEtudiantId(e.getId());
+        r.setEtudiantPrenom(e.getFirstName());
+        r.setEtudiantNom(e.getLastName());
+        r.setEtudiantEmail(e.getEmail());
         r.setEtudiantNomComplet(e.getFirstName() + " " + e.getLastName());
+        r.setEntrepriseNom(stage.getEntreprise() != null ? stage.getEntreprise().getNom() : "—");
+        r.setUniversite(e.getEtablissement() != null ? e.getEtablissement().getNom() : "—");
         r.setScoreEngagement(entite.getScoreEngagement());
         r.setNiveauRisque(entite.getNiveauRisque().name());
         r.setAnalyseLe(entite.getAnalyseLe());
 
-        // Comptage des alertes CRITIQUE
+        // Alertes CRITIQUE + résumé des messages
         try {
             if (entite.getAlertesJson() != null) {
                 List<RisqueAnalyseResponse.Alerte> alertes = objectMapper.readValue(
@@ -467,6 +475,10 @@ public class RisqueStageService {
                 r.setNbAlertesCritiques((int) alertes.stream()
                         .filter(a -> "CRITIQUE".equals(a.getNiveau()))
                         .count());
+                r.setAlertesResume(alertes.stream()
+                        .map(RisqueAnalyseResponse.Alerte::getMessage)
+                        .filter(m -> m != null && !m.isBlank())
+                        .toList());
             }
         } catch (Exception ignored) {}
         return r;

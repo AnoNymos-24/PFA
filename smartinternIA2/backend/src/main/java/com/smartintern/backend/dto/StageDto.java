@@ -37,10 +37,15 @@ public class StageDto {
         private String evaluationFinale;
         private Long etudiantId;
         private String etudiantNom;
+        private String etudiantPrenom;
+        private String etudiantEmail;
         private Long entrepriseId;
         private String entrepriseNom;
         private String encadrantAcademiqueNom;
+        private String encadrantAcademiquePrenom;
         private String encadrantEntrepriseNom;
+        private String offreTitre;
+        private int dureeSemaines;
         private Long candidatureId;
         private boolean conventionSigneeEntreprise;
         private LocalDate dateSignatureEntreprise;

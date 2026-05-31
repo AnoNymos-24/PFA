@@ -1,9 +1,10 @@
 package com.smartintern.backend.controller;
 
 import com.smartintern.backend.entity.User;
+import com.smartintern.backend.notification.NotificationEvent;
+import com.smartintern.backend.notification.NotificationService;
 import com.smartintern.backend.repository.UserRepository;
 import com.smartintern.backend.security.JwtUtils;
-import com.smartintern.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,11 +22,11 @@ import java.util.Random;
 @CrossOrigin(origins = "*")
 public class OtpController {
 
-    private final UserRepository userRepository;
-    private final EmailService emailService;
-    private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository      userRepository;
+    private final NotificationService notificationService;
+    private final JwtUtils            jwtUtils;
+    private final UserDetailsService  userDetailsService;
+    private final PasswordEncoder     passwordEncoder;
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
@@ -41,7 +42,6 @@ public class OtpController {
         if (user.getOtpExpiry().isBefore(LocalDateTime.now()))
             return ResponseEntity.badRequest().body(Map.of("message", "Code expiré"));
 
-        // ✅ setStatut au lieu de setEnabled
         user.setStatut(User.Statut.ACTIF);
         user.setOtpCode(null);
         user.setOtpExpiry(null);
@@ -51,14 +51,15 @@ public class OtpController {
         String token = jwtUtils.generateToken(userDetails);
 
         return ResponseEntity.ok(Map.of(
-                "token",     token,
-                "type",      "Bearer",
-                "id",        user.getId(),
-                "firstName", user.getFirstName(),
-                "lastName",  user.getLastName(),
-                "email",     user.getEmail(),
-                "role",      user.getRole().name(),
-                "statut",    user.getStatut().name()
+                "token",      token,
+                "type",       "Bearer",
+                "id",         user.getId(),
+                "firstName",  user.getFirstName(),
+                "lastName",   user.getLastName(),
+                "email",      user.getEmail(),
+                "role",       user.getRole().name(),
+                "statut",     user.getStatut().name(),
+                "firstLogin", true
         ));
     }
 
@@ -73,7 +74,12 @@ public class OtpController {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        emailService.sendOtpEmail(email, user.getFirstName(), newCode);
+        notificationService.envoyer(
+            NotificationEvent.RENVOI_OTP,
+            Map.of("prenom", user.getFirstName(), "code", newCode, "expiration", "10 minutes"),
+            email
+        );
+
         return ResponseEntity.ok(Map.of("message", "Code renvoyé avec succès"));
     }
 
@@ -87,7 +93,12 @@ public class OtpController {
             user.setOtpCode(code);
             user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
             userRepository.save(user);
-            emailService.sendPasswordResetEmail(email, user.getFirstName(), code);
+
+            notificationService.envoyer(
+                NotificationEvent.RESET_PASSWORD_OTP,
+                Map.of("prenom", user.getFirstName(), "code", code, "expiration", "10 minutes"),
+                email
+            );
         }
 
         return ResponseEntity.ok(Map.of("message", "Si cet email existe, un code vous a été envoyé"));

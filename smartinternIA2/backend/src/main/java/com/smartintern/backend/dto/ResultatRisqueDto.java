@@ -29,10 +29,17 @@ public class ResultatRisqueDto {
     public static class Resume {
         /** Vue allégée pour les listes (dashboard admin). */
         private Long stageId;
+        private Long etudiantId;
         private String etudiantNomComplet;
+        private String etudiantPrenom;
+        private String etudiantNom;
+        private String etudiantEmail;
+        private String entrepriseNom;
+        private String universite;
         private int scoreEngagement;
         private String niveauRisque;
         private int nbAlertesCritiques;
+        private List<String> alertesResume;
         private LocalDateTime analyseLe;
     }
 }

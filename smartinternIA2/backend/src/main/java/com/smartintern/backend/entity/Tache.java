@@ -75,7 +75,7 @@ public class Tache {
     /** Vrai si la tâche a été générée automatiquement par l'IA */
     @Builder.Default
     @Column(name = "generee_par_ia")
-    private boolean genereParIa = false;
+    private Boolean genereParIa = false;
 
     // ── Soft-delete ──────────────────────────────────────────────────────────
 

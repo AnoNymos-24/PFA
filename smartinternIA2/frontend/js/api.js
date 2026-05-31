@@ -116,6 +116,20 @@ async function apiUpdateProfile(data) {
   return handleResponse(res);
 }
 
+async function apiUploadPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const result = await apiUpdateProfile({ photoProfil: reader.result });
+        resolve(reader.result);
+      } catch (e) { reject(e); }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function apiChangePassword(oldPassword, newPassword) {
   const res = await fetch(`${BASE_URL}/users/change-password`, {
     method: 'PUT', headers: authHeaders(),
@@ -574,7 +588,28 @@ async function apiValidateStage(stageId) {
 }
 
 async function apiGetEtudiantsARisque() {
-  const res = await fetch(`${BASE_URL}/admin/etudiants/risque`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/admin/risques/etudiants-a-risque`, { headers: authHeaders() });
+  return handleResponse(res);
+}
+
+async function apiAnalyserTousStages() {
+  const res = await fetch(`${BASE_URL}/admin/risques/analyser-tous`, {
+    method: 'POST', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiAnalyserStage(stageId) {
+  const res = await fetch(`${BASE_URL}/admin/risques/analyser/${stageId}`, {
+    method: 'POST', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiGetRisqueHistorique(stageId) {
+  const res = await fetch(`${BASE_URL}/admin/risques/stage/${stageId}/historique`, {
+    headers: authHeaders()
+  });
   return handleResponse(res);
 }
 

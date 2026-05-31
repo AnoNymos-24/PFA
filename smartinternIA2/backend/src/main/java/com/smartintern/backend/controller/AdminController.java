@@ -57,6 +57,24 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getStats());
     }
 
+    // ── AD : Étudiants à risque ───────────────────────────────────────────────
+    @GetMapping("/api/admin/etudiants/risque")
+    public ResponseEntity<?> getEtudiantsARisque() {
+        return ResponseEntity.ok(adminService.getEtudiantsARisque());
+    }
+
+    // ── AD : Lister tous les étudiants ────────────────────────────────────────
+    @GetMapping("/api/admin/etudiants")
+    public ResponseEntity<?> getAllEtudiants() {
+        return ResponseEntity.ok(adminService.getAllEtudiants());
+    }
+
+    // ── AD : Lister toutes les entreprises ────────────────────────────────────
+    @GetMapping("/api/admin/entreprises")
+    public ResponseEntity<?> getAllEntreprises() {
+        return ResponseEntity.ok(adminService.getAllEntreprises());
+    }
+
     // ── AD-05 : Générer une demande de stage pour un étudiant ────────────────
     @PostMapping("/api/admin/demandes-stage")
     public ResponseEntity<DemandeStageDto.DemandeStageResponse> creerDemandeStage(

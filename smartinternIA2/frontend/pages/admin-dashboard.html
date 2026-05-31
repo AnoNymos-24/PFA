@@ -105,6 +105,146 @@
     .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--pink)); display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; color: #fff; cursor: pointer; }
     .content { flex: 1; padding: 2rem; max-width: 1300px; width: 100%; animation: fadeUp 0.3s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ── Modal Détail Risque ── */
+    @keyframes fadeIn  { from{opacity:0}                        to{opacity:1} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+    .risque-modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.72);
+      backdrop-filter:blur(4px); z-index:9999;
+      display:flex; align-items:center; justify-content:center; padding:1.25rem;
+      animation:fadeIn .2s ease;
+    }
+    .risque-modal {
+      background:var(--dark2); border:1px solid var(--border2); border-radius:20px;
+      width:100%; max-width:900px; max-height:92vh; overflow-y:auto;
+      position:relative; animation:slideUp .28s ease;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+    /* Header coloré selon le niveau */
+    .rm-header {
+      padding:1.75rem 2rem 1.5rem;
+      border-bottom:1px solid var(--border);
+      position:relative;
+    }
+    .rm-header-accent {
+      position:absolute; top:0; left:0; right:0; height:4px;
+      border-radius:20px 20px 0 0;
+    }
+    .rm-header-top { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+    .risque-modal-close {
+      width:34px; height:34px; border-radius:9px; flex-shrink:0;
+      background:var(--surface); border:1px solid var(--border2);
+      color:var(--text2); cursor:pointer; display:grid; place-items:center;
+      transition:background .15s;
+    }
+    .risque-modal-close:hover { background:var(--surface2); color:var(--text); }
+    .rm-title { font-size:1.35rem; font-weight:800; color:var(--text); letter-spacing:-.4px; }
+    .rm-sub   { font-size:.85rem; color:var(--text2); margin-top:.3rem; }
+
+    /* Body */
+    .rm-body { padding:1.75rem 2rem 2rem; }
+
+    /* ── Score hero ── */
+    .rm-score-hero {
+      display:grid; grid-template-columns:auto 1fr; gap:2rem;
+      align-items:center; margin-bottom:1.75rem;
+      padding:1.5rem 1.75rem; border-radius:14px;
+      border:1px solid var(--border2);
+    }
+    .rm-gauge-wrap { text-align:center; }
+    .rm-score-num  { font-size:3.5rem; font-weight:800; line-height:1; letter-spacing:-2px; }
+    .rm-score-denom{ font-size:1rem; font-weight:500; color:var(--text2); }
+    .rm-score-label{ font-size:.78rem; color:var(--text2); margin-top:.2rem; }
+    .rm-niveau-pill {
+      display:inline-block; margin-top:.6rem; padding:5px 16px;
+      border-radius:99px; font-size:.85rem; font-weight:700; letter-spacing:.3px;
+    }
+    /* Signaux grid */
+    .rm-signaux-grid { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+    .rm-signal {
+      display:flex; align-items:center; gap:.75rem;
+      background:var(--surface); border-radius:10px;
+      padding:.7rem 1rem; border:1px solid var(--border);
+    }
+    .rm-signal-icon { width:32px; height:32px; border-radius:8px; display:grid; place-items:center; flex-shrink:0; font-size:1rem; }
+    .rm-signal-label { font-size:.82rem; font-weight:600; color:var(--text); }
+    .rm-signal-status { margin-left:auto; font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:99px; flex-shrink:0; }
+
+    /* ── Section ── */
+    .rm-section { margin-bottom:1.5rem; }
+    .rm-section-head {
+      display:flex; align-items:center; gap:.75rem;
+      margin-bottom:1rem; padding-bottom:.65rem;
+      border-bottom:1px solid var(--border);
+    }
+    .rm-section-head-icon {
+      width:28px; height:28px; border-radius:7px;
+      display:grid; place-items:center; flex-shrink:0; font-size:.9rem;
+    }
+    .rm-section-title {
+      font-size:.95rem; font-weight:700; color:var(--text);
+    }
+    .rm-section-count {
+      margin-left:auto; font-size:.75rem; font-weight:700;
+      padding:2px 10px; border-radius:99px;
+      background:var(--surface); color:var(--text2);
+    }
+
+    /* ── Alertes ── */
+    .rm-alertes { display:flex; flex-direction:column; gap:.65rem; }
+    .rm-alerte {
+      padding:.9rem 1.1rem; border-radius:11px;
+      display:flex; gap:.9rem; align-items:flex-start;
+    }
+    .rm-alerte.CRITIQUE { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); }
+    .rm-alerte.ELEVE    { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); }
+    .rm-alerte.MOYEN    { background:rgba(37,99,235,.1);  border:1px solid rgba(37,99,235,.25); }
+    .rm-alerte-badge {
+      flex-shrink:0; padding:3px 9px; border-radius:6px;
+      font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-top:1px;
+    }
+    .rm-alerte.CRITIQUE .rm-alerte-badge { background:rgba(239,68,68,.25); color:#fca5a5; }
+    .rm-alerte.ELEVE    .rm-alerte-badge { background:rgba(245,158,11,.25); color:#fcd34d; }
+    .rm-alerte.MOYEN    .rm-alerte-badge { background:rgba(37,99,235,.25);  color:#93c5fd; }
+    .rm-alerte-type { font-size:.68rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; margin-bottom:.25rem; opacity:.7; }
+    .rm-alerte-msg  { font-size:.88rem; font-weight:500; line-height:1.5; color:var(--text); }
+
+    /* ── Recommandations ── */
+    .rm-recs { display:flex; flex-direction:column; gap:.6rem; }
+    .rm-rec {
+      display:flex; align-items:flex-start; gap:.9rem;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:11px; padding:.85rem 1.1rem;
+    }
+    .rm-rec-num {
+      width:24px; height:24px; border-radius:6px; flex-shrink:0;
+      background:rgba(16,185,129,.15); color:var(--green);
+      display:grid; place-items:center; font-size:.72rem; font-weight:800;
+    }
+    .rm-rec-text { font-size:.875rem; font-weight:500; color:var(--text); line-height:1.55; }
+
+    /* ── No alert ── */
+    .rm-no-alert {
+      display:flex; align-items:center; gap:.75rem;
+      background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.2);
+      border-radius:11px; padding:.9rem 1.1rem;
+      font-size:.88rem; font-weight:600; color:var(--green);
+    }
+
+    /* ── Footer ── */
+    .rm-footer {
+      margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      font-size:.75rem; color:var(--text3);
+    }
+
+    /* ── Loading / empty ── */
+    .rm-empty { text-align:center; padding:3rem 2rem; color:var(--text3); font-size:.9rem; }
+    .stat-loading { animation: pulse 1.2s ease-in-out infinite; font-size: 1.2rem; color: var(--text3); }
 
     .page-header { margin-bottom: 2rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
     .page-title { font-size: 1.6rem; font-weight: 800; color: var(--text); letter-spacing: -0.8px; }
@@ -286,7 +426,11 @@
       <a class="nav-item" data-view="encadrants" onclick="showView('encadrants', this)">
   <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
   <span class="nav-label">Encadrants</span>
-</a>
+
+
+
+
+    </a>
       <a class="nav-item" data-view="documents" onclick="showView('documents', this)">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span class="nav-label">Documents</span>
@@ -298,6 +442,8 @@
         <span class="nav-badge" id="notif-badge">0</span>
       </a>
     </nav>
+
+
 
     <div class="sidebar-profile">
       <div class="profile-avatar" id="sidebar-avatar">AD</div>
@@ -312,19 +458,34 @@
     </div>
   </aside>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <div class="main" id="main">
    <header class="topbar">
     <div class="topbar-title" id="topbar-title">Tableau de bord</div>
     <div class="topbar-right">
 
-        <!-- ✅ Bouton thème — ajouté ici -->
+        <!--  Bouton thème — ajouté ici -->
         <button class="topbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Changer le thème"></button>
 
         <div class="topbar-icon-btn" onclick="showView('notifications',null)">
             <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notif-dot" id="topbar-notif-dot" style="display:none;"></span>
         </div>
-        <div class="topbar-avatar" id="topbar-avatar">AD</div>
+        <a href="../pages/profil.html" class="topbar-avatar" id="topbar-avatar" title="Mon profil">AD</a>
         <div class="topbar-icon-btn" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
     </div>
 </header>
@@ -336,11 +497,11 @@
         <div class="page-header"><div><h1 class="page-title" id="welcome-title">Vue d'ensemble</h1><p class="page-subtitle">Tableau de bord administrateur · SmartIntern AI</p></div></div>
 
         <div class="stats-grid">
-          <div class="stat-card blue"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-value" id="stat-users">0</div><div class="stat-label">Utilisateurs total</div></div>
-          <div class="stat-card teal"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="stat-value" id="stat-etudiants">0</div><div class="stat-label">Étudiants actifs</div></div>
-          <div class="stat-card purple"><div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div class="stat-value" id="stat-entreprises">0</div><div class="stat-label">Entreprises</div></div>
-          <div class="stat-card green"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-value" id="stat-stages">0</div><div class="stat-label">Stages en cours</div></div>
-          <div class="stat-card red"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-value" id="stat-risque">0</div><div class="stat-label">Étudiants à risque</div></div>
+          <div class="stat-card blue"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-value" id="stat-users"><span class="stat-loading">…</span></div><div class="stat-label">Utilisateurs total</div></div>
+          <div class="stat-card teal"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="stat-value" id="stat-etudiants"><span class="stat-loading">…</span></div><div class="stat-label">Étudiants actifs</div></div>
+          <div class="stat-card purple"><div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div class="stat-value" id="stat-entreprises"><span class="stat-loading">…</span></div><div class="stat-label">Entreprises</div></div>
+          <div class="stat-card green"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-value" id="stat-stages"><span class="stat-loading">…</span></div><div class="stat-label">Stages en cours</div></div>
+          <div class="stat-card red"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-value" id="stat-risque"><span class="stat-loading">…</span></div><div class="stat-label">Étudiants à risque</div></div>
         </div>
 
         <div class="ai-alert" id="ai-alert" style="display:none;">
@@ -390,8 +551,18 @@
 
       <!-- RISQUE IA -->
       <div class="view" id="view-risque">
-        <div class="page-header"><div><h1 class="page-title">Étudiants à risque</h1><p class="page-subtitle" id="risque-subtitle">Détectés par l'algorithme SmartIntern AI</p></div></div>
-        <div class="card"><div class="table-wrap"><table><thead><tr><th>Étudiant</th><th>Université</th><th>Entreprise</th><th>Score risque</th><th>Raisons détectées</th><th>Actions</th></tr></thead><tbody id="risque-list"><tr><td colspan="6" style="text-align:center;">Chargement...</td></tr></tbody></table></div></div>
+        <div class="page-header">
+          <div><h1 class="page-title">Étudiants à risque</h1><p class="page-subtitle" id="risque-subtitle">Détectés par l'algorithme SmartIntern AI</p></div>
+          <button class="btn-ghost" id="btn-analyser-tous" onclick="lancerAnalyseIA()">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Lancer l'analyse IA
+          </button>
+        </div>
+        <div id="risque-alert" style="display:none;padding:10px 16px;border-radius:9px;margin-bottom:1rem;font-size:.85rem;"></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr>
+          <th>Étudiant</th><th>Université</th><th>Entreprise</th>
+          <th>Score engagement</th><th>Niveau</th><th>Actions</th>
+        </tr></thead><tbody id="risque-list"><tr><td colspan="6" style="text-align:center;">Cliquez sur "Lancer l'analyse IA" pour détecter les étudiants à risque.</td></tr></tbody></table></div></div>
       </div>
 
       <!-- UTILISATEURS -->
@@ -591,7 +762,7 @@ async function chargerAdminStats() {
     document.getElementById('stat-etudiants').textContent  = stats.etudiants     || 0;
     document.getElementById('stat-entreprises').textContent= stats.entreprises   || 0;
    document.getElementById('stat-stages').textContent = stats.stagesEnCours || 0;
-    document.getElementById('stat-risque').textContent     = 0; // Sprint 4
+    // stat-risque est mis à jour par chargerEtudiantsRisque()
     document.getElementById('donut-etudiants').textContent = stats.etudiants     || 0;
     document.getElementById('donut-entreprises').textContent = stats.entreprises || 0;
     document.getElementById('donut-encadrants').textContent= stats.encadrants    || 0;
@@ -618,19 +789,19 @@ async function chargerUtilisateurs() {
   <tr>
     <td><div class="user-cell">
       <div class="u-avatar" style="background:linear-gradient(135deg,var(--blue),var(--purple))">
-        ${(u.prenom?.[0] || '') + (u.nom?.[0] || '')}
+        ${((u.firstName||u.prenom||'')[0]||'')+((u.lastName||u.nom||'')[0]||'')}
       </div>
-      <span class="td-bold">${u.prenom || ''} ${u.nom || ''}</span>
+      <span class="td-bold">${u.firstName||u.prenom||''} ${u.lastName||u.nom||''}</span>
     </div></td>
-    <td><span class="badge ${u.role === 'ROLE_ETUDIANT' ? 'etudiant' : 'entreprise'}">${getRoleName(u.role)}</span></td>
-    <td><span class="badge ${u.enabled ? 'active' : 'danger'}">
-      ${u.enabled ? 'Actif' : 'Désactivé'}
+    <td><span class="badge ${u.role==='ETUDIANT'?'etudiant':u.role==='ENTREPRISE'?'entreprise':'neutral'}">${getRoleName(u.role)}</span></td>
+    <td><span class="badge ${u.statut==='ACTIF'?'active':'danger'}">
+      ${u.statut==='ACTIF'?'Actif':(u.statut||'Inactif')}
     </span></td>
     <td class="td-mono">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}</td>
     <td>
       <div class="action-btns">
       <button class="btn-sm neutral" onclick="voirUtilisateur(${u.id})">Voir</button>
-      ${u.enabled
+      ${u.statut==='ACTIF'
   ? `<button class="btn-sm danger" onclick="toggleUser(${u.id}, false)">Désactiver</button>`
   : `<button class="btn-sm success" onclick="toggleUser(${u.id}, true)">Réactiver</button>`
 }
@@ -662,62 +833,59 @@ function afficherUtilisateurs(users) {
   }
 
   tbody.innerHTML = users.map(u => {
-
-    const isActive = u.enabled && u.emailVerified;
-
+    const prenom   = u.firstName || u.prenom || '';
+    const nom      = u.lastName  || u.nom    || '';
+    const isActive = u.statut === 'ACTIF';
+    const roleClass = u.role === 'ETUDIANT' ? 'etudiant'
+                    : u.role === 'ENTREPRISE' ? 'entreprise'
+                    : (u.role || '').includes('ENCADRANT') ? 'encadrant'
+                    : 'neutral';
     return `
       <tr>
         <td>
           <div class="user-cell">
             <div class="u-avatar" style="background:linear-gradient(135deg,var(--blue),var(--purple))">
-              ${(u.prenom?.[0] || '') + (u.nom?.[0] || '')}
+              ${(prenom[0]||'')+(nom[0]||'')}
             </div>
-            <span class="td-bold">${u.prenom || ''} ${u.nom || ''}</span>
+            <span class="td-bold">${prenom} ${nom}</span>
           </div>
         </td>
-
         <td class="td-mono">${u.email || '—'}</td>
-
+        <td><span class="badge ${roleClass}">${getRoleName(u.role)}</span></td>
+        <td><span class="badge ${isActive ? 'active' : 'pending'}">${isActive ? 'Actif' : (u.statut || 'Inactif')}</span></td>
+        <td class="td-mono">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}</td>
         <td>
-          <span class="badge ${u.role === 'ROLE_ETUDIANT' ? 'etudiant' : (u.role === 'ROLE_ENTREPRISE' ? 'entreprise' : 'encadrant')}">
-            ${getRoleName(u.role)}
-          </span>
+          <div class="action-btns">
+            <button class="btn-sm neutral" onclick="voirUtilisateur(${u.id})">Voir</button>
+            ${isActive
+              ? `<button class="btn-sm danger" onclick="toggleUser(${u.id}, false)">Désactiver</button>`
+              : `<button class="btn-sm success" onclick="toggleUser(${u.id}, true)">Réactiver</button>`
+            }
+          </div>
         </td>
-
-        <td>
-          <span class="badge ${isActive ? 'active' : 'pending'}">
-            ${isActive ? 'Actif' : 'En attente'}
-          </span>
-        </td>
-
-        <td class="td-mono">
-          ${u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}
-        </td>
-
-        <td>
-  <div class="action-btns">
-    <button class="btn-sm neutral" onclick="voirUtilisateur(${u.id})">Voir</button>
-
-    ${u.enabled
-      ? `<button class="btn-sm danger" onclick="toggleUser(${u.id}, false)">Désactiver</button>`
-      : `<button class="btn-sm success" onclick="toggleUser(${u.id}, true)">Réactiver</button>`
-    }
-  </div>
-</td>
-      </tr>
-    `;
+      </tr>`;
   }).join('');
 }
 function filterUsers() {
   const search = document.getElementById('search-users')?.value.toLowerCase() || '';
   let filtered = allUsers;
   if (currentUserFilter !== 'all') {
-    if (currentUserFilter === 'etudiant') filtered = allUsers.filter(u => u.role === 'ROLE_ETUDIANT');
-    else if (currentUserFilter === 'entreprise') filtered = allUsers.filter(u => u.role === 'ROLE_ENTREPRISE');
-    else if (currentUserFilter === 'encadrant') filtered = allUsers.filter(u => u.role === 'ROLE_ENCADRANT_ACADEMIQUE' || u.role === 'ROLE_ENCADRANT_ENTREPRISE');
-    else if (currentUserFilter === 'pending') filtered = allUsers.filter(u => u.statut === 'PENDING');
+    if (currentUserFilter === 'etudiant')
+      filtered = allUsers.filter(u => u.role === 'ETUDIANT');
+    else if (currentUserFilter === 'entreprise')
+      filtered = allUsers.filter(u => u.role === 'ENTREPRISE');
+    else if (currentUserFilter === 'encadrant')
+      filtered = allUsers.filter(u => u.role === 'ENCADRANT_ACADEMIQUE' || u.role === 'ENCADRANT_ENTREPRISE');
+    else if (currentUserFilter === 'pending')
+      filtered = allUsers.filter(u => u.statut !== 'ACTIF');
   }
-  if (search) filtered = filtered.filter(u => (u.nom + ' ' + u.prenom).toLowerCase().includes(search) || u.email?.toLowerCase().includes(search));
+  if (search) {
+    filtered = filtered.filter(u => {
+      const nom    = (u.lastName  || u.nom    || '').toLowerCase();
+      const prenom = (u.firstName || u.prenom || '').toLowerCase();
+      return nom.includes(search) || prenom.includes(search) || (u.email || '').toLowerCase().includes(search);
+    });
+  }
   afficherUtilisateurs(filtered);
 }
 function setActiveChip(el) {
@@ -733,7 +901,13 @@ function filterUsersByRole(role, el) {
 }
 
 function getRoleName(role) {
-  const roles = { 'ROLE_ETUDIANT': 'Étudiant', 'ROLE_ENTREPRISE': 'Entreprise', 'ROLE_ADMIN': 'Admin', 'ROLE_ENCADRANT_ACADEMIQUE': 'Encadrant Académique', 'ROLE_ENCADRANT_ENTREPRISE': 'Encadrant Entreprise' };
+  const roles = {
+    'ETUDIANT': 'Étudiant', 'ROLE_ETUDIANT': 'Étudiant',
+    'ENTREPRISE': 'Entreprise', 'ROLE_ENTREPRISE': 'Entreprise',
+    'ADMIN': 'Admin', 'ROLE_ADMIN': 'Admin',
+    'ENCADRANT_ACADEMIQUE': 'Enc. Académique', 'ROLE_ENCADRANT_ACADEMIQUE': 'Enc. Académique',
+    'ENCADRANT_ENTREPRISE': 'Enc. Entreprise',  'ROLE_ENCADRANT_ENTREPRISE': 'Enc. Entreprise'
+  };
   return roles[role] || role || '—';
 }
 
@@ -947,26 +1121,248 @@ async function exporterStats() {
 // ==================== ÉTUDIANTS À RISQUE ====================
 async function chargerEtudiantsRisque() {
   try {
-    const etudiants = await apiGetEtudiantsARisque();
+    const liste = await apiGetEtudiantsARisque();
+    const count = liste.length;
+    document.getElementById('risque-badge').textContent = count;
+    document.getElementById('stat-risque').textContent  = count;
+    document.getElementById('risque-subtitle').textContent =
+      count > 0
+        ? `${count} étudiant${count > 1 ? 's' : ''} détecté${count > 1 ? 's' : ''} — triés du plus au moins à risque`
+        : 'Aucun résultat — lancez l\'analyse IA ci-dessus';
     const tbody = document.getElementById('risque-list');
-    if (etudiants.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Aucun étudiant à risque</td></tr>';
+    if (count === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);">Aucun étudiant à risque détecté. Vérifiez qu\'une analyse a été lancée.</td></tr>';
       return;
     }
-    tbody.innerHTML = etudiants.map(e => `
-      <tr>
-        <td><div class="user-cell"><div class="u-avatar" style="background:linear-gradient(135deg,var(--red),var(--amber))">${(e.prenom?.[0] || '') + (e.nom?.[0] || '')}</div><span class="td-bold">${e.prenom} ${e.nom}</span></div></td>
+    tbody.innerHTML = liste.map(e => {
+      const prenom = e.etudiantPrenom || '';
+      const nom    = e.etudiantNom    || e.etudiantNomComplet || '';
+      const score  = e.scoreEngagement ?? 0;
+      const niveau = e.niveauRisque   || 'STABLE';
+      const nbAlts = e.nbAlertesCritiques ?? 0;
+      const alertesTexte = Array.isArray(e.alertesResume) && e.alertesResume.length > 0
+        ? e.alertesResume.join(' · ')
+        : (niveau === 'A_RISQUE' ? 'Risque élevé détecté' : 'Surveillance recommandée');
+      const scoreColor = score <= 40 ? 'var(--red)' : score <= 60 ? 'var(--amber)' : 'var(--blue)';
+      const niveauBadge = niveau === 'A_RISQUE'
+        ? `<span style="background:rgba(239,68,68,.15);color:var(--red);padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700;">⚠ À RISQUE</span>`
+        : `<span style="background:rgba(245,158,11,.15);color:var(--amber);padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700;">👁 SURVEILLER</span>`;
+      return `<tr>
+        <td><div class="user-cell">
+          <div class="u-avatar" style="background:linear-gradient(135deg,var(--red),var(--amber))">${(prenom[0]||'')+(nom[0]||'')}</div>
+          <span class="td-bold">${prenom} ${nom}</span>
+        </div></td>
         <td class="td-mono">${e.universite || '—'}</td>
-        <td class="td-mono">${e.entreprise || '—'}</td>
-        <td><div class="risk-bar-wrap"><div class="risk-bar"><div class="risk-fill ${e.score >= 70 ? 'high' : 'medium'}" style="width:${e.score}%"></div></div><span class="risk-pct ${e.score >= 70 ? 'high' : 'medium'}">${e.score}</span></div></td>
-        <td style="font-size:0.75rem;">${e.raisons || '—'}</td>
-        <td><button class="btn-sm primary" onclick="contacterEtudiant(${e.id})">Contacter</button></td>
-      </tr>
-    `).join('');
+        <td class="td-mono">${e.entrepriseNom || '—'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden;">
+              <div style="width:${score}%;height:100%;background:${scoreColor};border-radius:3px;transition:width .3s;"></div>
+            </div>
+            <span style="font-weight:700;color:${scoreColor};min-width:30px;text-align:right;">${score}</span>
+          </div>
+        </td>
+        <td>${niveauBadge}${nbAlts > 0 ? `<span style="font-size:.7rem;color:var(--red);margin-left:4px;">${nbAlts} critique${nbAlts>1?'s':''}</span>` : ''}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-sm neutral" onclick="voirDetailRisque(${e.stageId},'${(e.etudiantPrenom||'')+' '+(e.etudiantNom||e.etudiantNomComplet||'')}')">Détail</button>
+            <button class="btn-sm primary" onclick="contacterEtudiant(${e.etudiantId || e.id})">Contacter</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
   } catch(err) { console.error('Erreur chargement étudiants risque:', err); }
 }
 
+async function lancerAnalyseIA() {
+  const btn    = document.getElementById('btn-analyser-tous');
+  const alert  = document.getElementById('risque-alert');
+  btn.disabled = true;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Analyse en cours…';
+  alert.style.display = 'none';
+  try {
+    const resultats = await apiAnalyserTousStages();
+    const n = Array.isArray(resultats) ? resultats.length : 0;
+    alert.style.cssText = 'display:block;background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);padding:10px 16px;border-radius:9px;margin-bottom:1rem;font-size:.85rem;';
+    alert.textContent = `✅ Analyse terminée — ${n} stage${n>1?'s':''} analysé${n>1?'s':''}. Liste mise à jour.`;
+    await chargerEtudiantsRisque();
+  } catch(err) {
+    alert.style.cssText = 'display:block;background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);padding:10px 16px;border-radius:9px;margin-bottom:1rem;font-size:.85rem;';
+    alert.textContent = `❌ Erreur : ${err.message || 'Le microservice IA est peut-être hors ligne.'}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> Lancer l\'analyse IA';
+  }
+}
+
 function contacterEtudiant(id) { alert(`Contacter l'étudiant - Fonctionnalité à implémenter`); }
+
+// ── Modal détail risque ───────────────────────────────────────────────────────
+async function voirDetailRisque(stageId, etudiantNom) {
+  ouvrirModalRisque(etudiantNom, null); // ouvre en mode chargement
+  try {
+    const data = await apiGetRisqueHistorique(stageId);
+    if (data && data.message) {
+      afficherModalRisqueVide(data.message);
+    } else {
+      afficherModalRisqueData(data, etudiantNom);
+    }
+  } catch (err) {
+    afficherModalRisqueVide('Erreur : ' + (err.message || 'Impossible de charger l\'analyse.'));
+  }
+}
+
+function ouvrirModalRisque(nom) {
+  fermerModalRisque();
+  const COLORS = { EXCELLENT:'#10b981', STABLE:'#3b82f6', A_SURVEILLER:'#f59e0b', A_RISQUE:'#ef4444', INCONNU:'#94a3b8' };
+  const overlay = document.createElement('div');
+  overlay.className = 'risque-modal-overlay';
+  overlay.id = 'risque-modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) fermerModalRisque(); };
+  overlay.innerHTML = `
+    <div class="risque-modal" id="risque-modal-inner">
+      <div class="rm-header">
+        <div class="rm-header-accent" id="rm-accent" style="background:#94a3b8;"></div>
+        <div class="rm-header-top">
+          <div>
+            <div class="rm-title">Rapport d'analyse de risque</div>
+            <div class="rm-sub" id="rm-sub-nom">${nom || 'Chargement…'}</div>
+          </div>
+          <button class="risque-modal-close" onclick="fermerModalRisque()">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="rm-body">
+        <div id="risque-modal-body" class="rm-empty">
+          <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" fill="none" stroke-width="1.5" style="animation:spin 1s linear infinite;margin-bottom:1rem;opacity:.5;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><br>
+          Chargement de l'analyse en cours…
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function fermerModalRisque() {
+  const el = document.getElementById('risque-modal-overlay');
+  if (el) el.remove();
+}
+
+function afficherModalRisqueVide(msg) {
+  const body = document.getElementById('risque-modal-body');
+  if (body) body.innerHTML = `<div class="rm-empty">${msg}</div>`;
+}
+
+function afficherModalRisqueData(d, nom) {
+  const body   = document.getElementById('risque-modal-body');
+  const accent = document.getElementById('rm-accent');
+  if (!body) return;
+
+  const score   = d.scoreEngagement ?? 0;
+  const niveau  = d.niveauRisque    ?? 'INCONNU';
+  const alertes = d.alertes         ?? [];
+  const recs    = d.recommandations ?? [];
+  const analyse = d.analyse         ?? {};
+  const date    = d.analyseLe ? new Date(d.analyseLe).toLocaleString('fr-FR') : '—';
+
+  const COLORS = { EXCELLENT:'#10b981', STABLE:'#3b82f6', A_SURVEILLER:'#f59e0b', A_RISQUE:'#ef4444', INCONNU:'#94a3b8' };
+  const LABELS = { EXCELLENT:'Excellent', STABLE:'Stable', A_SURVEILLER:'À surveiller', A_RISQUE:'À risque', INCONNU:'Inconnu' };
+  const EMOJIS = { EXCELLENT:'✅', STABLE:'🟦', A_SURVEILLER:'👁', A_RISQUE:'⚠️', INCONNU:'❓' };
+  const color  = COLORS[niveau] || '#94a3b8';
+
+  if (accent) accent.style.background = color;
+
+  // Gauge SVG demi-cercle
+  const angle   = Math.min((score / 100) * 180, 180);
+  const rad     = angle * Math.PI / 180;
+  const r = 58, cx = 70, cy = 68;
+  const x = cx + r * Math.cos(Math.PI - rad);
+  const y = cy - r * Math.sin(rad);
+  const lArc  = angle > 180 ? 1 : 0;
+  const gauge = `<svg width="140" height="80" viewBox="0 0 140 80">
+    <path d="M12,68 A58,58 0 0,1 128,68" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="11" stroke-linecap="round"/>
+    <path d="M12,68 A58,58 0 ${lArc},1 ${x.toFixed(1)},${y.toFixed(1)}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" style="filter:drop-shadow(0 0 6px ${color}88)"/>
+  </svg>`;
+
+  // Signaux détectés
+  const SIGNAUX_DEF = [
+    { key:'retardsImportants',      label:'Retards importants',    icon:'📋' },
+    { key:'inactiviteDetectee',     label:'Inactivité détectée',   icon:'🔕' },
+    { key:'tachesNonCommencees',    label:'Tâches non commencées', icon:'⏳' },
+    { key:'faibleFrequenceConnexion', label:'Faible fréquence',    icon:'📶' }
+  ];
+  const signauxHTML = SIGNAUX_DEF.filter(s => analyse[s.key] !== undefined).map(s => {
+    const actif = !!analyse[s.key];
+    const sc = actif ? '#ef4444' : '#10b981';
+    return `<div class="rm-signal">
+      <div class="rm-signal-icon" style="background:${sc}18;">${s.icon}</div>
+      <span class="rm-signal-label">${s.label}</span>
+      <span class="rm-signal-status" style="background:${sc}18;color:${sc};">${actif ? 'DÉTECTÉ' : 'OK'}</span>
+    </div>`;
+  }).join('');
+
+  // Alertes
+  const alertesHTML = alertes.length === 0
+    ? `<div class="rm-no-alert">✅ &nbsp;Aucune alerte — cet étudiant suit une bonne trajectoire.</div>`
+    : alertes.map(a => `
+      <div class="rm-alerte ${a.niveau||'MOYEN'}">
+        <span class="rm-alerte-badge">${a.niveau||'INFO'}</span>
+        <div>
+          <div class="rm-alerte-type">${a.type||''}</div>
+          <div class="rm-alerte-msg">${a.message||''}</div>
+        </div>
+      </div>`).join('');
+
+  // Recommandations
+  const recsHTML = recs.length === 0
+    ? `<div class="rm-no-alert">✅ &nbsp;Aucune recommandation particulière.</div>`
+    : recs.map((r, i) => `
+      <div class="rm-rec">
+        <div class="rm-rec-num">${i+1}</div>
+        <div class="rm-rec-text">${r}</div>
+      </div>`).join('');
+
+  const nbCritiques = alertes.filter(a => a.niveau === 'CRITIQUE').length;
+
+  body.innerHTML = `
+    <!-- ── Score hero ── -->
+    <div class="rm-score-hero" style="background:${color}0d; border-color:${color}30;">
+      <div class="rm-gauge-wrap">
+        ${gauge}
+        <div class="rm-score-num" style="color:${color};">${score}<span class="rm-score-denom"> /100</span></div>
+        <div class="rm-score-label">Score d'engagement</div>
+        <div class="rm-niveau-pill" style="background:${color}20;color:${color};border:1px solid ${color}40;">
+          ${EMOJIS[niveau]} ${LABELS[niveau]||niveau}
+        </div>
+      </div>
+      ${signauxHTML ? `<div class="rm-signaux-grid" style="flex:1;">${signauxHTML}</div>` : ''}
+    </div>
+
+    <!-- ── Alertes ── -->
+    <div class="rm-section">
+      <div class="rm-section-head">
+        <div class="rm-section-head-icon" style="background:rgba(239,68,68,.12);">🚨</div>
+        <span class="rm-section-title">Alertes détectées</span>
+        ${alertes.length > 0 ? `<span class="rm-section-count">${alertes.length} alerte${alertes.length>1?'s':''} · ${nbCritiques} critique${nbCritiques>1?'s':''}</span>` : ''}
+      </div>
+      <div class="rm-alertes">${alertesHTML}</div>
+    </div>
+
+    <!-- ── Recommandations ── -->
+    <div class="rm-section">
+      <div class="rm-section-head">
+        <div class="rm-section-head-icon" style="background:rgba(16,185,129,.12);">💡</div>
+        <span class="rm-section-title">Recommandations</span>
+        ${recs.length > 0 ? `<span class="rm-section-count">${recs.length} action${recs.length>1?'s':''}</span>` : ''}
+      </div>
+      <div class="rm-recs">${recsHTML}</div>
+    </div>
+
+    <div class="rm-footer">
+      <span>Stage #${d.stageId || '—'}</span>
+      <span>Analysé le ${date}</span>
+    </div>`;
+}
 
 // ==================== NOTIFICATIONS ====================
 async function chargerNotifications() {

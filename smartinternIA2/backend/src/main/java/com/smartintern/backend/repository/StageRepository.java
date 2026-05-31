@@ -14,4 +14,5 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
     List<Stage> findByEncadrantEntrepriseId(Long encadrantId);
     Optional<Stage> findByCandidatureId(Long candidatureId);
     List<Stage> findByStatut(Stage.Statut statut);
+    long countByStatut(Stage.Statut statut);
 }

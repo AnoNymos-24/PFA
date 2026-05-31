@@ -2,6 +2,8 @@ package com.smartintern.backend.service;
 
 import com.smartintern.backend.dto.AuthDto;
 import com.smartintern.backend.entity.User;
+import com.smartintern.backend.notification.NotificationEvent;
+import com.smartintern.backend.notification.NotificationService;
 import com.smartintern.backend.repository.UserRepository;
 import com.smartintern.backend.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -22,10 +25,10 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtils jwtUtils;
-    private final EmailService emailService;
+    private final UserRepository         userRepository;
+    private final PasswordEncoder        passwordEncoder;
+    private final JwtUtils               jwtUtils;
+    private final NotificationService    notificationService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -38,10 +41,6 @@ public class AuthService implements UserDetailsService {
                 .build();
     }
 
-    /**
-     * Retourne l'entité User complète par email — utilisée par AuthController
-     * pour passer le User aux services d'audit (SessionConnexionService, LogActiviteService).
-     */
     public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -50,7 +49,6 @@ public class AuthService implements UserDetailsService {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Cet email est déjà utilisé");
 
-        // ✅ statut EN_ATTENTE par défaut via @Builder.Default — pas de setEnabled()
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -65,13 +63,11 @@ public class AuthService implements UserDetailsService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        try {
-            emailService.sendOtpEmail(user.getEmail(), user.getFirstName(), otp);
-        } catch (Exception e) {
-            // En développement : si SMTP non configuré, on logue l'OTP dans la console
-            log.warn("⚠️  Email non envoyé (SMTP non configuré). OTP pour [{}] : >>>  {}  <<<  — {}",
-                    user.getEmail(), otp, e.getMessage());
-        }
+        notificationService.envoyer(
+            NotificationEvent.INSCRIPTION_OTP,
+            Map.of("prenom", user.getFirstName(), "code", otp, "expiration", "10 minutes"),
+            user.getEmail()
+        );
 
         return AuthDto.AuthResponse.builder()
                 .id(user.getId())
@@ -92,7 +88,7 @@ public class AuthService implements UserDetailsService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new BadCredentialsException("Email ou mot de passe incorrect");
 
-        if (!user.isEnabled()) // ✅ isEnabled() → statut == ACTIF
+        if (!user.isEnabled())
             throw new RuntimeException("Compte non vérifié. Vérifiez votre email.");
 
         UserDetails userDetails = loadUserByUsername(user.getEmail());

@@ -158,15 +158,21 @@ public class StageService {
                 .mission(s.getMission())
                 .evaluationFinale(s.getEvaluationFinale())
                 .etudiantId(s.getEtudiant().getId())
-                .etudiantNom(s.getEtudiant().getFirstName() + " " + s.getEtudiant().getLastName())
+                .etudiantPrenom(s.getEtudiant().getFirstName())
+                .etudiantNom(s.getEtudiant().getLastName())
+                .etudiantEmail(s.getEtudiant().getEmail())
                 .entrepriseId(s.getEntreprise().getId())
                 .entrepriseNom(s.getEntreprise().getNom())
                 .encadrantAcademiqueNom(s.getEncadrantAcademique() != null
-                        ? s.getEncadrantAcademique().getFirstName() + " " + s.getEncadrantAcademique().getLastName()
-                        : null)
+                        ? s.getEncadrantAcademique().getLastName() : null)
+                .encadrantAcademiquePrenom(s.getEncadrantAcademique() != null
+                        ? s.getEncadrantAcademique().getFirstName() : null)
                 .encadrantEntrepriseNom(s.getEncadrantEntreprise() != null
                         ? s.getEncadrantEntreprise().getFirstName() + " " + s.getEncadrantEntreprise().getLastName()
                         : null)
+                .offreTitre(s.getCandidature() != null && s.getCandidature().getOffre() != null
+                        ? s.getCandidature().getOffre().getTitre() : null)
+                .dureeSemaines(s.getDureeMois() * 4)
                 .candidatureId(s.getCandidature() != null ? s.getCandidature().getId() : null)
                 .conventionSigneeEntreprise(s.isConventionSigneeEntreprise())
                 .dateSignatureEntreprise(s.getDateSignatureEntreprise())

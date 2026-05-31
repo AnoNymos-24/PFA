@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Vérification SmartIntern AI</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f4f8;padding:40px 16px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+      <!-- HEADER -->
+      <tr>
+        <td style="background-color:#185FA5;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
+          <table cellpadding="0" cellspacing="0" style="display:inline-table;">
+            <tr>
+              <td style="vertical-align:middle;padding-right:12px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background:rgba(255,255,255,0.2);width:40px;height:40px;border-radius:10px;text-align:center;vertical-align:middle;">
+                      <span style="color:white;font-size:22px;line-height:40px;">&#127891;</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align:middle;">
+                <span style="color:white;font-size:22px;font-weight:700;letter-spacing:-0.5px;">SmartIntern AI</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- BODY -->
+      <tr>
+        <td style="background-color:#ffffff;padding:40px;border-left:1px solid #dde3eb;border-right:1px solid #dde3eb;">
+          <h2 style="color:#111827;font-size:20px;margin:0 0 8px 0;font-weight:700;">Bienvenue, {{prenom}}&nbsp;!</h2>
+          <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 28px 0;">
+            Merci de vous inscrire sur <strong>SmartIntern AI</strong>. Entrez le code ci-dessous pour activer votre compte.
+          </p>
+
+          <!-- CODE OTP -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td align="center" style="background-color:#EBF4FF;border-radius:12px;padding:28px 20px;">
+                <p style="margin:0 0 8px 0;color:#6b7280;font-size:13px;text-transform:uppercase;letter-spacing:1px;">Code de vérification</p>
+                <span style="font-size:44px;font-weight:700;letter-spacing:16px;color:#185FA5;font-family:'Courier New',Courier,monospace;">{{code}}</span>
+              </td>
+            </tr>
+          </table>
+
+          <p style="color:#9ca3af;font-size:13px;text-align:center;margin:0 0 6px 0;">
+            Ce code est valide pendant <strong style="color:#374151;">{{expiration}}</strong>.
+          </p>
+          <p style="color:#9ca3af;font-size:13px;text-align:center;margin:0;">
+            Si vous n'avez pas créé de compte, ignorez cet email.
+          </p>
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background-color:#f8fafc;padding:20px 40px;border:1px solid #dde3eb;border-top:none;border-radius:0 0 12px 12px;text-align:center;">
+          <p style="color:#9ca3af;font-size:12px;margin:0 0 6px 0;">
+            &copy; 2025 SmartIntern AI &mdash; Plateforme universitaire de gestion des stages
+          </p>
+          <p style="margin:0;">
+            <a href="mailto:support@smartintern.ai" style="color:#185FA5;font-size:12px;text-decoration:none;">Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="#" style="color:#185FA5;font-size:12px;text-decoration:none;">Mentions légales</a>
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

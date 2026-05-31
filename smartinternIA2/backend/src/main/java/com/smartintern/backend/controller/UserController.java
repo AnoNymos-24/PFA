@@ -22,6 +22,30 @@ public class UserController {
     private final EtudiantRepository etudiantRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // ── Profil de l'utilisateur connecté ─────────────────────────────────────
+    @GetMapping("/api/users/me")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("id",        user.getId());
+        response.put("firstName", user.getFirstName());
+        response.put("lastName",  user.getLastName());
+        response.put("email",     user.getEmail());
+        response.put("role",      user.getRole() != null ? user.getRole().name() : null);
+        response.put("statut",    user.getStatut() != null ? user.getStatut().name() : null);
+        response.put("telephone", user.getTelephone());
+        if (user.getRole() == User.Role.ETUDIANT) {
+            etudiantRepository.findByEmail(email).ifPresent(e -> {
+                response.put("filiere", e.getFiliere());
+                response.put("classe",  e.getClasse());
+                response.put("codeEtudiant", e.getCodeEtudiant());
+            });
+        }
+        return ResponseEntity.ok(response);
+    }
+
     // ── Mettre à jour le profil de l'utilisateur connecté ────────────────────
     @PutMapping("/api/users/me")
     public ResponseEntity<?> updateProfile(
@@ -32,8 +56,10 @@ public class UserController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        if (request.getTelephone() != null)
-            user.setTelephone(request.getTelephone());
+        if (request.getFirstName()   != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName()    != null) user.setLastName(request.getLastName());
+        if (request.getTelephone()   != null) user.setTelephone(request.getTelephone());
+        if (request.getPhotoProfil() != null) user.setPhotoProfil(request.getPhotoProfil());
 
         userRepository.save(user);
 
@@ -70,9 +96,12 @@ public class UserController {
 
     @Data
     public static class ProfileUpdateRequest {
+        private String firstName;
+        private String lastName;
         private String telephone;
         private String filiere;
         private String classe;
+        private String photoProfil;
     }
 
     @Data

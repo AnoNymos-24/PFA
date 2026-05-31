@@ -35,7 +35,7 @@ public class Stage {
     /** Semaine courante du stage — mise à jour chaque lundi par StageProgressionScheduler */
     @Builder.Default
     @Column(name = "semaine_actuelle")
-    private int semaineActuelle = 1;
+    private Integer semaineActuelle = 1;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

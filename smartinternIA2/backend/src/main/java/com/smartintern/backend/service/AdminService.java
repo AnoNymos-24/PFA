@@ -6,8 +6,9 @@ import com.smartintern.backend.entity.*;
 import com.smartintern.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,12 +17,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final EtudiantRepository etudiantRepository;
-    private final EntrepriseRepository entrepriseRepository;
+    private final UserRepository         userRepository;
+    private final EtudiantRepository     etudiantRepository;
+    private final EntrepriseRepository   entrepriseRepository;
     private final DemandeStageRepository demandeStageRepository;
-    private final OffreStageRepository offreStageRepository;
-    private final StageRepository stageRepository;
+    private final OffreStageRepository   offreStageRepository;
+    private final StageRepository        stageRepository;
+    private final CandidatureRepository  candidatureRepository;
+    private final RapportStageRepository rapportStageRepository;
+    private final ResultatRisqueRepository resultatsRisqueRepository;
 
     // ── Lister tous les utilisateurs ──────────────────────────────────────────
     public List<UserDto.UserResponse> getAllUsers() {
@@ -77,7 +81,7 @@ public class AdminService {
                 .entreprise(entreprise)
                 .lettreMotivation(request.getLettreMotivation())
                 .typeDemande(request.getTypeDemande())
-                .dateDemande(LocalDate.now())
+                .dateDemande(java.time.LocalDate.now())
                 .statut(DemandeStage.Statut.EN_ATTENTE)
                 .build();
 
@@ -85,15 +89,127 @@ public class AdminService {
         return toDemandeResponse(demande);
     }
 
-    // ── Admin : statistiques globales ────────────────────────────────────────
+    // ── Statistiques globales ─────────────────────────────────────────────────
     public Map<String, Long> getStats() {
-        return Map.of(
-            "totalEtudiants",   userRepository.countByRole(User.Role.ETUDIANT),
-            "totalEntreprises", userRepository.countByRole(User.Role.ENTREPRISE),
-            "totalOffres",      offreStageRepository.count(),
-            "offresActives",    offreStageRepository.countByStatut(OffreStage.Statut.ACTIVE),
-            "totalStages",      stageRepository.count()
-        );
+        long encadrants = userRepository.countByRole(User.Role.ENCADRANT_ACADEMIQUE)
+                        + userRepository.countByRole(User.Role.ENCADRANT_ENTREPRISE);
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("totalUsers",    userRepository.count());
+        stats.put("etudiants",     userRepository.countByRole(User.Role.ETUDIANT));
+        stats.put("entreprises",   userRepository.countByRole(User.Role.ENTREPRISE));
+        stats.put("stagesEnCours", stageRepository.countByStatut(Stage.Statut.EN_COURS));
+        stats.put("encadrants",    encadrants);
+        stats.put("candidatures",  candidatureRepository.count());
+        stats.put("offres",        offreStageRepository.count());
+        stats.put("conventions",   stageRepository.count());
+        stats.put("rapports",      rapportStageRepository.count());
+        return stats;
+    }
+
+    // ── Lister tous les stages ────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllStages() {
+        return stageRepository.findAll().stream().map(s -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id",                   s.getId());
+            m.put("etudiantPrenom",       s.getEtudiant().getFirstName());
+            m.put("etudiantNom",          s.getEtudiant().getLastName());
+            m.put("etudiantEmail",        s.getEtudiant().getEmail());
+            m.put("entrepriseNom",        s.getEntreprise().getNom());
+            m.put("offreTitre",           s.getCandidature() != null && s.getCandidature().getOffre() != null
+                                            ? s.getCandidature().getOffre().getTitre() : "—");
+            m.put("poste",                s.getCandidature() != null && s.getCandidature().getOffre() != null
+                                            ? s.getCandidature().getOffre().getTitre() : "—");
+            m.put("dureeSemaines",        s.getDureeMois() * 4);
+            m.put("dateDebut",            s.getDateDebut());
+            m.put("dateFin",              s.getDateFin());
+            m.put("statut",               s.getStatut().name());
+            m.put("encadrantAcademiqueNom",    s.getEncadrantAcademique() != null
+                                                ? s.getEncadrantAcademique().getLastName() : null);
+            m.put("encadrantAcademiquePrenom", s.getEncadrantAcademique() != null
+                                                ? s.getEncadrantAcademique().getFirstName() : null);
+            m.put("semaineActuelle",      s.getSemaineActuelle() != null ? s.getSemaineActuelle() : 1);
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+    // ── Détail d'un stage ─────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public Map<String, Object> getStageById(Long id) {
+        Stage s = stageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Stage non trouvé"));
+        Map<String, Object> m = new HashMap<>();
+        m.put("id",                   s.getId());
+        m.put("etudiantPrenom",       s.getEtudiant().getFirstName());
+        m.put("etudiantNom",          s.getEtudiant().getLastName());
+        m.put("etudiantEmail",        s.getEtudiant().getEmail());
+        m.put("entrepriseNom",        s.getEntreprise().getNom());
+        m.put("offreTitre",           s.getCandidature() != null && s.getCandidature().getOffre() != null
+                                        ? s.getCandidature().getOffre().getTitre() : "—");
+        m.put("poste",                s.getCandidature() != null && s.getCandidature().getOffre() != null
+                                        ? s.getCandidature().getOffre().getTitre() : "—");
+        m.put("dateDebut",            s.getDateDebut());
+        m.put("dateFin",              s.getDateFin());
+        m.put("statut",               s.getStatut().name());
+        m.put("sujet",                s.getSujet());
+        m.put("mission",              s.getMission());
+        m.put("encadrantAcademiqueNom",    s.getEncadrantAcademique() != null
+                                            ? s.getEncadrantAcademique().getLastName() : null);
+        m.put("encadrantAcademiquePrenom", s.getEncadrantAcademique() != null
+                                            ? s.getEncadrantAcademique().getFirstName() : null);
+        return m;
+    }
+
+    // ── Étudiants à risque ────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getEtudiantsARisque() {
+        return resultatsRisqueRepository
+                .findByNiveauRisque(ResultatRisque.NiveauRisque.A_RISQUE)
+                .stream().map(r -> {
+                    Stage s = r.getStage();
+                    Etudiant e = s.getEtudiant();
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id",           e.getId());
+                    m.put("etudiantPrenom", e.getFirstName());
+                    m.put("etudiantNom",  e.getLastName());
+                    m.put("universite",   e.getEtablissement() != null
+                                            ? e.getEtablissement().getNom() : "—");
+                    m.put("entrepriseNom", s.getEntreprise().getNom());
+                    m.put("scoreRisque",  r.getScoreEngagement());
+                    m.put("raisons",      r.getNiveauRisque().name());
+                    m.put("stageId",      s.getId());
+                    return m;
+                }).collect(Collectors.toList());
+    }
+
+    // ── Lister tous les étudiants ─────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllEtudiants() {
+        return etudiantRepository.findAll().stream().map(e -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id",      e.getId());
+            m.put("prenom",  e.getFirstName());
+            m.put("nom",     e.getLastName());
+            m.put("email",   e.getEmail());
+            m.put("filiere", e.getFiliere());
+            m.put("classe",  e.getClasse());
+            m.put("statut",  e.getStatut() != null ? e.getStatut().name() : null);
+            m.put("universite", e.getEtablissement() != null ? e.getEtablissement().getNom() : "—");
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+    // ── Lister toutes les entreprises ─────────────────────────────────────────
+    public List<Map<String, Object>> getAllEntreprises() {
+        return entrepriseRepository.findAll().stream().map(e -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id",             e.getId());
+            m.put("nom",            e.getNom());
+            m.put("adresse",        e.getAdresse());
+            m.put("domaineActivite", e.getDomaineActivite());
+            m.put("siteWeb",        e.getSiteWeb());
+            return m;
+        }).collect(Collectors.toList());
     }
 
     // ── Admin : lister toutes les demandes de stage ───────────────────────────
