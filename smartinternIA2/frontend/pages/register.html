@@ -908,7 +908,7 @@
       });
       // token="PENDING_VERIFICATION" après inscription → on stocke juste l'email pour l'OTP
       localStorage.setItem('pending_email', email);
-      localStorage.setItem('smartintern_prenom', data.firstName || prenom);
+      sessionStorage.setItem('smartintern_prenom', data.firstName || prenom);
       window.location.href = 'verify-email.html';
     } catch (err) {
       showErr('etudiant', err.message);
@@ -945,7 +945,7 @@
         telephone: tel
       });
       localStorage.setItem('pending_email', email);
-      localStorage.setItem('smartintern_prenom', data.firstName || prenom);
+      sessionStorage.setItem('smartintern_prenom', data.firstName || prenom);
       window.location.href = 'verify-email.html';
     } catch (err) {
       showErr('entreprise', err.message);

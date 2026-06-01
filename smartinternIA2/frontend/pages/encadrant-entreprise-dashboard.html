@@ -212,10 +212,20 @@
         <span class="nav-label">Mes stagiaires</span>
         <span class="nav-badge" id="stagiaires-badge">0</span>
       </a>
-      <div class="nav-section-label" style="margin-top:0.75rem">Suivi</div>
+      <div class="nav-section-label" style="margin-top:0.75rem">Suivi v6</div>
+      <a class="nav-item" data-view="cdc" onclick="showView('cdc',this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span class="nav-label">Cahier des charges</span>
+      </a>
+      <a class="nav-item" data-view="sprints" onclick="showView('sprints',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="nav-label">Sprints & Tâches</span>
+        <span class="nav-badge" id="sprints-badge">0</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:0.75rem">Suivi v5</div>
       <a class="nav-item" data-view="taches" onclick="showView('taches',this)">
         <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span class="nav-label">Tâches & missions</span>
+        <span class="nav-label">Missions (legacy)</span>
       </a>
       <a class="nav-item" data-view="rapports" onclick="showView('rapports',this)">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -344,6 +354,35 @@
   </div>
 </div>
 
+      <!-- CAHIER DES CHARGES -->
+      <div class="view" id="view-cdc">
+        <div class="page-header">
+          <div><h1 class="page-title">Cahier des charges</h1><p class="page-subtitle">Déposez et validez le cahier des charges pour chaque stagiaire</p></div>
+        </div>
+        <div id="cdc-stagiaires-list"><div class="empty-state">Chargement...</div></div>
+      </div>
+
+      <!-- SPRINTS & TÂCHES -->
+      <div class="view" id="view-sprints">
+        <div class="page-header">
+          <div><h1 class="page-title">Sprints & Tâches</h1><p class="page-subtitle">Planifiez les sprints et assignez des tâches à vos stagiaires</p></div>
+          <button class="btn-primary" id="btn-creer-sprint" onclick="ouvrirCreerSprint()" disabled>
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouveau sprint
+          </button>
+        </div>
+
+        <!-- Sélecteur de stagiaire -->
+        <div class="field" style="max-width:400px;margin-bottom:1.5rem;">
+          <label style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;">Stagiaire</label>
+          <select id="sprint-stage-select" onchange="chargerSprintsEtTaches()" style="width:100%;padding:.65rem .875rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;">
+            <option value="">-- Sélectionner un stagiaire --</option>
+          </select>
+        </div>
+
+        <div id="sprints-container"><div class="empty-state">Sélectionnez un stagiaire pour voir ses sprints.</div></div>
+      </div>
+
       <!-- RAPPORTS -->
       <div class="view" id="view-rapports">
         <div class="page-header"><div><h1 class="page-title">Rapports reçus</h1><p class="page-subtitle" id="rapports-subtitle">Chargement...</p></div></div>
@@ -415,6 +454,101 @@
       </div>
     </div>
   </div>
+ <!-- MODAL CDC UPLOAD -->
+  <div class="modal-overlay" id="modal-cdc" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span style="font-size:1.1rem;font-weight:800;color:var(--text);">Déposer le cahier des charges</span>
+        <button onclick="document.getElementById('modal-cdc').classList.remove('open')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="cdc-stage-id-input"/>
+      <div class="field"><label>Titre *</label><input type="text" id="cdc-titre" placeholder="Cahier des charges — Projet X"/></div>
+      <div class="field"><label>Fichier (PDF, DOCX) *</label><input type="file" id="cdc-file" accept=".pdf,.doc,.docx" style="padding:.5rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);width:100%;"/></div>
+      <div id="cdc-error" style="display:none;color:var(--red);font-size:.825rem;margin-bottom:.75rem;"></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="document.getElementById('modal-cdc').classList.remove('open')">Annuler</button>
+        <button class="btn-primary" id="btn-cdc-submit" onclick="soumettreUploadCDC()">Déposer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CRÉER SPRINT -->
+  <div class="modal-overlay" id="modal-sprint" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span style="font-size:1.1rem;font-weight:800;color:var(--text);" id="modal-sprint-title">Créer un sprint</span>
+        <button onclick="document.getElementById('modal-sprint').classList.remove('open')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="sprint-edit-id"/>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+        <div class="field"><label>Date début *</label><input type="date" id="sprint-date-debut" style="width:100%;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;"/></div>
+        <div class="field"><label>Date fin *</label><input type="date" id="sprint-date-fin" style="width:100%;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;"/></div>
+      </div>
+      <div id="sprint-error" style="display:none;color:var(--red);font-size:.825rem;margin-bottom:.75rem;"></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="document.getElementById('modal-sprint').classList.remove('open')">Annuler</button>
+        <button class="btn-primary" id="btn-sprint-submit" onclick="soumettreSprintModal()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CRÉER TÂCHE -->
+  <div class="modal-overlay" id="modal-tache" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span style="font-size:1.1rem;font-weight:800;color:var(--text);" id="modal-tache-title">Créer une tâche</span>
+        <button onclick="document.getElementById('modal-tache').classList.remove('open')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="tache-sprint-id-input"/>
+      <input type="hidden" id="tache-edit-id"/>
+      <div class="field"><label>Titre *</label><input type="text" id="tache-titre" placeholder="Implémenter module X"/></div>
+      <div class="field"><label>Description</label><textarea id="tache-description" placeholder="Détails de la tâche..." style="width:100%;min-height:80px;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;resize:vertical;"></textarea></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+        <div class="field"><label>Date début</label><input type="date" id="tache-date-debut" style="width:100%;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;"/></div>
+        <div class="field"><label>Date fin</label><input type="date" id="tache-date-fin" style="width:100%;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;"/></div>
+      </div>
+      <div id="tache-error" style="display:none;color:var(--red);font-size:.825rem;margin-bottom:.75rem;"></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="document.getElementById('modal-tache').classList.remove('open')">Annuler</button>
+        <button class="btn-primary" id="btn-tache-submit" onclick="soumettreCreerTache()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CLÔTURER SPRINT -->
+  <div class="modal-overlay" id="modal-cloturer-sprint" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span style="font-size:1.1rem;font-weight:800;color:var(--text);">Clôturer le sprint</span>
+        <button onclick="document.getElementById('modal-cloturer-sprint').classList.remove('open')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="cloturer-sprint-id"/>
+      <div class="field"><label>Observation (optionnel)</label><textarea id="cloturer-observation" placeholder="Bilan du sprint..." style="width:100%;min-height:80px;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;resize:vertical;"></textarea></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="document.getElementById('modal-cloturer-sprint').classList.remove('open')">Annuler</button>
+        <button class="btn-primary" onclick="confirmerClotureSprint()" style="background:var(--amber);">Clôturer le sprint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL VALIDER/REFUSER TÂCHE -->
+  <div class="modal-overlay" id="modal-valider-tache" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span style="font-size:1.1rem;font-weight:800;color:var(--text);" id="valider-tache-title">Valider la tâche</span>
+        <button onclick="document.getElementById('modal-valider-tache').classList.remove('open')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="valider-tache-id"/>
+      <input type="hidden" id="valider-tache-action"/>
+      <div class="field"><label id="valider-tache-obs-label">Observation (optionnel)</label><textarea id="valider-tache-observation" style="width:100%;min-height:80px;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;resize:vertical;"></textarea></div>
+      <div class="field" id="valider-tache-note-field" style="display:none;"><label>Note (/20)</label><input type="number" id="valider-tache-note" min="0" max="20" step="0.5" style="width:100%;padding:.65rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;"/></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="document.getElementById('modal-valider-tache').classList.remove('open')">Annuler</button>
+        <button class="btn-primary" id="btn-valider-tache-submit" onclick="confirmerValidationTache()">Valider</button>
+      </div>
+    </div>
+  </div>
+
  <!-- MODAL VOIR RAPPORT (NOUVEAU - À AJOUTER) -->
   <div class="modal-overlay" id="modal-voir-rapport" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal" style="max-width: 700px;">
@@ -495,9 +629,11 @@
   async function init() {
     try {
       currentUser = await apiGetMe();
-      const initials = (currentUser.prenom[0] + currentUser.nom[0]).toUpperCase();
-      document.getElementById('welcome-title').textContent = `Bonjour, ${currentUser.prenom} 👋`;
-      document.getElementById('sidebar-name').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+      const prenom = currentUser.firstName || currentUser.prenom || '';
+      const nom    = currentUser.lastName  || currentUser.nom    || '';
+      const initials = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || 'EE';
+      document.getElementById('welcome-title').textContent = `Bonjour, ${prenom} 👋`;
+      document.getElementById('sidebar-name').textContent = `${prenom} ${nom}`;
       document.getElementById('sidebar-avatar').textContent = initials;
       document.getElementById('topbar-avatar').textContent = initials;
       document.getElementById('entreprise-name').textContent = `Encadrant entreprise · ${currentUser.entrepriseNom || 'Votre entreprise'}`;
@@ -513,9 +649,8 @@
     await chargerStagiaires();
     await chargerRapports();
     await chargerNotifications();
-    //await chargerTaches();
-    
     await chargerSelectStagiaires();
+    remplirSelectSprintStagiaires();
   }
 
   // ==================== STAGIAIRES ====================
@@ -636,8 +771,8 @@ async function soumettreMission() {
       const accueilHtml = aValider.slice(0,2).map(r => `
         <div class="rapport-row">
           <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="rapport-info"><div class="rapport-title">${r.titre || 'Rapport'} — ${r.etudiantPrenom} ${r.etudiantNom}</div><div class="rapport-meta">${new Date(r.dateDepot).toLocaleDateString('fr-FR')}</div></div>
-          <span class="badge pending">À valider</span>
+          <div class="rapport-info"><div class="rapport-title">${r.titre || 'Rapport'} — ${r.etudiantPrenom||''} ${r.etudiantNom||''}</div><div class="rapport-meta">${r.dateSoumission ? new Date(r.dateSoumission).toLocaleDateString('fr-FR') : (r.dateCreation ? new Date(r.dateCreation).toLocaleDateString('fr-FR') : '—')}</div></div>
+          <span class="badge pending">Soumis</span>
         </div>`).join('');
       document.getElementById('rapports-accueil').innerHTML = accueilHtml || '<div class="empty-state">Aucun rapport à valider</div>';
       
@@ -657,27 +792,27 @@ function afficherRapports(rapports) {
         return;
     }
     
-    document.getElementById('rapports-list').innerHTML = filtered.map(r => `
-        <div class="rapport-row">
+    document.getElementById('rapports-list').innerHTML = filtered.map(r => {
+        const dateAffich = r.dateSoumission
+            ? new Date(r.dateSoumission).toLocaleDateString('fr-FR')
+            : (r.dateCreation ? new Date(r.dateCreation).toLocaleDateString('fr-FR') : '—');
+        const semaine = r.semaineDebut ? `· Semaine du ${new Date(r.semaineDebut).toLocaleDateString('fr-FR')}` : '';
+        const etudiant = `${r.etudiantPrenom||''} ${r.etudiantNom||''}`.trim() || 'Étudiant';
+        const statutMap = {VALIDE:'active', REJETE:'rejected', SOUMIS:'pending', BROUILLON:'neutral'};
+        const labelMap  = {VALIDE:'Validé ✓', REJETE:'Rejeté ✗', SOUMIS:'Soumis', BROUILLON:'Brouillon'};
+        return `<div class="rapport-row">
             <div class="rapport-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div class="rapport-info">
-                <div class="rapport-title">${r.titre || 'Rapport'} — ${r.etudiantPrenom} ${r.etudiantNom}</div>
-                <div class="rapport-meta">Reçu le ${new Date(r.dateDepot).toLocaleDateString('fr-FR')} · Semaine ${r.semaine || 1}</div>
-                ${r.commentaireEntreprise ? `<div class="rapport-comment">« ${r.commentaireEntreprise} »</div>` : ''}
+                <div class="rapport-title">${r.titre || 'Rapport'} — ${etudiant}</div>
+                <div class="rapport-meta">Reçu le ${dateAffich} ${semaine}</div>
+                ${r.commentaireEncadrant ? `<div class="rapport-comment">« ${r.commentaireEncadrant} »</div>` : ''}
             </div>
-            <span class="badge ${r.statut === 'VALIDE' ? 'active' : r.statut === 'REJETE' ? 'rejected' : 'pending'}">
-                ${r.statut === 'VALIDE' ? 'Validé ✓' : r.statut === 'REJETE' ? 'Rejeté ✗' : 'À valider'}
-            </span>
+            <span class="badge ${statutMap[r.statut]||'pending'}">${labelMap[r.statut]||r.statut}</span>
             <div class="action-btns">
                 <button class="btn-sm neutral" onclick="voirRapportDetail(${r.id})">📖 Lire</button>
-                ${r.statut === 'EN_ATTENTE' ? `
-                    <button class="btn-sm success" onclick="ouvrirValidationRapport(${r.id})">✅ Valider</button>
-                    <button class="btn-sm danger" onclick="rejeterRapport(${r.id})">❌ Rejeter</button>
-                    <button class="btn-sm amber" onclick="commenterRapport(${r.id})">💬 Commenter</button>
-                ` : ''}
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
   function filterRapports(filter, btn) {
@@ -1018,27 +1153,29 @@ function voirRapportDetail(rapportId) {
     }
     
     currentRapportVu = rapport;
-    
-    // Remplir le modal
+
+    const dateRef = rapport.dateSoumission || rapport.dateCreation;
+    const etudiant = `${rapport.etudiantPrenom||''} ${rapport.etudiantNom||''}`.trim() || 'Étudiant';
+
     document.getElementById('voir-rapport-titre').textContent = `📄 ${rapport.titre || 'Rapport'}`;
-    document.getElementById('voir-rapport-stagiaire').textContent = `${rapport.etudiantPrenom || ''} ${rapport.etudiantNom || ''}`;
-    document.getElementById('voir-rapport-date').textContent = new Date(rapport.dateDepot).toLocaleDateString('fr-FR') + ' à ' + new Date(rapport.dateDepot).toLocaleTimeString('fr-FR');
-    document.getElementById('voir-rapport-semaine').textContent = `Semaine ${rapport.semaine || 1}`;
+    document.getElementById('voir-rapport-stagiaire').textContent = etudiant;
+    document.getElementById('voir-rapport-date').textContent = dateRef
+        ? new Date(dateRef).toLocaleString('fr-FR') : '—';
+    document.getElementById('voir-rapport-semaine').textContent = rapport.semaineDebut
+        ? `Semaine du ${new Date(rapport.semaineDebut).toLocaleDateString('fr-FR')}` : '—';
     document.getElementById('voir-rapport-contenu').textContent = rapport.contenu || 'Contenu non disponible';
-    
-    // Gérer le commentaire existant
-    if (rapport.commentaireEntreprise) {
+
+    if (rapport.commentaireEncadrant) {
         document.getElementById('voir-rapport-commentaire').style.display = 'block';
-        document.getElementById('voir-rapport-commentaire-texte').textContent = rapport.commentaireEntreprise;
+        document.getElementById('voir-rapport-commentaire-texte').textContent = rapport.commentaireEncadrant;
     } else {
         document.getElementById('voir-rapport-commentaire').style.display = 'none';
     }
-    
-    // Afficher/cacher les boutons selon le statut
-    const isEnAttente = rapport.statut === 'EN_ATTENTE';
-    document.getElementById('voir-rapport-btn-valider').style.display = isEnAttente ? 'inline-flex' : 'none';
-    document.getElementById('voir-rapport-btn-rejeter').style.display = isEnAttente ? 'inline-flex' : 'none';
-    document.getElementById('voir-rapport-btn-commenter').style.display = isEnAttente ? 'inline-flex' : 'none';
+
+    // L'encadrant entreprise peut seulement lire, pas valider (rôle de l'académique)
+    document.getElementById('voir-rapport-btn-valider').style.display = 'none';
+    document.getElementById('voir-rapport-btn-rejeter').style.display = 'none';
+    document.getElementById('voir-rapport-btn-commenter').style.display = 'none';
     
     // Ouvrir le modal
     document.getElementById('modal-voir-rapport').classList.add('open');
@@ -1091,11 +1228,275 @@ async function rejeterRapport(rapportId) {
     }
   }
 
+  // ==================== CDC (CAHIER DES CHARGES) ====================
+  async function chargerCDC() {
+    const container = document.getElementById('cdc-stagiaires-list');
+    if (!mesStages.length) {
+      container.innerHTML = '<div class="empty-state">Aucun stagiaire actif</div>';
+      return;
+    }
+    container.innerHTML = '<div class="empty-state">Chargement...</div>';
+    const rows = await Promise.all(mesStages.map(async stage => {
+      let cdc = null;
+      try { cdc = await apiGetCahierDesChargesEncadrant(stage.id); } catch(e) { /* pas de CDC */ }
+      const statutBadge = !cdc ? '<span class="badge pending">Non déposé</span>'
+        : cdc.statut === 'VALIDE' ? '<span class="badge active">Validé ✓</span>'
+        : '<span class="badge pending">Brouillon</span>';
+      return `<div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${stage.etudiantPrenom||''} ${stage.etudiantNom||''}</div>
+            <div class="card-subtitle">${stage.offreTitre||'Stage'}</div>
+          </div>
+          ${statutBadge}
+        </div>
+        <div style="padding:1rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+          ${cdc ? `<span style="font-size:.875rem;color:var(--text2);">📄 ${cdc.titre||'CDC'}</span>` : '<span style="color:var(--text3);font-size:.875rem;">Aucun cahier des charges déposé</span>'}
+          <div style="margin-left:auto;display:flex;gap:.5rem;">
+            <button class="btn-sm primary" onclick="ouvrirUploadCDC(${stage.id})">
+              ${cdc ? 'Remplacer' : 'Déposer CDC'}
+            </button>
+            ${cdc && cdc.statut === 'BROUILLON' ? `<button class="btn-sm success" onclick="validerCDC(${cdc.id}, ${stage.id})">Valider CDC</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }));
+    container.innerHTML = rows.join('');
+  }
+
+  function ouvrirUploadCDC(stageId) {
+    document.getElementById('cdc-stage-id-input').value = stageId;
+    document.getElementById('cdc-titre').value = '';
+    document.getElementById('cdc-file').value = '';
+    document.getElementById('cdc-error').style.display = 'none';
+    document.getElementById('modal-cdc').classList.add('open');
+  }
+
+  async function soumettreUploadCDC() {
+    const stageId = parseInt(document.getElementById('cdc-stage-id-input').value);
+    const titre = document.getElementById('cdc-titre').value.trim();
+    const file = document.getElementById('cdc-file').files[0];
+    const errEl = document.getElementById('cdc-error');
+    errEl.style.display = 'none';
+    if (!titre || !file) { errEl.textContent = 'Titre et fichier requis.'; errEl.style.display = 'block'; return; }
+    const btn = document.getElementById('btn-cdc-submit');
+    btn.disabled = true; btn.textContent = 'Envoi...';
+    try {
+      await apiUploadCahierDesCharges(stageId, file, titre);
+      document.getElementById('modal-cdc').classList.remove('open');
+      alert('Cahier des charges déposé !');
+      chargerCDC();
+    } catch(err) { errEl.textContent = 'Erreur : ' + err.message; errEl.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = 'Déposer'; }
+  }
+
+  async function validerCDC(cdcId, stageId) {
+    if (!confirm('Valider ce cahier des charges ? Cela déverrouillera la création de sprints.')) return;
+    try {
+      await apiValiderCahierDesCharges(cdcId);
+      alert('CDC validé ! Vous pouvez maintenant créer des sprints.');
+      chargerCDC();
+    } catch(err) { alert('Erreur : ' + err.message); }
+  }
+
+  // ==================== SPRINTS & TÂCHES (v6) ====================
+  let currentSprintStageId = null;
+  let sprintsData = [];
+
+  function remplirSelectSprintStagiaires() {
+    const sel = document.getElementById('sprint-stage-select');
+    sel.innerHTML = '<option value="">-- Sélectionner un stagiaire --</option>' +
+      mesStages.map(s => `<option value="${s.id}">${s.etudiantPrenom||''} ${s.etudiantNom||''} — ${s.offreTitre||'Stage'}</option>`).join('');
+  }
+
+  async function chargerSprintsEtTaches() {
+    const stageId = parseInt(document.getElementById('sprint-stage-select').value);
+    const container = document.getElementById('sprints-container');
+    const btn = document.getElementById('btn-creer-sprint');
+    if (!stageId) {
+      container.innerHTML = '<div class="empty-state">Sélectionnez un stagiaire pour voir ses sprints.</div>';
+      btn.disabled = true; return;
+    }
+    currentSprintStageId = stageId;
+    btn.disabled = false;
+    container.innerHTML = '<div class="empty-state">Chargement...</div>';
+    try {
+      sprintsData = await apiGetSprintsEncadrant(stageId);
+      document.getElementById('sprints-badge').textContent = sprintsData.length;
+      if (!sprintsData.length) {
+        container.innerHTML = '<div class="empty-state">Aucun sprint — créez le premier sprint pour ce stagiaire.</div>';
+        return;
+      }
+      const sprintHtmlParts = await Promise.all(sprintsData.map(async sprint => {
+        let taches = [];
+        try { taches = await apiGetTachesEncadrant(sprint.id); } catch(e) {}
+        return renderSprintCard(sprint, taches);
+      }));
+      container.innerHTML = sprintHtmlParts.join('');
+    } catch(err) {
+      container.innerHTML = `<div class="empty-state">Erreur : ${err.message}</div>`;
+    }
+  }
+
+  function renderSprintCard(sprint, taches) {
+    const statutColor = sprint.statut === 'CLOTURE' ? 'var(--green)' : sprint.statut === 'EN_COURS' ? 'var(--blue)' : 'var(--text3)';
+    const statutLabel = { PLANIFIE:'Planifié', EN_COURS:'En cours', CLOTURE:'Clôturé' }[sprint.statut] || sprint.statut;
+    const tacheRows = taches.map(t => {
+      const tColors = { A_FAIRE:'pending', EN_COURS:'active', TERMINEE_PAR_ETUDIANT:'pending', VALIDEE:'active', REFUSEE:'rejected' };
+      const tLabels = { A_FAIRE:'À faire', EN_COURS:'En cours', TERMINEE_PAR_ETUDIANT:'À valider', VALIDEE:'Validée ✓', REFUSEE:'Refusée' };
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .875rem;border-bottom:1px solid var(--border);">
+        <span style="flex:1;font-size:.875rem;color:var(--text);font-weight:500;">${t.titre||'Tâche'}</span>
+        <span style="font-size:.75rem;color:var(--text3);">${t.dateDebut||''} → ${t.dateFin||''}</span>
+        <span class="badge ${tColors[t.statut]||'pending'}" style="font-size:.65rem;">${tLabels[t.statut]||t.statut}</span>
+        ${t.statut === 'TERMINEE_PAR_ETUDIANT' ? `
+          <button class="btn-sm success" onclick="ouvrirValidationTache(${t.id}, 'valider', '${(t.titre||'').replace(/'/g,'')}')">Valider</button>
+          <button class="btn-sm danger"  onclick="ouvrirValidationTache(${t.id}, 'refuser', '${(t.titre||'').replace(/'/g,'')}')">Refuser</button>
+        ` : ''}
+        ${sprint.statut !== 'CLOTURE' ? `<button class="btn-sm neutral" onclick="supprimerTache(${t.id})">✕</button>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Sprint — ${sprint.dateDebut||''} → ${sprint.dateFin||''}</div>
+          <div class="card-subtitle">${taches.length} tâche${taches.length>1?'s':''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:.8rem;font-weight:700;color:${statutColor};">${statutLabel}</span>
+          ${sprint.statut !== 'CLOTURE' ? `
+            <button class="btn-sm primary" onclick="ouvrirCreerTachePourSprint(${sprint.id})">+ Tâche</button>
+            <button class="btn-sm amber"   onclick="ouvrirClotureSprint(${sprint.id})">Clôturer</button>
+          ` : ''}
+        </div>
+      </div>
+      ${tacheRows || '<div style="padding:1rem;color:var(--text3);font-size:.875rem;">Aucune tâche — ajoutez des tâches à ce sprint.</div>'}
+      ${sprint.observation ? `<div style="padding:.75rem 1rem;background:var(--surface2);border-top:1px solid var(--border);font-size:.8rem;color:var(--text2);">Observation : ${sprint.observation}</div>` : ''}
+    </div>`;
+  }
+
+  function ouvrirCreerSprint() {
+    document.getElementById('sprint-edit-id').value = '';
+    document.getElementById('sprint-date-debut').value = '';
+    document.getElementById('sprint-date-fin').value = '';
+    document.getElementById('sprint-error').style.display = 'none';
+    document.getElementById('modal-sprint-title').textContent = 'Créer un sprint';
+    document.getElementById('btn-sprint-submit').textContent = 'Créer';
+    document.getElementById('modal-sprint').classList.add('open');
+  }
+
+  async function soumettreSprintModal() {
+    const editId = document.getElementById('sprint-edit-id').value;
+    const dateDebut = document.getElementById('sprint-date-debut').value;
+    const dateFin   = document.getElementById('sprint-date-fin').value;
+    const errEl = document.getElementById('sprint-error');
+    errEl.style.display = 'none';
+    if (!dateDebut || !dateFin) { errEl.textContent = 'Dates requises.'; errEl.style.display = 'block'; return; }
+    const btn = document.getElementById('btn-sprint-submit');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      if (editId) {
+        await apiModifierSprint(parseInt(editId), { dateDebut, dateFin });
+      } else {
+        await apiCreerSprint(currentSprintStageId, { dateDebut, dateFin });
+      }
+      document.getElementById('modal-sprint').classList.remove('open');
+      chargerSprintsEtTaches();
+    } catch(err) { errEl.textContent = 'Erreur : ' + err.message; errEl.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = editId ? 'Modifier' : 'Créer'; }
+  }
+
+  function ouvrirClotureSprint(sprintId) {
+    document.getElementById('cloturer-sprint-id').value = sprintId;
+    document.getElementById('cloturer-observation').value = '';
+    document.getElementById('modal-cloturer-sprint').classList.add('open');
+  }
+
+  async function confirmerClotureSprint() {
+    const sprintId = parseInt(document.getElementById('cloturer-sprint-id').value);
+    const observation = document.getElementById('cloturer-observation').value.trim();
+    try {
+      await apiCloturerSprint(sprintId, observation);
+      document.getElementById('modal-cloturer-sprint').classList.remove('open');
+      chargerSprintsEtTaches();
+    } catch(err) { alert('Erreur : ' + err.message); }
+  }
+
+  function ouvrirCreerTachePourSprint(sprintId) {
+    document.getElementById('tache-sprint-id-input').value = sprintId;
+    document.getElementById('tache-edit-id').value = '';
+    document.getElementById('tache-titre').value = '';
+    document.getElementById('tache-description').value = '';
+    document.getElementById('tache-date-debut').value = '';
+    document.getElementById('tache-date-fin').value = '';
+    document.getElementById('tache-error').style.display = 'none';
+    document.getElementById('modal-tache-title').textContent = 'Créer une tâche';
+    document.getElementById('btn-tache-submit').textContent = 'Créer';
+    document.getElementById('modal-tache').classList.add('open');
+  }
+
+  async function soumettreCreerTache() {
+    const sprintId = parseInt(document.getElementById('tache-sprint-id-input').value);
+    const titre = document.getElementById('tache-titre').value.trim();
+    const description = document.getElementById('tache-description').value.trim();
+    const dateDebut = document.getElementById('tache-date-debut').value;
+    const dateFin   = document.getElementById('tache-date-fin').value;
+    const errEl = document.getElementById('tache-error');
+    errEl.style.display = 'none';
+    if (!titre) { errEl.textContent = 'Titre requis.'; errEl.style.display = 'block'; return; }
+    const btn = document.getElementById('btn-tache-submit');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      await apiCreerTache(sprintId, { titre, description, dateDebut: dateDebut||null, dateFin: dateFin||null });
+      document.getElementById('modal-tache').classList.remove('open');
+      chargerSprintsEtTaches();
+    } catch(err) { errEl.textContent = 'Erreur : ' + err.message; errEl.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = 'Créer'; }
+  }
+
+  function ouvrirValidationTache(tacheId, action, titreTache) {
+    document.getElementById('valider-tache-id').value = tacheId;
+    document.getElementById('valider-tache-action').value = action;
+    document.getElementById('valider-tache-observation').value = '';
+    const isValider = action === 'valider';
+    document.getElementById('valider-tache-title').textContent = isValider ? `Valider : ${titreTache}` : `Refuser : ${titreTache}`;
+    document.getElementById('valider-tache-obs-label').textContent = isValider ? 'Observation (optionnel)' : 'Motif du refus *';
+    document.getElementById('valider-tache-note-field').style.display = isValider ? 'block' : 'none';
+    if (!isValider) document.getElementById('valider-tache-note').value = '';
+    document.getElementById('btn-valider-tache-submit').textContent = isValider ? 'Valider' : 'Refuser';
+    document.getElementById('btn-valider-tache-submit').style.background = isValider ? '' : 'var(--red)';
+    document.getElementById('modal-valider-tache').classList.add('open');
+  }
+
+  async function confirmerValidationTache() {
+    const tacheId = parseInt(document.getElementById('valider-tache-id').value);
+    const action  = document.getElementById('valider-tache-action').value;
+    const obs = document.getElementById('valider-tache-observation').value.trim();
+    if (action === 'refuser' && !obs) { alert('Motif du refus obligatoire.'); return; }
+    try {
+      if (action === 'valider') {
+        const noteVal = document.getElementById('valider-tache-note').value;
+        const note = noteVal ? parseFloat(noteVal) : null;
+        await apiValiderTache(tacheId, obs, note);
+      } else {
+        await apiRefuserTache(tacheId, obs);
+      }
+      document.getElementById('modal-valider-tache').classList.remove('open');
+      chargerSprintsEtTaches();
+    } catch(err) { alert('Erreur : ' + err.message); }
+  }
+
+  async function supprimerTache(tacheId) {
+    if (!confirm('Supprimer cette tâche ?')) return;
+    try { await apiSupprimerTache(tacheId); chargerSprintsEtTaches(); }
+    catch(err) { alert('Erreur : ' + err.message); }
+  }
+
   const viewTitles = {
     accueil:'Tableau de bord', stagiaires:'Mes stagiaires',
-    taches:'Tâches & missions', rapports:'Rapports reçus',
+    cdc:'Cahier des charges', sprints:'Sprints & Tâches',
+    taches:'Missions (legacy)', rapports:'Rapports reçus',
     evaluation:'Évaluation du stagiaire',
-     documents:'Mes documents',  
+    documents:'Mes documents',
     notifications:'Notifications'
   };
 
@@ -1107,10 +1508,11 @@ async function rejeterRapport(rapportId) {
     if (target) target.classList.add('active');
     document.getElementById('topbar-title').textContent = viewTitles[name] || '';
     window.scrollTo({ top:0, behavior:'smooth' });
-    
 
     if (name === 'documents') chargerDocuments();
-     if (name === 'taches') chargerTaches();
+    if (name === 'taches') chargerTaches();
+    if (name === 'cdc') chargerCDC();
+    if (name === 'sprints') { remplirSelectSprintStagiaires(); chargerSprintsEtTaches(); }
   }
  
 

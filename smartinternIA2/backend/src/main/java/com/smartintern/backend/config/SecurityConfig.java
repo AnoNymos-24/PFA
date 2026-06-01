@@ -70,6 +70,18 @@ public class SecurityConfig {
                 // ── Notifications (tout utilisateur authentifié) ───────────
                 .requestMatchers("/api/notifications/**").authenticated()
 
+                // ── Candidatures (étudiant + entreprise) ──────────────────
+                .requestMatchers("/api/candidatures/**").authenticated()
+
+                // ── Encadrants (entreprise crée ses propres encadrants) ────
+                .requestMatchers("/api/encadrants/**").authenticated()
+
+                // ── Rapports — accès multi-rôles ──────────────────────────
+                .requestMatchers("/api/rapports/**").authenticated()
+
+                // ── Messagerie (tout utilisateur authentifié) ─────────────
+                .requestMatchers("/api/messagerie/**").authenticated()
+
                 // ── Tout le reste nécessite une authentification ───────────
                 .anyRequest().authenticated()
             )

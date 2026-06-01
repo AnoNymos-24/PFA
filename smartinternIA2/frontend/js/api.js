@@ -9,7 +9,7 @@ const BASE_URL = 'http://localhost:8081/api';
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function authHeaders() {
-  const token = localStorage.getItem('smartintern_token');
+  const token = sessionStorage.getItem('smartintern_token');
   return {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + token
@@ -55,7 +55,7 @@ async function apiLogin(email, password) {
   const data = await handleResponse(res);
   // ✅ Sauvegarde dans smartintern_token (clé utilisée partout)
   if (data?.token) {
-    localStorage.setItem('smartintern_token', data.token);
+    sessionStorage.setItem('smartintern_token', data.token);
   }
   return data;
 }
@@ -210,7 +210,7 @@ async function apiUploadCv(file) {
   formData.append('file', file);
   const res = await fetch(`${BASE_URL}/etudiant/cv`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` },
+    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` },
     body: formData
   });
   return handleResponse(res);
@@ -255,130 +255,140 @@ async function apiDeleteCv() {
 
 // ── CANDIDATURES ───────────────────────────────────────────────────────────
 
-async function apiPostuler(offreId) {
-  const file = document.getElementById('cv-file')?.files[0];
-  if (file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    await fetch(`${BASE_URL}/candidatures/upload-cv`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` },
-      body: formData
-    });
-  }
-  const res = await fetch(`${BASE_URL}/candidatures/postuler/${offreId}`, {
-    method: 'POST', headers: authHeaders()
+async function apiPostuler(offreId, lettreMotivation = '') {
+  const res = await fetch(`${BASE_URL}/etudiant/candidatures`, {
+    method: 'POST', headers: authHeaders(),
+    body: JSON.stringify({ offreId, lettreMotivation })
   });
   return handleResponse(res);
 }
 
 async function apiGetCandidatures() {
-  const res = await fetch(`${BASE_URL}/candidatures/mes-candidatures`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/etudiant/candidatures`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
+async function apiGetCandidaturesParOffre(offreId) {
+  const res = await fetch(`${BASE_URL}/entreprise/offres/${offreId}/candidatures`, { headers: authHeaders() });
+  return handleResponse(res);
+}
+
+// Compatibilité: récupère toutes les candidatures reçues pour toutes les offres de l'entreprise
 async function apiGetCandidaturesRecues() {
-  const res = await fetch(`${BASE_URL}/candidatures/recues`, { headers: authHeaders() });
-  return handleResponse(res);
+  const offres = await apiMesOffres();
+  if (!offres || !offres.length) return [];
+  const promises = offres.map(o => apiGetCandidaturesParOffre(o.id).catch(() => []));
+  const results = await Promise.all(promises);
+  return results.flat();
 }
 
-async function apiChangerStatutCandidature(candidatureId, data) {
-  const res = await fetch(`${BASE_URL}/candidatures/${candidatureId}/statut`, {
-    method: 'PUT',
+async function apiDeciderCandidature(candidatureId, statut, commentaire = '') {
+  const res = await fetch(`${BASE_URL}/entreprise/candidatures/${candidatureId}/decision`, {
+    method: 'PATCH',
     headers: authHeaders(),
-    body: JSON.stringify({
-      statut:         data.statut,
-      commentaire:    data.commentaire    || '',
-      dateEntretien:  data.dateEntretien  || null,
-      lieuEntretien:  data.lieuEntretien  || null
-    })
+    body: JSON.stringify({ statut, commentaire })
   });
   return handleResponse(res);
+}
+
+// Alias pour compatibilité avec les anciens appels
+async function apiChangerStatutCandidature(candidatureId, data) {
+  return apiDeciderCandidature(candidatureId, data.statut, data.commentaire);
 }
 
 async function apiRepondreCandidature(id, action, commentaire = '') {
-  const res = await fetch(`${BASE_URL}/candidatures/${id}/repondre`, {
-    method: 'PUT', headers: authHeaders(),
-    body: JSON.stringify({ action, commentaire })
-  });
-  return handleResponse(res);
+  const statut = action === 'accepter' ? 'ACCEPTEE' : 'REFUSEE';
+  return apiDeciderCandidature(id, statut, commentaire);
 }
 
 // ── STAGES ─────────────────────────────────────────────────────────────────
 
 async function apiGetStage() {
-  const res = await fetch(`${BASE_URL}/stages/mon-stage`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/etudiant/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
+// Alias pour obtenir le premier stage actif de l'étudiant
+async function apiGetMonStage() {
+  const stages = await apiGetStage();
+  return Array.isArray(stages) ? (stages[0] || null) : stages;
+}
+
+// Pour encadrant entreprise : ses stagiaires assignés
 async function apiGetStagiaires() {
-  const res = await fetch(`${BASE_URL}/stages/mes-stagiaires`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/stages`, { headers: authHeaders() });
+  return handleResponse(res);
+}
+
+// Pour entreprise : tous ses stages (via ses offres)
+async function apiGetStagesEntreprise() {
+  const res = await fetch(`${BASE_URL}/entreprise/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
 async function apiGetConventions() {
-  const res = await fetch(`${BASE_URL}/stages/mes-conventions`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/entreprise/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
 async function apiSignerConventionEntreprise(stageId) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/signer-convention-entreprise`, {
-    method: 'PUT', headers: authHeaders()
+  const res = await fetch(`${BASE_URL}/entreprise/stages/${stageId}/signer-convention`, {
+    method: 'PATCH', headers: authHeaders()
   });
   return handleResponse(res);
 }
 
 async function apiSignerConventionEncadrant(stageId) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/signer-convention-encadrant`, {
-    method: 'PUT', headers: authHeaders()
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/stages/${stageId}/signer-convention`, {
+    method: 'PATCH', headers: authHeaders()
   });
   return handleResponse(res);
 }
 
-async function apiDefinirMission(stageId, description, objectifs) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/definir-mission`, {
-    method: 'POST',
+async function apiDefinirMission(stageId, mission) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/stages/${stageId}/mission`, {
+    method: 'PATCH',
     headers: authHeaders(),
-    body: JSON.stringify({ description, objectifs })
+    body: JSON.stringify({ mission })
   });
   return handleResponse(res);
 }
 
 async function apiGetStagesEncadrantEntreprise() {
-  const res = await fetch(`${BASE_URL}/stages/encadrant-entreprise`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
 async function apiGetStagesEncadrantAcademique() {
-  const res = await fetch(`${BASE_URL}/stages/encadrant-academique`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
 async function apiGetStagesSoutenance() {
-  const res = await fetch(`${BASE_URL}/stages/soutenances`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
 async function apiAutoriserSoutenance(stageId, dateSoutenance, commentaire) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/autoriser-soutenance`, {
-    method: 'PUT', headers: authHeaders(),
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages/${stageId}/autoriser-soutenance`, {
+    method: 'PATCH', headers: authHeaders(),
     body: JSON.stringify({ dateSoutenance, commentaire })
   });
   return handleResponse(res);
 }
 
 async function apiAffecterEncadrantEntreprise(stageId, encadrantId) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/affecter-encadrant-entreprise`, {
-    method: 'PUT', headers: authHeaders(),
-    body: JSON.stringify({ encadrantId })
+  const res = await fetch(`${BASE_URL}/admin/stages/${stageId}/encadrants`, {
+    method: 'PATCH', headers: authHeaders(),
+    body: JSON.stringify({ encadrantEntrepriseId: encadrantId })
   });
   return handleResponse(res);
 }
 
 async function apiAffecterEncadrantAcademique(stageId, encadrantId) {
-  const res = await fetch(`${BASE_URL}/stages/${stageId}/affecter-encadrant-academique`, {
-    method: 'PUT', headers: authHeaders(),
-    body: JSON.stringify({ encadrantId })
+  const res = await fetch(`${BASE_URL}/admin/stages/${stageId}/encadrants`, {
+    method: 'PATCH', headers: authHeaders(),
+    body: JSON.stringify({ encadrantAcademiqueId: encadrantId })
   });
   return handleResponse(res);
 }
@@ -464,7 +474,7 @@ async function apiDeposerRapport(stageId, type, semaine, titre, contenu, fichier
   fichiers.forEach(f => formData.append('fichiers', f));
   const res = await fetch(`${BASE_URL}/etudiant/stages/${stageId}/rapports`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` },
+    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` },
     body: formData
   });
   return handleResponse(res);
@@ -476,39 +486,43 @@ async function apiGetRapports() {
 }
 
 async function apiGetRapportsRecus() {
-  const res = await fetch(`${BASE_URL}/rapports/recus/encadrant`, { headers: authHeaders() });
-  return handleResponse(res);
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages/rapports`, { headers: authHeaders() });
+  return handleResponse(res).catch(() => []);
 }
 
 async function apiGetRapportsEncadrantAcademique() {
-  const res = await fetch(`${BASE_URL}/rapports/recus/encadrant-academique`, { headers: authHeaders() });
-  return handleResponse(res);
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages/rapports`, { headers: authHeaders() });
+  return handleResponse(res).catch(() => []);
 }
 
 async function apiGetRapportsAValider() {
-  const res = await fetch(`${BASE_URL}/rapports/a-valider`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/encadrant-academique/stages/rapports`, { headers: authHeaders() });
+  return handleResponse(res).catch(() => []);
+}
+
+async function apiSoumettreRapport(rapportId) {
+  const res = await fetch(`${BASE_URL}/etudiant/rapports/${rapportId}/soumettre`, {
+    method: 'PATCH', headers: authHeaders()
+  });
   return handleResponse(res);
 }
 
 async function apiValiderRapport(id, commentaire = '') {
-  const res = await fetch(`${BASE_URL}/rapports/${id}/valider`, {
-    method: 'PUT', headers: authHeaders(), body: JSON.stringify({ commentaire })
+  const res = await fetch(`${BASE_URL}/encadrant-academique/rapports/${id}/valider`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ commentaire })
   });
   return handleResponse(res);
 }
 
 async function apiCommenterRapport(id, commentaire) {
-  const res = await fetch(`${BASE_URL}/rapports/${id}/commenter`, {
-    method: 'PUT', headers: authHeaders(), body: JSON.stringify({ commentaire })
+  const res = await fetch(`${BASE_URL}/encadrant-academique/rapports/${id}/commenter`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ commentaire })
   });
   return handleResponse(res);
 }
 
 async function apiRejeterRapport(id, commentaire) {
-  const res = await fetch(`${BASE_URL}/rapports/${id}/rejeter`, {
-    method: 'PUT', headers: authHeaders(), body: JSON.stringify({ commentaire })
-  });
-  return handleResponse(res);
+  return apiCommenterRapport(id, commentaire);
 }
 
 // ── NOTIFICATIONS ──────────────────────────────────────────────────────────
@@ -521,8 +535,15 @@ async function apiGetNotifications() {
 }
 
 async function apiMarkAllNotificationsRead() {
-  const res = await fetch(`${BASE_URL}/notifications/mark-all-read`, {
-    method: 'PUT', headers: authHeaders()
+  const res = await fetch(`${BASE_URL}/notifications/lire-tout`, {
+    method: 'PATCH', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiMarquerNotificationLue(id) {
+  const res = await fetch(`${BASE_URL}/notifications/${id}/lire`, {
+    method: 'PATCH', headers: authHeaders()
   });
   return handleResponse(res);
 }
@@ -645,7 +666,7 @@ async function apiGetEncadrantsAcademiques() {
 }
 
 async function apiGetEncadrantsEntreprise() {
-  const res = await fetch(`${BASE_URL}/encadrants/entreprise`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/entreprise/encadrants`, { headers: authHeaders() });
   return handleResponse(res);
 }
 
@@ -685,7 +706,7 @@ async function apiGenererDocument(typeDocumentId, donneesSupp = {}, outputFormat
  */
 async function apiTelechargerDocument(uuid) {
   const res = await fetch(`${BASE_URL}/documents/${uuid}/telecharger`, {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` }
+    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` }
   });
   if (!res.ok) throw new Error(`Erreur téléchargement document ${uuid} : HTTP ${res.status}`);
   return res.blob();
@@ -737,7 +758,7 @@ async function apiEnvoyerFichierMessage(conversationId, fichier) {
   formData.append('fichier', fichier);
   const res = await fetch(`${BASE_URL}/messagerie/conversations/${conversationId}/fichiers`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` },
+    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` },
     body: formData
   });
   return handleResponse(res);
@@ -752,10 +773,164 @@ async function apiEnvoyerFichierMessage(conversationId, fichier) {
 async function apiExporterHistoriqueConversation(conversationId) {
   const res = await fetch(
     `${BASE_URL}/messagerie/conversations/${conversationId}/export`,
-    { headers: { 'Authorization': `Bearer ${localStorage.getItem('smartintern_token')}` } }
+    { headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` } }
   );
   if (!res.ok) throw new Error(`Erreur export historique : HTTP ${res.status}`);
   return res.blob();
+}
+
+// ── CAHIER DES CHARGES (CDC) ───────────────────────────────────────────────
+
+async function apiUploadCahierDesCharges(stageId, file, titre) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('titre', titre);
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/cahier-des-charges/stage/${stageId}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('smartintern_token')}` },
+    body: formData
+  });
+  return handleResponse(res);
+}
+
+async function apiValiderCahierDesCharges(id) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/cahier-des-charges/${id}/valider`, {
+    method: 'POST', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiGetCahierDesChargesEncadrant(stageId) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/cahier-des-charges/stage/${stageId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiGetCahierDesChargesEtudiant(stageId) {
+  const res = await fetch(`${BASE_URL}/etudiant/cahier-des-charges/stage/${stageId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+// ── SPRINTS ────────────────────────────────────────────────────────────────
+
+async function apiCreerSprint(stageId, data) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/sprints/stage/${stageId}`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(data)
+  });
+  return handleResponse(res);
+}
+
+async function apiModifierSprint(id, data) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/sprints/${id}`, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify(data)
+  });
+  return handleResponse(res);
+}
+
+async function apiSupprimerSprint(id) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/sprints/${id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiCloturerSprint(id, observation = '') {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/sprints/${id}/cloturer`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify({ observation })
+  });
+  return handleResponse(res);
+}
+
+async function apiGetSprintsEncadrant(stageId) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/sprints/stage/${stageId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiGetSprintsEtudiant(stageId) {
+  const res = await fetch(`${BASE_URL}/etudiant/sprints/stage/${stageId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+// ── TÂCHES ─────────────────────────────────────────────────────────────────
+
+async function apiCreerTache(sprintId, data) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/sprint/${sprintId}`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(data)
+  });
+  return handleResponse(res);
+}
+
+async function apiModifierTache(id, data) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/${id}`, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify(data)
+  });
+  return handleResponse(res);
+}
+
+async function apiSupprimerTache(id) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/${id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiValiderTache(id, observation = '', note = null) {
+  const body = { observation };
+  if (note !== null) body.note = note;
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/${id}/valider`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(body)
+  });
+  return handleResponse(res);
+}
+
+async function apiRefuserTache(id, observation) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/${id}/refuser`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify({ observation })
+  });
+  return handleResponse(res);
+}
+
+async function apiGetTachesEncadrant(sprintId) {
+  const res = await fetch(`${BASE_URL}/encadrant-entreprise/taches/sprint/${sprintId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiDemarrerTache(id) {
+  const res = await fetch(`${BASE_URL}/etudiant/taches/${id}/demarrer`, {
+    method: 'POST', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiTerminerTache(id, noteEtudiant = '') {
+  const res = await fetch(`${BASE_URL}/etudiant/taches/${id}/terminer`, {
+    method: 'POST', headers: authHeaders(),
+    body: JSON.stringify({ noteEtudiant })
+  });
+  return handleResponse(res);
+}
+
+async function apiReprendreTache(id) {
+  const res = await fetch(`${BASE_URL}/etudiant/taches/${id}/reprendre`, {
+    method: 'POST', headers: authHeaders()
+  });
+  return handleResponse(res);
+}
+
+async function apiGetTachesEtudiant(sprintId) {
+  const res = await fetch(`${BASE_URL}/etudiant/taches/sprint/${sprintId}`, {
+    headers: authHeaders()
+  });
+  return handleResponse(res);
 }
 
 // ── IA — MATCHING & RECOMMANDATION (v7) ────────────────────────────────────

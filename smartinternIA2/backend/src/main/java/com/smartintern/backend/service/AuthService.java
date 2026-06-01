@@ -15,10 +15,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -58,7 +58,7 @@ public class AuthService implements UserDetailsService {
                 .telephone(request.getTelephone())
                 .build();
 
-        String otp = String.format("%04d", new Random().nextInt(10000));
+        String otp = String.format("%06d", new SecureRandom().nextInt(1000000));
         user.setOtpCode(otp);
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);

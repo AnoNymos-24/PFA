@@ -27,6 +27,7 @@ public class RapportStageDto {
         private Long stageId;
         private Long etudiantId;
         private String etudiantNom;
+        private String etudiantPrenom;
         private String type;
         private String titre;
         private String contenu;

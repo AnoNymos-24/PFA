@@ -552,9 +552,11 @@ function timeAgo(d) {
 async function init() {
   try {
     const user = await apiGetMe();
-    const nom = `${user.prenom || ''} ${user.nom || ''}`.trim();
-    const ini = ((user.prenom?.[0] || '') + (user.nom?.[0] || '')).toUpperCase() || 'EA';
-    document.getElementById('welcome-title').textContent = `Bonjour, ${user.prenom || ''} 👋`;
+    const prenom = user.firstName || user.prenom || '';
+    const nomFam = user.lastName  || user.nom    || '';
+    const nom    = `${prenom} ${nomFam}`.trim();
+    const ini    = ((prenom[0] || '') + (nomFam[0] || '')).toUpperCase() || 'EA';
+    document.getElementById('welcome-title').textContent = `Bonjour, ${prenom} 👋`;
     document.getElementById('sidebar-name').textContent  = nom;
     document.getElementById('sidebar-avatar').textContent = ini;
     document.getElementById('topbar-avatar').textContent  = ini;
@@ -675,17 +677,18 @@ function afficherRapports() {
 function rapportRowHtml(r, showActions) {
   const statutBadge = r.statut === 'VALIDE' ? 'valide' : r.statut === 'REJETE' ? 'rejete' : 'pending';
   const statutLabel = r.statut === 'VALIDE' ? 'Validé ✓' : r.statut === 'REJETE' ? 'Rejeté' : 'À valider';
-  const date = r.dateDepot ? new Date(r.dateDepot).toLocaleDateString('fr-FR') : '—';
-  
-  // ✅ Statut académique séparé
-  const aCommente = r.commentaireEncadrantAcademique ? true : false;
-  
+  const dateRef = r.dateSoumission || r.dateCreation || r.dateDepot;
+  const date = dateRef ? new Date(dateRef).toLocaleDateString('fr-FR') : '—';
+  const semaine = r.semaineDebut ? `Sem. ${new Date(r.semaineDebut).toLocaleDateString('fr-FR')}` : (r.semaine ? `Sem. ${r.semaine}` : '');
+
+  const aCommente = !!(r.commentaireEncadrantAcademique || r.commentaireEncadrant);
+
   return `
     <div class="rapport-row">
       <div class="rapport-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
       <div class="rapport-info">
         <div class="rapport-title">${r.titre || 'Rapport'} — ${r.etudiantPrenom||''} ${r.etudiantNom||''}</div>
-        <div class="rapport-meta">${date} · Sem. ${r.semaine||'?'} · ${r.offreTitre||''}</div>
+        <div class="rapport-meta">${date} ${semaine ? '· ' + semaine : ''} · ${r.offreTitre||''}</div>
         <div class="rapport-meta" style="margin-top:3px;">
           Statut entreprise : <strong>${statutLabel}</strong>
         </div>
@@ -842,10 +845,12 @@ function voirRapportDetail(rapportId) {
     
     rapportVuId = rapportId;
     
+    const dateRefModal = r.dateSoumission || r.dateCreation || r.dateDepot;
     document.getElementById('voir-rap-titre').textContent    = `📄 ${r.titre || 'Rapport'}`;
     document.getElementById('voir-rap-etudiant').textContent = `${r.etudiantPrenom || ''} ${r.etudiantNom || ''}`;
-    document.getElementById('voir-rap-date').textContent     = r.dateDepot ? new Date(r.dateDepot).toLocaleDateString('fr-FR') : '—';
-    document.getElementById('voir-rap-semaine').textContent  = `Semaine ${r.semaine || '?'}`;
+    document.getElementById('voir-rap-date').textContent     = dateRefModal ? new Date(dateRefModal).toLocaleDateString('fr-FR') : '—';
+    document.getElementById('voir-rap-semaine').textContent  = r.semaineDebut
+        ? `Semaine du ${new Date(r.semaineDebut).toLocaleDateString('fr-FR')}` : `Semaine ${r.semaine || '?'}`;
     document.getElementById('voir-rap-contenu').textContent  = r.contenu || 'Contenu non disponible';
     
     const blocEntreprise = document.getElementById('voir-rap-commentaire-entreprise-bloc');

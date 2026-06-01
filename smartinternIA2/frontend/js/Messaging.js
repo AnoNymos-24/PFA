@@ -25,8 +25,8 @@
   let selectedParts   = [];
 
   // ── Session ───────────────────────────────────────────────
-  const getToken  = () => localStorage.getItem('smartintern_token') || localStorage.getItem('token') || '';
-  const getUserId = () => parseInt(localStorage.getItem('smartintern_userId') || '0');
+  const getToken  = () => sessionStorage.getItem('smartintern_token') || sessionStorage.getItem('token') || '';
+  const getUserId = () => parseInt(sessionStorage.getItem('smartintern_userId') || '0');
 
   const authHeader = () => ({
     'Content-Type': 'application/json',

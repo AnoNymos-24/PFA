@@ -5,34 +5,34 @@ const PRENOM_KEY = 'smartintern_prenom';
 const ID_KEY     = 'smartintern_userId';
 
 function saveSession(data) {
-  localStorage.setItem('smartintern_token',  data.token);
+  sessionStorage.setItem('smartintern_token',  data.token);
   // Le backend renvoie role sans préfixe ("ADMIN") — on normalise ici
   const role = data.role
     ? (data.role.startsWith('ROLE_') ? data.role : 'ROLE_' + data.role)
     : '';
-  localStorage.setItem('smartintern_role',   role);
+  sessionStorage.setItem('smartintern_role',   role);
   // Compatibilité backend : firstName/lastName OU prenom/nom
-  localStorage.setItem('smartintern_nom',    data.lastName  || data.nom    || '');
-  localStorage.setItem('smartintern_prenom', data.firstName || data.prenom || '');
-  localStorage.setItem('smartintern_userId', data.id);
+  sessionStorage.setItem('smartintern_nom',    data.lastName  || data.nom    || '');
+  sessionStorage.setItem('smartintern_prenom', data.firstName || data.prenom || '');
+  sessionStorage.setItem('smartintern_userId', data.id);
   if (data.firstLogin !== undefined) {
-    localStorage.setItem('smartintern_firstLogin', data.firstLogin ? 'true' : 'false');
+    sessionStorage.setItem('smartintern_firstLogin', data.firstLogin ? 'true' : 'false');
   }
 }
 
 function isFirstLogin() {
-  return localStorage.getItem('smartintern_firstLogin') === 'true';
+  return sessionStorage.getItem('smartintern_firstLogin') === 'true';
 }
 
-function getToken()   { return localStorage.getItem(TOKEN_KEY);  }
-function getRole()    { return localStorage.getItem(ROLE_KEY);   }
-function getNom()     { return localStorage.getItem(NOM_KEY);    }
-function getPrenom()  { return localStorage.getItem(PRENOM_KEY); }
-function getUserId()  { return localStorage.getItem(ID_KEY);     }
+function getToken()   { return sessionStorage.getItem(TOKEN_KEY);  }
+function getRole()    { return sessionStorage.getItem(ROLE_KEY);   }
+function getNom()     { return sessionStorage.getItem(NOM_KEY);    }
+function getPrenom()  { return sessionStorage.getItem(PRENOM_KEY); }
+function getUserId()  { return sessionStorage.getItem(ID_KEY);     }
 function isLoggedIn() { return !!getToken(); }
 
 function logout() {
-  localStorage.clear();
+  sessionStorage.clear();
   window.location.href = 'login.html';
 }
 
@@ -46,7 +46,7 @@ function requireAuth() {
 function redirectByRole(role) {
   // Rediriger vers la page de premier login si applicable
   if (isFirstLogin()) {
-    localStorage.setItem('smartintern_firstLogin', 'false');
+    sessionStorage.setItem('smartintern_firstLogin', 'false');
     const currentPath = window.location.pathname;
     window.location.href = currentPath.includes('/pages/')
       ? 'first-login.html'

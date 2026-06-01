@@ -22,4 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u SET u.derniereConnexion = :date WHERE u.id = :id")
     void updateDerniereConnexion(@Param("id") Long id, @Param("date") LocalDateTime date);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :since")
+    long countSince(@Param("since") LocalDateTime since);
+
+    long countByStatut(User.Statut statut);
 }

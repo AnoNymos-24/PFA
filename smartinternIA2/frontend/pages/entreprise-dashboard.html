@@ -402,14 +402,16 @@ let currentCandId = null;
 async function loadUserProfile() {
   try {
     const user = await apiGetMe();
-    const nom = user.raisonSociale || user.nom || 'Entreprise';
-    const ini = nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('welcome-title').textContent = `Bonjour, ${nom} 👋`;
-    document.getElementById('sidebar-name').textContent = nom;
+    const nomAffich = user.raisonSociale || user.firstName || user.nom || 'Entreprise';
+    const ini = nomAffich.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('welcome-title').textContent = `Bonjour, ${nomAffich} 👋`;
+    document.getElementById('sidebar-name').textContent = nomAffich;
     document.getElementById('sidebar-avatar').textContent = ini;
     document.getElementById('topbar-avatar').textContent = ini;
     const sv = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
-    sv('profil-nom', user.nom); sv('profil-prenom', user.prenom); sv('profil-email', user.email);
+    sv('profil-nom',    user.lastName  || user.nom);
+    sv('profil-prenom', user.firstName || user.prenom);
+    sv('profil-email',  user.email);
     sv('profil-raison', user.raisonSociale); sv('profil-matricule', user.matriculeFiscal);
     sv('profil-secteur', user.secteur); sv('profil-adresse', user.adresse);
     sv('profil-ville', user.ville); sv('profil-tel', user.telephone);
@@ -556,7 +558,15 @@ async function supprimerOffre(id) { if (!confirm('Supprimer définitivement ?'))
 
 async function chargerCandidatures() {
   try {
-    toutesCandidatures = await apiGetCandidaturesRecues();
+    const raw = await apiGetCandidaturesRecues();
+    // Normalisation des champs pour compatibilité avec l'UI
+    toutesCandidatures = (raw || []).map(c => ({
+      ...c,
+      prenom: c.etudiantNom ? c.etudiantNom.split(' ')[0] : (c.prenom || ''),
+      nom:    c.etudiantNom ? c.etudiantNom.split(' ').slice(1).join(' ') : (c.nom || ''),
+      datePostulation: c.dateCandidature || c.datePostulation,
+      commentaireEntreprise: c.commentaireEntreprise || c.commentaire || ''
+    }));
     const enAttente = toutesCandidatures.filter(c => c.statut === 'EN_ATTENTE').length;
     document.getElementById('stat-candidatures-attente').textContent = enAttente;
     document.getElementById('candidatures-badge').textContent = enAttente || '';
@@ -703,8 +713,7 @@ async function signerConvention(id) { if (!confirm('Confirmer la signature élec
 
 async function chargerStagiaires() {
   try {
-    const st = await apiGetStagiaires();
-    console.log("STAGIAIRES RAW =", st);
+    const st = await apiGetStagesEntreprise();
 
     document.getElementById('stat-stagiaires-actifs').textContent = st.filter(s => s.statut === 'EN_COURS').length;
     document.getElementById('stagiaires-subtitle').textContent = `${st.length} stagiaire${st.length !== 1 ? 's' : ''}`;
@@ -752,8 +761,19 @@ async function chargerEncadrantsEntreprise() {
     document.getElementById('enc-subtitle').textContent = `${encs.length} encadrant${encs.length !== 1 ? 's' : ''}`;
     const el = document.getElementById('enc-list');
     if (!encs.length) { el.innerHTML = '<div class="empty">Aucun encadrant. Cliquez sur "Ajouter un encadrant".</div>'; return; }
-    el.innerHTML = encs.map(e => `<div class="cand-row"><div class="cand-avatar" style="background:linear-gradient(135deg,var(--amber),var(--purple))">${(e.prenom?.[0]||'')+(e.nom?.[0]||'')}</div><div class="cand-info"><div class="cand-name">${e.prenom||''} ${e.nom||''}</div>
-    <div class="cand-meta"><span>${e.email||'—'}</span></div>${e.mustChangePassword?'<div class="cand-extra" style="color:var(--amber);">⚠️ N\'a pas encore changé son mot de passe temporaire</div>':''}</div><span class="badge ${e.enabled?'active':'closed'}">${e.enabled?'Actif':'Inactif'}</span></div>`).join('');
+    el.innerHTML = encs.map(e => {
+      const prenom = e.prenom || e.firstName || '';
+      const nom    = e.nom    || e.lastName  || '';
+      const isActif = e.statut === 'ACTIF' || e.enabled;
+      return `<div class="cand-row">
+        <div class="cand-avatar" style="background:linear-gradient(135deg,var(--amber),var(--purple))">${(prenom[0]||'')+(nom[0]||'')}</div>
+        <div class="cand-info">
+          <div class="cand-name">${prenom} ${nom}</div>
+          <div class="cand-meta"><span>${e.email||'—'}</span></div>
+        </div>
+        <span class="badge ${isActif?'active':'closed'}">${isActif?'Actif':'Inactif'}</span>
+      </div>`;
+    }).join('');
   } catch(e) { console.error(e); }
 }
 
@@ -831,8 +851,7 @@ function voirCandidat(id) {
 async function chargerDocuments() {
   const container = document.getElementById('documents-content');
   try {
-    // L'entreprise voit les stages de ses stagiaires
-    const stages = await apiGetStagiaires();
+    const stages = await apiGetStagesEntreprise();
 
     if (!stages || stages.length === 0) {
       container.innerHTML = '<div class="empty"><p>Aucun stagiaire actif — les documents seront disponibles dès qu\'un stage est en cours</p></div>';

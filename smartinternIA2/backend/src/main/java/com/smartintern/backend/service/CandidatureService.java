@@ -4,12 +4,14 @@ import com.smartintern.backend.dto.CandidatureDto;
 import com.smartintern.backend.entity.*;
 import com.smartintern.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CandidatureService {
@@ -17,6 +19,7 @@ public class CandidatureService {
     private final CandidatureRepository candidatureRepository;
     private final EtudiantRepository etudiantRepository;
     private final OffreStageRepository offreStageRepository;
+    private final EmailService emailService;
 
     // ── Étudiant : postuler à une offre ──────────────────────────────────────
     public CandidatureDto.CandidatureResponse postuler(
@@ -55,16 +58,17 @@ public class CandidatureService {
         Etudiant etudiant = etudiantRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Étudiant non trouvé"));
         return candidatureRepository.findByEtudiantId(etudiant.getId())
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── Entreprise : candidatures reçues pour une offre ───────────────────────
     public List<CandidatureDto.CandidatureResponse> getCandidaturesParOffre(Long offreId) {
         return candidatureRepository.findByOffreId(offreId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── Entreprise : décision (accepter / refuser) ────────────────────────────
+    @Transactional
     public CandidatureDto.CandidatureResponse decider(
             Long id, CandidatureDto.CandidatureDecisionRequest request, String email) {
 
@@ -72,7 +76,8 @@ public class CandidatureService {
                 .orElseThrow(() -> new RuntimeException("Candidature non trouvée"));
 
         // Vérifier que l'entreprise est bien propriétaire de l'offre
-        if (!candidature.getOffre().getCreateur().getEmail().equals(email)) {
+        User createur = candidature.getOffre() != null ? candidature.getOffre().getCreateur() : null;
+        if (createur == null || !createur.getEmail().equals(email)) {
             throw new RuntimeException("Non autorisé");
         }
 
@@ -84,6 +89,25 @@ public class CandidatureService {
                 nouveauStatut == Candidature.Statut.ACCEPTEE ? "Candidature acceptée" : "Candidature refusée");
 
         candidatureRepository.save(candidature);
+
+        // Envoi email de notification à l'étudiant
+        try {
+            String prenom = candidature.getEtudiant().getFirstName();
+            String offreTitre = candidature.getOffre().getTitre();
+            String entrepriseNom = candidature.getOffre().getEntreprise() != null
+                    ? candidature.getOffre().getEntreprise().getNom() : "l'entreprise";
+            if (nouveauStatut == Candidature.Statut.ACCEPTEE) {
+                emailService.sendCandidatureAccepteeEmail(
+                    candidature.getEtudiant().getEmail(), prenom, offreTitre, entrepriseNom);
+            } else if (nouveauStatut == Candidature.Statut.REFUSEE) {
+                emailService.sendCandidatureRefuseeEmail(
+                    candidature.getEtudiant().getEmail(), prenom, offreTitre, entrepriseNom,
+                    request.getCommentaire());
+            }
+        } catch (Exception e) {
+            log.warn("Email notification non envoyée pour candidature {}: {}", id, e.getMessage());
+        }
+
         return toResponse(candidature);
     }
 

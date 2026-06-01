@@ -5,15 +5,14 @@ import com.smartintern.backend.repository.UserRepository;
 import com.smartintern.backend.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -107,7 +106,9 @@ public class OtpService {
         userRepository.save(user);
     }
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private String generateOtp() {
-        return String.format("%04d", new Random().nextInt(10000));
+        return String.format("%06d", SECURE_RANDOM.nextInt(1000000));
     }
 }

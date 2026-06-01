@@ -353,7 +353,7 @@ public class TacheService {
         dto.setNoteEtudiant(tache.getNoteEtudiant());
         dto.setObservationEncadrant(tache.getObservationEncadrant());
         dto.setNote(tache.getNote());
-        dto.setGenereParIa(tache.isGenereParIa());
+        dto.setGenereParIa(Boolean.TRUE.equals(tache.getGenereParIa()));
         dto.setCreatedAt(tache.getCreatedAt());
         dto.setUpdatedAt(tache.getUpdatedAt());
         return dto;

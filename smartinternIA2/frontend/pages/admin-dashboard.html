@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
    <script>
@@ -539,13 +539,47 @@
 
       <!-- STATISTIQUES -->
       <div class="view" id="view-statistiques">
-        <div class="page-header"><div><h1 class="page-title">Statistiques globales</h1><p class="page-subtitle" id="stats-period">Chargement...</p></div><button class="btn-ghost" onclick="exporterStats()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Exporter</button></div>
-        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-          <div class="stat-card blue"><div class="stat-value" id="stat-candidatures">0</div><div class="stat-label">Candidatures totales</div></div>
-          <div class="stat-card green"><div class="stat-value" id="stat-offres">0</div><div class="stat-label">Offres publiées</div></div>
-          <div class="stat-card amber"><div class="stat-value" id="stat-conventions">0</div><div class="stat-label">Conventions signées</div></div>
-          <div class="stat-card purple"><div class="stat-value" id="stat-rapports">0</div><div class="stat-label">Rapports déposés</div></div>
-          
+        <div class="page-header">
+          <div><h1 class="page-title">Statistiques globales</h1><p class="page-subtitle" id="stats-period">Chargement...</p></div>
+          <button class="btn-ghost" onclick="exporterStats()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Exporter CSV
+          </button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
+          <div class="stat-card blue"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-value" id="stat-candidatures">0</div><div class="stat-label">Candidatures totales</div><div class="stat-trend up" id="stat-cand-attente"></div></div>
+          <div class="stat-card green"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/></svg></div><div class="stat-value" id="stat-offres">0</div><div class="stat-label">Offres publiées</div><div class="stat-trend" id="stat-offres-actives"></div></div>
+          <div class="stat-card amber"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="stat-value" id="stat-conventions">0</div><div class="stat-label">Stages créés</div><div class="stat-trend" id="stat-stages-encours"></div></div>
+          <div class="stat-card purple"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-value" id="stat-rapports">0</div><div class="stat-label">Rapports déposés</div></div>
+        </div>
+
+        <!-- Graphiques -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Inscriptions — 6 derniers mois</div></div>
+            <div style="padding:1.25rem;"><canvas id="chart-inscriptions" height="200"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Candidatures — 6 derniers mois</div></div>
+            <div style="padding:1.25rem;"><canvas id="chart-candidatures" height="200"></canvas></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Statut des candidatures</div></div>
+            <div style="padding:1.25rem;display:flex;align-items:center;justify-content:center;gap:2rem;">
+              <canvas id="chart-cand-statut" width="150" height="150"></canvas>
+              <div id="legend-cand-statut" style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Statut des stages</div></div>
+            <div style="padding:1.25rem;display:flex;align-items:center;justify-content:center;gap:2rem;">
+              <canvas id="chart-stages-statut" width="150" height="150"></canvas>
+              <div id="legend-stages-statut" style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -696,6 +730,7 @@
     <div id="user-modal-content" style="padding:1rem"></div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/api.js"></script>
 <!-- SockJS + STOMP (nécessaires pour le WebSocket) -->
@@ -750,27 +785,134 @@ function toggleSidebar() {
 }
 
 // ==================== CHARGEMENT DONNÉES ====================
+let cachedStats = null;
+let chartInstances = {};
+
 async function chargerAdminStats() {
   try {
     const stats = await apiGetAdminStats();
+    cachedStats = stats;
 
-    console.log('Stats reçues du backend:', stats); // Debug
-    console.log('Clés de l\'objet stats:', Object.keys(stats)); // Affiche les propriétés
-    console.log('Contenu détaillé:', JSON.stringify(stats, null, 2)); // Vue complète
-    
-    document.getElementById('stat-users').textContent      = stats.totalUsers    || 0;
-    document.getElementById('stat-etudiants').textContent  = stats.etudiants     || 0;
-    document.getElementById('stat-entreprises').textContent= stats.entreprises   || 0;
-   document.getElementById('stat-stages').textContent = stats.stagesEnCours || 0;
-    // stat-risque est mis à jour par chargerEtudiantsRisque()
-    document.getElementById('donut-etudiants').textContent = stats.etudiants     || 0;
-    document.getElementById('donut-entreprises').textContent = stats.entreprises || 0;
-    document.getElementById('donut-encadrants').textContent= stats.encadrants    || 0;
-   document.getElementById('stat-candidatures').textContent = stats.candidatures || 0;
-    document.getElementById('stat-offres').textContent     = stats.offres        || 0;
-    document.getElementById('stat-conventions').textContent = stats.conventions || 0;  // ← Au lieu de 0
-    document.getElementById('stat-rapports').textContent = stats.rapports || 0;        // ← Au lieu de 0
+    // KPIs accueil
+    document.getElementById('stat-users').textContent       = stats.totalUsers    || 0;
+    document.getElementById('stat-etudiants').textContent   = stats.etudiants     || 0;
+    document.getElementById('stat-entreprises').textContent = stats.entreprises   || 0;
+    document.getElementById('stat-stages').textContent      = stats.stagesEnCours || 0;
+    document.getElementById('donut-etudiants').textContent  = stats.etudiants     || 0;
+    document.getElementById('donut-entreprises').textContent= stats.entreprises   || 0;
+    document.getElementById('donut-encadrants').textContent = stats.encadrants    || 0;
+
+    // KPIs page statistiques
+    document.getElementById('stat-candidatures').textContent = stats.candidatures || 0;
+    document.getElementById('stat-offres').textContent       = stats.offres       || 0;
+    document.getElementById('stat-conventions').textContent  = stats.conventions  || 0;
+    document.getElementById('stat-rapports').textContent     = stats.rapports     || 0;
+
+    const cAttenteEl = document.getElementById('stat-cand-attente');
+    if (cAttenteEl) cAttenteEl.textContent = `↑ ${stats.candidaturesEnAttente || 0} en attente`;
+    const offresActEl = document.getElementById('stat-offres-actives');
+    if (offresActEl) { offresActEl.textContent = `${stats.offresActives || 0} actives`; offresActEl.className = 'stat-trend up'; }
+    const stagesEnCEl = document.getElementById('stat-stages-encours');
+    if (stagesEnCEl) { stagesEnCEl.textContent = `${stats.stagesEnCours || 0} en cours`; stagesEnCEl.className = 'stat-trend up'; }
+
+    document.getElementById('stats-period').textContent =
+      `Mise à jour ${new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'})}`;
+
+    // Donut SVG répartition rôles
+    const total = (stats.etudiants||0) + (stats.entreprises||0) + (stats.encadrants||0) + 1;
+    const circ = 2 * Math.PI * 35;
+    const pEt = ((stats.etudiants||0)/total)*circ;
+    const pEn = ((stats.entreprises||0)/total)*circ;
+    const pEc = ((stats.encadrants||0)/total)*circ;
+    let offset = 0;
+    const setArc = (id, dash, off) => {
+      const el = document.getElementById(id);
+      if (el) { el.setAttribute('stroke-dasharray', `${dash} ${circ}`); el.setAttribute('stroke-dashoffset', -off); }
+    };
+    setArc('donut-etudiants-svg', pEt, 0);
+    setArc('donut-entreprises-svg', pEn, pEt);
+    setArc('donut-encadrants-svg', pEc, pEt + pEn);
+
+    // Graphiques (chargés seulement si la section statistiques est visible)
+    renderCharts(stats);
   } catch(err) { console.error('Erreur chargement stats:', err); }
+}
+
+function renderCharts(stats) {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? '#94a3b8' : '#475569';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  Chart.defaults.color = textColor;
+
+  // Chart 1 — Inscriptions mensuelles (bar)
+  const inscData = stats.inscriptionsMensuelles || [];
+  renderBarChart('chart-inscriptions', inscData.map(m => m.mois), inscData.map(m => m.count),
+    '#2563eb', 'Inscriptions', gridColor);
+
+  // Chart 2 — Candidatures mensuelles (bar)
+  const candData = stats.candidaturesMensuelles || [];
+  renderBarChart('chart-candidatures', candData.map(m => m.mois), candData.map(m => m.count),
+    '#10b981', 'Candidatures', gridColor);
+
+  // Chart 3 — Donut statut candidatures
+  renderDoughnut('chart-cand-statut', 'legend-cand-statut',
+    ['En attente','Acceptées','Refusées'],
+    [stats.candidaturesEnAttente||0, stats.candidaturesAcceptees||0, stats.candidaturesRefusees||0],
+    ['#f59e0b','#10b981','#ef4444']);
+
+  // Chart 4 — Donut statut stages
+  renderDoughnut('chart-stages-statut', 'legend-stages-statut',
+    ['En cours','Terminés'],
+    [stats.stagesEnCours||0, stats.stagesTermines||0],
+    ['#2563eb','#10b981']);
+}
+
+function renderBarChart(canvasId, labels, data, color, label, gridColor) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+  chartInstances[canvasId] = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label, data, backgroundColor: color + 'cc', borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { font: { size: 11 } } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { font: { size: 11 }, stepSize: 1 } }
+      }
+    }
+  });
+}
+
+function renderDoughnut(canvasId, legendId, labels, data, colors) {
+  const el = document.getElementById(canvasId);
+  const legendEl = document.getElementById(legendId);
+  if (!el) return;
+  if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+  chartInstances[canvasId] = new Chart(el, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
+    options: {
+      responsive: false, cutout: '65%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => ` ${ctx.label}: ${ctx.parsed}`
+      }}}
+    }
+  });
+  if (legendEl) {
+    const total = data.reduce((a,b) => a+b, 0);
+    legendEl.innerHTML = labels.map((l, i) =>
+      `<div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0;"></div>
+        <span style="color:var(--text2);">${l}</span>
+        <span style="font-weight:700;color:var(--text);margin-left:auto;padding-left:12px;">${data[i]}</span>
+      </div>`
+    ).join('');
+  }
 }
 
 async function chargerUtilisateurs() {
@@ -911,7 +1053,6 @@ function getRoleName(role) {
   return roles[role] || role || '—';
 }
 
-function voirUtilisateur(id) { alert('Détails utilisateur - Fonctionnalité à implémenter'); }
 async function validerUtilisateur(id) { try { await apiValidateUser(id); chargerUtilisateurs(); } catch(err) { alert(err.message); } }
 async function desactiverUtilisateur(id) { if(confirm('Désactiver cet utilisateur ?')) try { await apiDisableUser(id); chargerUtilisateurs(); } catch(err) { alert(err.message); } }
 
@@ -924,24 +1065,6 @@ async function chargerStages() {
   } catch(err) { console.error('Erreur chargement stages:', err); }
 }
 
-function afficherStages(stages) {
-  const tbody = document.getElementById('stages-list');
-  if (stages.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Aucune demande de stage</td></tr>';
-    return;
-  }
-  tbody.innerHTML = stages.map(s => `
-    <tr>
-      <td><div class="user-cell"><div class="u-avatar" style="background:linear-gradient(135deg,#10b981,#2563eb)">${(s.etudiantPrenom?.[0] || '') + (s.etudiantNom?.[0] || '')}</div><span class="td-bold">${s.etudiantPrenom} ${s.etudiantNom}</span></div></td>
-      <td class="td-mono">${s.entrepriseNom || '—'}</td>
-      <td class="td-bold">${s.poste || '—'}</td>
-      <td class="td-mono">${s.duree || '—'}</td>
-      <td class="td-mono">${new Date(s.dateDebut).toLocaleDateString('fr-FR')}</td>
-      <td><span class="badge ${s.statut === 'ACTIF' ? 'active' : 'pending'}">${s.statut === 'ACTIF' ? 'Actif' : 'En attente'}</span></td>
-      <td><button class="btn-sm neutral" onclick="voirStage(${s.id})">Détails</button>${s.statut === 'PENDING' ? '<button class="btn-sm success" onclick="validerStage('+s.id+')">Valider</button>' : ''}</td>
-    </tr>
-  `).join('');
-}
 let stageAAffecter = null;
 
 async function ouvrirAffectationEncadrant(stageId) {
@@ -1011,8 +1134,8 @@ function afficherStages(stages) {
 
 function filterStages(filter) {
   let filtered = allStages;
-  if (filter === 'active') filtered = allStages.filter(s => s.statut === 'ACTIF');
-  else if (filter === 'pending') filtered = allStages.filter(s => s.statut === 'PENDING');
+  if (filter === 'active') filtered = allStages.filter(s => s.statut === 'EN_COURS');
+  else if (filter === 'pending') filtered = allStages.filter(s => s.statut === 'TERMINE' || s.statut === 'ABANDONNE');
   afficherStages(filtered);
 }
 
@@ -1050,7 +1173,7 @@ async function validerStage(id) { try { await apiValidateStage(id); chargerStage
 
 async function exporterStats() {
     try {
-        const stats = await apiGetStats(); // Récupère les stats
+        const stats = cachedStats || await apiGetAdminStats();
 
         if (!stats || Object.keys(stats).length === 0) {
             alert('Aucune statistique disponible pour l’export.');
@@ -1111,11 +1234,11 @@ async function exporterStats() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        alert('✅ Export terminé avec succès !');
+        URL.revokeObjectURL(url);
+        alert(‘Export terminé avec succès !’);
     } catch (err) {
-        console.error('Erreur export stats:', err);
-        alert('❌ Erreur lors de l’export des statistiques.');
+        console.error(‘Erreur export stats:’, err);
+        alert(‘Erreur export : ‘ + err.message);
     }
 }
 // ==================== ÉTUDIANTS À RISQUE ====================
@@ -1488,9 +1611,9 @@ function afficherEncadrants(liste) {
       <td>
         <div class="user-cell">
           <div class="u-avatar" style="background:linear-gradient(135deg,var(--amber),var(--purple))">
-            ${(u.prenom?.[0] || '') + (u.nom?.[0] || '')}
+            ${((u.firstName||u.prenom||'')[0]||'') + ((u.lastName||u.nom||'')[0]||'')}
           </div>
-          <span class="td-bold">${u.prenom || ''} ${u.nom || ''}</span>
+          <span class="td-bold">${u.firstName||u.prenom||''} ${u.lastName||u.nom||''}</span>
         </div>
       </td>
       <td class="td-mono">${u.email || '—'}</td>
@@ -1500,13 +1623,13 @@ function afficherEncadrants(liste) {
         </span>
       </td>
       <td>
-        <span class="badge ${u.enabled && u.emailVerified ? 'active' : 'pending'}">
-          ${u.enabled && u.emailVerified ? 'Actif' : 'En attente'}
+        <span class="badge ${u.statut === 'ACTIF' ? 'active' : 'pending'}">
+          ${u.statut === 'ACTIF' ? 'Actif' : (u.statut || 'En attente')}
         </span>
       </td>
       <td>
         <div class="action-btns">
-          ${!u.enabled
+          ${u.statut !== 'ACTIF'
             ? `<button class="btn-sm success" onclick="validerUtilisateur(${u.id})">Activer</button>`
             : `<button class="btn-sm danger" onclick="desactiverUtilisateur(${u.id})">Désactiver</button>`
           }
@@ -1561,11 +1684,6 @@ function closeEncadrantModalOutside(e) {
     document.getElementById('modal-encadrant').classList.remove('open');
 }
 
-function closeEncadrantModalOutside(e) {
-  if (e.target === document.getElementById('modal-encadrant'))
-    document.getElementById('modal-encadrant').classList.remove('open');
-}
-
 // ==================== MODAL DÉTAIL UTILISATEUR ====================
 function voirUtilisateur(id) {
   const u = allUsers.find(x => x.id === id);
@@ -1573,36 +1691,14 @@ function voirUtilisateur(id) {
 
   const content = document.getElementById('user-modal-content');
 
+  const prenom = u.firstName || u.prenom || '';
+  const nom    = u.lastName  || u.nom    || '';
   content.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:0.6rem">
-      <p><b>Nom :</b> ${u.prenom} ${u.nom}</p>
+      <p><b>Nom :</b> ${prenom} ${nom}</p>
       <p><b>Email :</b> ${u.email}</p>
       <p><b>Rôle :</b> ${getRoleName(u.role)}</p>
-      <p><b>Statut :</b> ${u.enabled && u.emailVerified ? 'Actif' : 'En attente'}</p>
-      <p><b>Créé le :</b> ${u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
-    </div>
-  `;
-
-  document.getElementById('user-modal').style.display = 'flex';
-}
-
-function closeUserModal(e) {
-  if (!e || e.target.id === 'user-modal') {
-    document.getElementById('user-modal').style.display = 'none';
-  }
-}
-function voirUtilisateur(id) {
-  const u = allUsers.find(x => x.id === id);
-  if (!u) return;
-
-  const content = document.getElementById('user-modal-content');
-
-  content.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:0.6rem">
-      <p><b>Nom :</b> ${u.prenom} ${u.nom}</p>
-      <p><b>Email :</b> ${u.email}</p>
-      <p><b>Rôle :</b> ${getRoleName(u.role)}</p>
-      <p><b>Statut :</b> ${u.enabled && u.emailVerified ? 'Actif' : 'En attente'}</p>
+      <p><b>Statut :</b> ${u.statut === 'ACTIF' ? 'Actif' : (u.statut || 'Inactif')}</p>
       <p><b>Créé le :</b> ${u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}</p>
     </div>
   `;

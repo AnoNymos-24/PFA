@@ -1362,6 +1362,11 @@
   <span class="nav-label">Mes missions</span>
 </a>
 
+<a class="nav-item" data-view="sprints-etudiant" data-tooltip="Sprints" onclick="showView('sprints-etudiant', this)">
+  <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  <span class="nav-label">Mes sprints & tâches</span>
+</a>
+
 <a class="nav-item" data-view="rapports" data-tooltip="Rapports" onclick="showView('rapports', this)">
   <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
   <span class="nav-label">Mes rapports</span>
@@ -1626,6 +1631,14 @@
 
 
 <!-- DOCUMENTS -->
+      <!-- SPRINTS & TÂCHES (lecture seule) -->
+      <div class="view" id="view-sprints-etudiant">
+        <div class="page-header">
+          <div><h1 class="page-title">Mes sprints & tâches</h1><p class="page-subtitle">Suivez vos tâches assignées par votre encadrant</p></div>
+        </div>
+        <div id="sprints-etudiant-container"><div class="empty"><p>Chargement...</p></div></div>
+      </div>
+
 <div class="view" id="view-documents">
   <div class="page-header">
     <div>
@@ -1932,11 +1945,17 @@ async function chargerProfil() {
     const userData = await apiGetMe();
     if (!userData) return;
 
-    const ini = ((userData.prenom?.[0] || '') + (userData.nom?.[0] || '')).toUpperCase();
-    document.getElementById('welcome-title').textContent  = `Bonjour, ${userData.prenom} 👋`;
-    document.getElementById('sidebar-name').textContent   = `${userData.prenom} ${userData.nom}`;
+    const prenom = userData.firstName || userData.prenom || '';
+    const nom    = userData.lastName  || userData.nom    || '';
+    const ini    = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || 'ET';
+    document.getElementById('welcome-title').textContent  = `Bonjour, ${prenom} 👋`;
+    document.getElementById('sidebar-name').textContent   = `${prenom} ${nom}`;
     document.getElementById('sidebar-avatar').textContent = ini;
     document.getElementById('topbar-avatar').textContent  = ini;
+
+    // Normalise les champs pour compatibilité backend
+    userData.prenom = prenom;
+    userData.nom    = nom;
 
     const map = {
       'profil-nom'        : 'nom',
@@ -1970,11 +1989,11 @@ const viewTitles = {
   candidatures: 'Mes candidatures',
   suivi: 'Suivi du stage',
   missions: 'Mes missions',
+  'sprints-etudiant': 'Mes sprints & tâches',
   rapports: 'Mes rapports',
-   documents: 'Mes documents',  
+  documents: 'Mes documents',
   profil: 'Mon profil & CV',
   notifications: 'Notifications'
-  
 };
 
 window.showView = function(name, navEl) {
@@ -1986,9 +2005,9 @@ window.showView = function(name, navEl) {
   document.getElementById('topbar-title').textContent = viewTitles[name] || '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // ← AJOUT : recharger la vue documents à chaque visite
   if (name === 'documents') chargerDocuments();
-  if (name === 'missions') chargerMissions(); 
+  if (name === 'missions') chargerMissions();
+  if (name === 'sprints-etudiant') chargerSprintsEtudiant();
 };
 
 window.toggleSidebar = function() {
@@ -2129,7 +2148,7 @@ function authHeaders() {
   };
 }
 function getToken() {
-  return localStorage.getItem("smartintern_token");
+  return sessionStorage.getItem("smartintern_token");
 }
 
 function setOffreFilter(type, el) {
@@ -2791,7 +2810,12 @@ if (uploadZone) {
 async function chargerDocuments() {
   const container = document.getElementById('documents-content');
   try {
-    const stage = await apiGetStage();
+    // apiGetStage() retourne une liste, on prend le premier stage actif
+    let stage = null;
+    try {
+      const stages = await apiGetStage();
+      stage = Array.isArray(stages) ? stages[0] : stages;
+    } catch(e) {}
     if (!stage || !stage.id) {
       container.innerHTML = '<div class="empty"><p>Vous devez avoir un stage actif pour accéder aux documents</p></div>';
       return;
@@ -2864,6 +2888,73 @@ async function telechargerDocument(type, stageId, label, btn) {
     btn.innerHTML = '⬇ Télécharger';
   }
 }
+// ==================== SPRINTS & TÂCHES (lecture seule) ====================
+async function chargerSprintsEtudiant() {
+  const container = document.getElementById('sprints-etudiant-container');
+  try {
+    const stages = await apiGetStage();
+    const stage = Array.isArray(stages) ? stages[0] : stages;
+    if (!stage || !stage.id) {
+      container.innerHTML = '<div class="empty"><p>Aucun stage actif. Les sprints seront disponibles une fois votre stage démarré.</p></div>';
+      return;
+    }
+    const sprints = await apiGetSprintsEtudiant(stage.id).catch(() => []);
+    if (!sprints.length) {
+      container.innerHTML = '<div class="empty"><p>Aucun sprint planifié pour votre stage. Votre encadrant entreprise créera les sprints prochainement.</p></div>';
+      return;
+    }
+    const sprintParts = await Promise.all(sprints.map(async sprint => {
+      const taches = await apiGetTachesEtudiant(sprint.id).catch(() => []);
+      const statutColor = {PLANIFIE:'var(--text3)', EN_COURS:'var(--blue)', CLOTURE:'var(--green)'}[sprint.statut] || 'var(--text3)';
+      const statutLabel = {PLANIFIE:'Planifié', EN_COURS:'En cours', CLOTURE:'Clôturé'}[sprint.statut] || sprint.statut;
+      const tacheRows = taches.map(t => {
+        const tColor = {A_FAIRE:'var(--text3)', EN_COURS:'var(--blue)', TERMINEE_PAR_ETUDIANT:'var(--amber)', VALIDEE:'var(--green)', REFUSEE:'var(--red)'}[t.statut] || 'var(--text3)';
+        const tLabel = {A_FAIRE:'À faire', EN_COURS:'En cours', TERMINEE_PAR_ETUDIANT:'Soumise', VALIDEE:'Validée ✓', REFUSEE:'Refusée'}[t.statut] || t.statut;
+        const actions = t.statut === 'A_FAIRE'
+          ? `<button class="btn-sm primary" onclick="demarrerTache(${t.id})">Démarrer</button>`
+          : t.statut === 'EN_COURS'
+          ? `<button class="btn-sm success" onclick="terminerTache(${t.id})">Marquer terminée</button>`
+          : t.statut === 'REFUSEE'
+          ? `<button class="btn-sm amber"   onclick="reprendreTache(${t.id})">Reprendre</button>`
+          : '';
+        return `<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .875rem;border-bottom:1px solid var(--border);">
+          <div style="flex:1;">
+            <div style="font-size:.875rem;font-weight:600;color:var(--text);">${t.titre||'Tâche'}</div>
+            ${t.description ? `<div style="font-size:.75rem;color:var(--text2);margin-top:2px;">${t.description}</div>` : ''}
+          </div>
+          <span style="font-size:.72rem;font-weight:700;color:${tColor};">${tLabel}</span>
+          ${actions}
+        </div>`;
+      }).join('');
+      return `<div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Sprint — ${sprint.dateDebut||''} → ${sprint.dateFin||''}</div>
+            <div class="card-subtitle">${taches.length} tâche${taches.length>1?'s':''}</div>
+          </div>
+          <span style="font-weight:700;font-size:.825rem;color:${statutColor};">${statutLabel}</span>
+        </div>
+        ${tacheRows || '<div style="padding:1rem;color:var(--text3);font-size:.875rem;">Aucune tâche dans ce sprint.</div>'}
+        ${sprint.observation ? `<div style="padding:.75rem 1rem;background:var(--surface2);border-top:1px solid var(--border);font-size:.8rem;color:var(--text2);">Bilan : ${sprint.observation}</div>` : ''}
+      </div>`;
+    }));
+    container.innerHTML = sprintParts.join('');
+  } catch(err) {
+    container.innerHTML = `<div class="empty"><p>Erreur : ${err.message}</p></div>`;
+  }
+}
+
+async function demarrerTache(id) {
+  try { await apiDemarrerTache(id); chargerSprintsEtudiant(); } catch(err) { alert('Erreur : ' + err.message); }
+}
+async function terminerTache(id) {
+  const note = prompt('Note de complétion (optionnel) :') || '';
+  try { await apiTerminerTache(id, note); chargerSprintsEtudiant(); } catch(err) { alert('Erreur : ' + err.message); }
+}
+async function reprendreTache(id) {
+  try { await apiReprendreTache(id); chargerSprintsEtudiant(); } catch(err) { alert('Erreur : ' + err.message); }
+}
+
 // Variables pour les missions
 let mesMissions = [];
 let currentMission = null;

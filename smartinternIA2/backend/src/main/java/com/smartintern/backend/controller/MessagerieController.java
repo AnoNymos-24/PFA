@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/messagerie")
@@ -168,7 +167,7 @@ public class MessagerieController {
                         "email",  u.getEmail(),
                         "role",   u.getRole() != null ? u.getRole().name() : ""
                 ))
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(contacts);
     }
 

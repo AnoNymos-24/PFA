@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class AdminController {
 
     // ── AD : Statistiques globales ────────────────────────────────────────────
     @GetMapping("/api/admin/stats")
-    public ResponseEntity<?> getStats() {
+    public ResponseEntity<Map<String, Object>> getStats() {
         return ResponseEntity.ok(adminService.getStats());
     }
 

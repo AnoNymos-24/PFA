@@ -6,10 +6,8 @@
 
 -- ── Migration structurelle idempotente ───────────────────────────────────
 -- Convertit la colonne logs_activite.action de ENUM → VARCHAR(100)
--- nécessaire quand de nouvelles valeurs TypeAction sont ajoutées à l'enum Java
--- (ddl-auto=update ne modifie pas les colonnes ENUM existantes).
--- Idempotent : si la colonne est déjà VARCHAR(100) l'opération est sans effet.
-ALTER TABLE IF EXISTS logs_activite MODIFY COLUMN action VARCHAR(100) NOT NULL;
+-- Compatible MySQL et MariaDB (sans IF EXISTS sur ALTER TABLE MODIFY)
+ALTER TABLE logs_activite MODIFY COLUMN action VARCHAR(100) NOT NULL;
 
 -- ── Données de test — Mission C : workflow CDC → Sprint → Tâche ──────────
 -- Idempotent via INSERT IGNORE + conditions NOT EXISTS.

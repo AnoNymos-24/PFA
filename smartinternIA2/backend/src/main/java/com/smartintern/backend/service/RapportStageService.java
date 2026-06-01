@@ -4,12 +4,13 @@ import com.smartintern.backend.dto.RapportStageDto;
 import com.smartintern.backend.entity.*;
 import com.smartintern.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RapportStageService {
@@ -18,6 +19,7 @@ public class RapportStageService {
     private final StageRepository stageRepository;
     private final EtudiantRepository etudiantRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     // ── ET-07 : Étudiant rédige un rapport hebdomadaire ───────────────────────
     // ── ET-08 : Étudiant dépose le rapport final ──────────────────────────────
@@ -83,7 +85,7 @@ public class RapportStageService {
                 .stream()
                 .filter(r -> r.getEtudiant().getId().equals(etudiant.getId()))
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // ── Encadrant académique : rapports d'un stage ────────────────────────────
@@ -97,7 +99,7 @@ public class RapportStageService {
             throw new RuntimeException("Non autorisé");
         }
         return rapportStageRepository.findByStageIdOrderByDateCreationDesc(stageId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── EA-01 : Encadrant académique valide un rapport ────────────────────────
@@ -127,6 +129,20 @@ public class RapportStageService {
         rapport.setStatut(nouveauStatut);
         if (commentaire != null) rapport.setCommentaireEncadrant(commentaire);
         rapportStageRepository.save(rapport);
+
+        // Notification email à l'étudiant
+        try {
+            String prenomEtudiant = rapport.getEtudiant().getFirstName();
+            String emailEtudiant  = rapport.getEtudiant().getEmail();
+            if (nouveauStatut == RapportStage.Statut.VALIDE) {
+                emailService.sendRapportValideEmail(emailEtudiant, prenomEtudiant, rapport.getTitre());
+            } else if (nouveauStatut == RapportStage.Statut.REJETE && commentaire != null) {
+                emailService.sendRapportCommenteEmail(emailEtudiant, prenomEtudiant, rapport.getTitre(), commentaire);
+            }
+        } catch (Exception e) {
+            log.warn("Email rapport non envoyé pour rapport {}: {}", rapportId, e.getMessage());
+        }
+
         return toResponse(rapport);
     }
 
@@ -136,7 +152,8 @@ public class RapportStageService {
                 .id(r.getId())
                 .stageId(r.getStage().getId())
                 .etudiantId(r.getEtudiant().getId())
-                .etudiantNom(r.getEtudiant().getFirstName() + " " + r.getEtudiant().getLastName())
+                .etudiantPrenom(r.getEtudiant().getFirstName())
+                .etudiantNom(r.getEtudiant().getLastName())
                 .type(r.getType().name())
                 .titre(r.getTitre())
                 .contenu(r.getContenu())

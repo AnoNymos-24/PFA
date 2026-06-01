@@ -273,7 +273,7 @@ let originalData = {};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('smartintern_token');
+  const token = sessionStorage.getItem('smartintern_token');
   if (!token) { window.location.href = '../pages/login.html'; return; }
   await loadProfile();
 });

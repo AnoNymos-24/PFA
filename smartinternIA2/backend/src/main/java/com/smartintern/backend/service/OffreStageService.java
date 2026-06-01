@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,14 +65,14 @@ public class OffreStageService {
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
         Long entrepriseId = getEntrepriseIdFromUser(user);
         return offreStageRepository.findByEntrepriseId(entrepriseId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── Étudiant : offres actives et validées avec filtres ───────────────────
     public List<OffreStageDto.OffreStageResponse> searchOffres(
             String domaine, String localisation, String typeStage, String niveauRequis) {
         return offreStageRepository.searchOffres(domaine, localisation, typeStage, niveauRequis)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     public List<OffreStageDto.OffreStageResponse> getAllOffresActives() {
@@ -81,7 +80,7 @@ public class OffreStageService {
                 .stream()
                 .filter(o -> o.getStatut() == OffreStage.Statut.ACTIVE)
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Page<OffreStageDto.OffreStageResponse> getAllOffresActivesPaginees(Pageable pageable) {
@@ -181,7 +180,7 @@ public class OffreStageService {
     public List<OffreStageDto.OffreStageResponse> getAllOffresParStatutValidation(String statut) {
         return offreStageRepository
                 .findByStatutValidation(OffreStage.StatutValidation.valueOf(statut))
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── Entreprise : fermer une offre ────────────────────────────────────────

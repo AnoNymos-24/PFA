@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class AdminService {
     // ── Lister tous les utilisateurs ──────────────────────────────────────────
     public List<UserDto.UserResponse> getAllUsers() {
         return userRepository.findAll()
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     // ── Lister par rôle ───────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ public class AdminService {
         return userRepository.findAll().stream()
                 .filter(u -> u.getRole() == userRole)
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // ── Détail d'un utilisateur ───────────────────────────────────────────────
@@ -68,6 +68,7 @@ public class AdminService {
     }
 
     // ── AD-05 : Générer une demande de stage pour un étudiant ────────────────
+    @Transactional
     public DemandeStageDto.DemandeStageResponse creerDemandeStage(
             DemandeStageDto.DemandeStageRequest request) {
 
@@ -89,20 +90,72 @@ public class AdminService {
         return toDemandeResponse(demande);
     }
 
-    // ── Statistiques globales ─────────────────────────────────────────────────
-    public Map<String, Long> getStats() {
+    // ── Statistiques globales enrichies ──────────────────────────────────────
+    public Map<String, Object> getStats() {
         long encadrants = userRepository.countByRole(User.Role.ENCADRANT_ACADEMIQUE)
                         + userRepository.countByRole(User.Role.ENCADRANT_ENTREPRISE);
-        Map<String, Long> stats = new HashMap<>();
+        Map<String, Object> stats = new HashMap<>();
+
+        // Compteurs globaux
         stats.put("totalUsers",    userRepository.count());
         stats.put("etudiants",     userRepository.countByRole(User.Role.ETUDIANT));
         stats.put("entreprises",   userRepository.countByRole(User.Role.ENTREPRISE));
         stats.put("stagesEnCours", stageRepository.countByStatut(Stage.Statut.EN_COURS));
+        stats.put("stagesTermines", stageRepository.countByStatut(Stage.Statut.TERMINE));
         stats.put("encadrants",    encadrants);
         stats.put("candidatures",  candidatureRepository.count());
         stats.put("offres",        offreStageRepository.count());
         stats.put("conventions",   stageRepository.count());
         stats.put("rapports",      rapportStageRepository.count());
+
+        // Breakdowns candidatures
+        stats.put("candidaturesEnAttente", candidatureRepository.countByStatut(Candidature.Statut.EN_ATTENTE));
+        stats.put("candidaturesAcceptees", candidatureRepository.countByStatut(Candidature.Statut.ACCEPTEE));
+        stats.put("candidaturesRefusees",  candidatureRepository.countByStatut(Candidature.Statut.REFUSEE));
+
+        // Breakdowns offres
+        stats.put("offresActives",    offreStageRepository.countByStatut(OffreStage.Statut.ACTIVE));
+        stats.put("offresFermees",    offreStageRepository.countByStatut(OffreStage.Statut.FERMEE));
+
+        // Utilisateurs 30 derniers jours
+        LocalDateTime il30jours = LocalDateTime.now().minusDays(30);
+        stats.put("nouveauxUsersJours30", userRepository.countSince(il30jours));
+
+        // Données mensuelles (6 derniers mois) pour les graphiques
+        List<Map<String, Object>> inscriptionsMensuelles = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            LocalDateTime debut = LocalDateTime.now().minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime fin   = debut.plusMonths(1);
+            long count = userRepository.findAll().stream()
+                    .filter(u -> u.getCreatedAt() != null
+                              && !u.getCreatedAt().isBefore(debut)
+                              && u.getCreatedAt().isBefore(fin))
+                    .count();
+            Map<String, Object> m = new HashMap<>();
+            m.put("mois",   debut.getMonth().getDisplayName(TextStyle.SHORT, java.util.Locale.FRENCH));
+            m.put("annee",  debut.getYear());
+            m.put("count",  count);
+            inscriptionsMensuelles.add(m);
+        }
+        stats.put("inscriptionsMensuelles", inscriptionsMensuelles);
+
+        // Candidatures des 6 derniers mois
+        List<Map<String, Object>> candidaturesMensuelles = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            LocalDate debut = LocalDate.now().minusMonths(i).withDayOfMonth(1);
+            LocalDate fin   = debut.plusMonths(1);
+            long count = candidatureRepository.findAll().stream()
+                    .filter(c -> c.getDateCandidature() != null
+                              && !c.getDateCandidature().isBefore(debut)
+                              && c.getDateCandidature().isBefore(fin))
+                    .count();
+            Map<String, Object> m = new HashMap<>();
+            m.put("mois",   debut.getMonth().getDisplayName(TextStyle.SHORT, java.util.Locale.FRENCH));
+            m.put("count",  count);
+            candidaturesMensuelles.add(m);
+        }
+        stats.put("candidaturesMensuelles", candidaturesMensuelles);
+
         return stats;
     }
 
@@ -130,7 +183,7 @@ public class AdminService {
                                                 ? s.getEncadrantAcademique().getFirstName() : null);
             m.put("semaineActuelle",      s.getSemaineActuelle() != null ? s.getSemaineActuelle() : 1);
             return m;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     // ── Détail d'un stage ─────────────────────────────────────────────────────
@@ -179,7 +232,7 @@ public class AdminService {
                     m.put("raisons",      r.getNiveauRisque().name());
                     m.put("stageId",      s.getId());
                     return m;
-                }).collect(Collectors.toList());
+                }).toList();
     }
 
     // ── Lister tous les étudiants ─────────────────────────────────────────────
@@ -196,7 +249,7 @@ public class AdminService {
             m.put("statut",  e.getStatut() != null ? e.getStatut().name() : null);
             m.put("universite", e.getEtablissement() != null ? e.getEtablissement().getNom() : "—");
             return m;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     // ── Lister toutes les entreprises ─────────────────────────────────────────
@@ -209,13 +262,13 @@ public class AdminService {
             m.put("domaineActivite", e.getDomaineActivite());
             m.put("siteWeb",        e.getSiteWeb());
             return m;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     // ── Admin : lister toutes les demandes de stage ───────────────────────────
     public List<DemandeStageDto.DemandeStageResponse> getAllDemandesStage() {
         return demandeStageRepository.findAll()
-                .stream().map(this::toDemandeResponse).collect(Collectors.toList());
+                .stream().map(this::toDemandeResponse).toList();
     }
 
     // ── Mapping ───────────────────────────────────────────────────────────────
